@@ -1,6 +1,6 @@
 import { useState } from "react";
-import InputField from "./InputField";
-import SelectField from "./SelectField";
+import InputField from "./components/InputField";
+import SelectField from "./components/SelectField";
 
 export default function FormMahasiswa() {
   const [form, setForm] = useState({

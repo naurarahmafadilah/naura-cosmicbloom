@@ -1,0 +1,303 @@
+[
+  {
+    "id": 1,
+    "name": "Laundry Express",
+    "category": "Home Service",
+    "price": 25000,
+    "rating": 4.5,
+    "image": "laundry.jpg",
+    "status": "active",
+    "provider": {
+      "name": "CleanFast",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0811111111", "email": "clean@gmail.com" }
+    },
+    "schedule": { "open": "08:00", "close": "20:00" }
+  },
+  {
+    "id": 2,
+    "name": "Service AC",
+    "category": "Repair",
+    "price": 75000,
+    "rating": 4.7,
+    "image": "ac.jpg",
+    "status": "active",
+    "provider": {
+      "name": "CoolTech",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0822222222", "email": "cool@gmail.com" }
+    },
+    "schedule": { "open": "09:00", "close": "18:00" }
+  },
+  {
+    "id": 3,
+    "name": "Cuci Mobil",
+    "category": "Automotive",
+    "price": 50000,
+    "rating": 4.6,
+    "image": "mobil.jpg",
+    "status": "active",
+    "provider": {
+      "name": "AutoClean",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0833333333", "email": "auto@gmail.com" }
+    },
+    "schedule": { "open": "07:00", "close": "19:00" }
+  },
+  {
+    "id": 4,
+    "name": "Salon Kecantikan",
+    "category": "Beauty",
+    "price": 100000,
+    "rating": 4.8,
+    "image": "cantik.jpg",
+    "status": "active",
+    "provider": {
+      "name": "BeautyGlow",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0844444444", "email": "beauty@gmail.com" }
+    },
+    "schedule": { "open": "10:00", "close": "21:00" }
+  },
+  {
+    "id": 5,
+    "name": "Les Privat Matematika",
+    "category": "Education",
+    "price": 150000,
+    "rating": 4.9,
+    "image": "matematika.jpg",
+    "status": "active",
+    "provider": {
+      "name": "SmartEdu",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0855555555", "email": "edu@gmail.com" }
+    },
+    "schedule": { "open": "13:00", "close": "20:00" }
+  },
+  {
+    "id": 6,
+    "name": "Service Laptop",
+    "category": "IT Service",
+    "price": 120000,
+    "rating": 4.6,
+    "image": "laptop.jpg",
+    "status": "active",
+    "provider": {
+      "name": "TechFix",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0866666666", "email": "tech@gmail.com" }
+    },
+    "schedule": { "open": "09:00", "close": "17:00" }
+  },
+  {
+    "id": 7,
+    "name": "Fotografi Wisuda",
+    "category": "Photography",
+    "price": 300000,
+    "rating": 4.9,
+    "image": "fotografi.jpg",
+    "status": "active",
+    "provider": {
+      "name": "SnapArt",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0877777777", "email": "photo@gmail.com" }
+    },
+    "schedule": { "open": "08:00", "close": "22:00" }
+  },
+  {
+    "id": 8,
+    "name": "Cleaning Service",
+    "category": "Home Service",
+    "price": 80000,
+    "rating": 4.4,
+    "image": "home.jpg",
+    "status": "active",
+    "provider": {
+      "name": "CleanHome",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0888888888", "email": "cleanhome@gmail.com" }
+    },
+    "schedule": { "open": "07:00", "close": "17:00" }
+  },
+  {
+    "id": 9,
+    "name": "Makeup Artist",
+    "category": "Beauty",
+    "price": 250000,
+    "rating": 4.8,
+    "image": "makeup.jpg",
+    "status": "active",
+    "provider": {
+      "name": "GlamUp",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0899999999", "email": "makeup@gmail.com" }
+    },
+    "schedule": { "open": "09:00", "close": "18:00" }
+  },
+  {
+    "id": 10,
+    "name": "Servis Motor",
+    "category": "Automotive",
+    "price": 60000,
+    "rating": 4.5,
+    "image": "motor.jpg",
+    "status": "active",
+    "provider": {
+      "name": "MotoFix",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0810101010", "email": "motor@gmail.com" }
+    },
+    "schedule": { "open": "08:00", "close": "17:00" }
+  },
+
+  {
+    "id": 11,
+    "name": "Jasa Desain Logo",
+    "category": "IT Service",
+    "price": 200000,
+    "rating": 4.7,
+    "image": "it.jpg",
+    "status": "active",
+    "provider": {
+      "name": "DesignPro",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0812121212", "email": "design@gmail.com" }
+    },
+    "schedule": { "open": "09:00", "close": "17:00" }
+  },
+  {
+    "id": 12,
+    "name": "Les Bahasa Inggris",
+    "category": "Education",
+    "price": 140000,
+    "rating": 4.8,
+    "image": "inggris.jpg",
+    "status": "active",
+    "provider": {
+      "name": "EnglishHub",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0823232323", "email": "english@gmail.com" }
+    },
+    "schedule": { "open": "14:00", "close": "20:00" }
+  },
+  {
+    "id": 13,
+    "name": "Barbershop",
+    "category": "Beauty",
+    "price": 40000,
+    "rating": 4.5,
+    "image": "barber.jpg",
+    "status": "active",
+    "provider": {
+      "name": "GentleCut",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0834343434", "email": "barber@gmail.com" }
+    },
+    "schedule": { "open": "10:00", "close": "21:00" }
+  },
+  {
+    "id": 14,
+    "name": "Service HP",
+    "category": "Repair",
+    "price": 90000,
+    "rating": 4.6,
+    "image": "hp.jpg",
+    "status": "active",
+    "provider": {
+      "name": "FixPhone",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0845454545", "email": "hp@gmail.com" }
+    },
+    "schedule": { "open": "09:00", "close": "18:00" }
+  },
+  {
+    "id": 15,
+    "name": "Catering Harian",
+    "category": "Food Service",
+    "price": 30000,
+    "rating": 4.7,
+    "image": "food.jpg",
+    "status": "active",
+    "provider": {
+      "name": "DapurIbu",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0856565656", "email": "food@gmail.com" }
+    },
+    "schedule": { "open": "06:00", "close": "14:00" }
+  },
+  {
+    "id": 16,
+    "name": "Jasa Dekorasi",
+    "category": "Event",
+    "price": 500000,
+    "rating": 4.9,
+    "image": "dekorasi.jpg",
+    "status": "active",
+    "provider": {
+      "name": "DecorArt",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0867676767", "email": "decor@gmail.com" }
+    },
+    "schedule": { "open": "08:00", "close": "20:00" }
+  },
+  {
+    "id": 17,
+    "name": "Jasa Pindahan",
+    "category": "Home Service",
+    "price": 200000,
+    "rating": 4.6,
+    "image": "pindahan.jpg",
+    "status": "active",
+    "provider": {
+      "name": "MoveIt",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0878787878", "email": "move@gmail.com" }
+    },
+    "schedule": { "open": "07:00", "close": "17:00" }
+  },
+  {
+    "id": 18,
+    "name": "Jasa Editing Video",
+    "category": "IT Service",
+    "price": 250000,
+    "rating": 4.8,
+    "image": "video.jpg",
+    "status": "active",
+    "provider": {
+      "name": "EditPro",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0889898989", "email": "video@gmail.com" }
+    },
+    "schedule": { "open": "10:00", "close": "19:00" }
+  },
+  {
+    "id": 19,
+    "name": "Jasa Tukang",
+    "category": "Home Service",
+    "price": 100000,
+    "rating": 4.4,
+    "image": "tukang.jpg",
+    "status": "active",
+    "provider": {
+      "name": "BangunanPro",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0819191919", "email": "tukang@gmail.com" }
+    },
+    "schedule": { "open": "08:00", "close": "17:00" }
+  },
+  {
+    "id": 20,
+    "name": "Jasa Kebersihan Kantor",
+    "category": "Cleaning",
+    "price": 150000,
+    "rating": 4.7,
+    "image": "kantor.jpg",
+    "status": "active",
+    "provider": {
+      "name": "OfficeClean",
+      "location": "Pekanbaru",
+      "contact": { "phone": "0820202020", "email": "office@gmail.com" }
+    },
+    "schedule": { "open": "08:00", "close": "17:00" }
+  }
+]
