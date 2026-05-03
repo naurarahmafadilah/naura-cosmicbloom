@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* ================= FONT ================= */
+
+@font-face {
+    font-family: 'PlayfairDisplay';
+    src: url('./assets/fonts/PlayfairDisplay-VariableFont_wght.ttf');
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('./assets/fonts/Poppins-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'GreatVibes';
+    src: url('./assets/fonts/GreatVibes-Regular.ttf');
+}
+
+
+/* ================= THEME ================= */
+
+@theme {
+    --font-playfair: 'PlayfairDisplay', serif;
+    --font-poppins: 'Poppins', sans-serif;
+    --font-greatvibes: 'GreatVibes', cursive;
+
+    --color-latar: #f6efe9;
+    --color-primary: #d6a77a;
+    --color-secondary: #e8d8c4;
+    --color-teks: #2f2f2f;
+    --color-teks-soft: #9a8f87;
+}
+
+
+/* ================= GLOBAL ================= */
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-poppins);
+    background-color: var(--color-latar);
+    color: var(--color-teks);
+}
