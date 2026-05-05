@@ -2,42 +2,34 @@ import { Link } from "react-router-dom";
 
 const PageHeader = ({ title, breadcrumb, children }) => {
   return (
-    <div className="mb-10">
+    <div className="mb-10 animate-fade-in">
 
-      {/* TITLE */}
-      <h1 className="text-4xl font-[var(--font-playfair)] text-teks">
+      <h1 className="text-5xl font-playfair text-primary-dark tracking-tight">
         {title}
       </h1>
 
-      {/* LINE */}
-      <div className="w-20 h-[2px] bg-primary mt-3 mb-4"></div>
+      <div className="w-16 h-[3px] bg-secondary-light mt-4 mb-5 rounded-full"></div>
 
-      {/* BREADCRUMB */}
-      <div className="text-sm text-teks-soft flex items-center gap-2">
-
+      <nav className="text-sm font-quicksand font-medium flex items-center gap-2">
         {breadcrumb?.map((item, i) => (
           <span key={i} className="flex items-center gap-2">
-            {i !== 0 && <span>/</span>}
+            {i !== 0 && <span className="text-secondary-dark/30">/</span>}
 
             {item.link ? (
-              <Link to={item.link} className="hover:text-primary">
+              <Link 
+                to={item.link} 
+                className="text-secondary-dark/60 hover:text-primary-light transition-colors"
+              >
                 {item.label}
               </Link>
             ) : (
-              <span className="text-teks">{item.label}</span>
+              <span className="text-primary-dark">{item.label}</span>
             )}
           </span>
         ))}
+      </nav>
 
-      </div>
-
-      {/* OPTIONAL CONTENT */}
-      {children && <div className="mt-4">{children}</div>}
-
-      {/* TAGLINE */}
-      <p className="mt-4 text-primary text-lg font-[var(--font-greatvibes)]">
-        Temukan gayamu sendiri ✨
-      </p>
+      {children && <div className="mt-6">{children}</div>}
 
     </div>
   );

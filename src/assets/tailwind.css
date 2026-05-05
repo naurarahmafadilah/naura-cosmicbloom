@@ -8,8 +8,8 @@
 }
 
 @font-face {
-    font-family: 'Poppins';
-    src: url('./assets/fonts/Poppins-Regular.ttf');
+    font-family: 'Quicksand';
+    src: url('./assets/fonts/Quicksand-SemiBold.ttf');
 }
 
 @font-face {
@@ -17,28 +17,57 @@
     src: url('./assets/fonts/GreatVibes-Regular.ttf');
 }
 
-
-/* ================= THEME ================= */
+/* ================= THEME (Tailwind v4) ================= */
 
 @theme {
+    /* Fonts */
     --font-playfair: 'PlayfairDisplay', serif;
-    --font-poppins: 'Poppins', sans-serif;
-    --font-greatvibes: 'GreatVibes', cursive;
+    --font-quicksand: 'Quicksand', sans-serif;
+    --font-accent: 'GreatVibes', cursive;
 
-    --color-latar: #f6efe9;
-    --color-primary: #d6a77a;
-    --color-secondary: #e8d8c4;
-    --color-teks: #2f2f2f;
-    --color-teks-soft: #9a8f87;
+    /* Colors dari Brand Identity */
+    --color-primary-light: #849159;
+    --color-primary-dark: #4e5631;
+    --color-secondary-light: #ab656b;
+    --color-secondary-dark: #784248;
+
+    /* Neutrals */
+    --color-bg-main: #eff0ee;
+    --color-bg-soft: #f5eded;
+    --color-border-subtle: #e2e8f0;
+    
+    /* Interactive States */
+    --color-hover-green: #75824f;
+    --color-hover-rose: #96565c;
+    --color-disabled: #d1d5db;
+    --color-error: #b91c1c;
+
+    /* Shadow */
+    --shadow-veloura: 0 4px 20px -2px rgba(78, 86, 49, 0.08);
 }
-
 
 /* ================= GLOBAL ================= */
 
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: var(--font-poppins);
-    background-color: var(--color-latar);
-    color: var(--color-teks);
+    font-family: var(--font-playfair);
+    background-color: var(--color-bg-main);
+    color: var(--color-primary-dark);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Reset Default Fonts berdasarkan Design System */
+h1, h2, h3, h4 { 
+    font-family: var(--font-playfair); 
+    font-weight: 400; 
+}
+
+button { 
+    font-family: var(--font-quicksand); 
+    font-weight: 600; 
+}
+
+input, textarea {
+    font-family: var(--font-quicksand);
 }

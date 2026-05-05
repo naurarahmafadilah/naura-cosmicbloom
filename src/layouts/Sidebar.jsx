@@ -4,10 +4,10 @@ import { NavLink } from "react-router-dom";
 const Sidebar = () => {
 
   const menuClass = ({ isActive }) =>
-    `group relative flex items-center justify-between px-4 py-3 rounded-xl transition ${
+    `group relative flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300 font-quicksand text-sm ${
       isActive
-        ? "bg-primary/10 text-primary font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"
-        : "text-teks-soft hover:bg-[#f8f2ec] hover:text-primary"
+        ? "bg-primary-light/10 text-primary-dark font-bold shadow-sm"
+        : "text-secondary-dark/60 hover:bg-bg-soft hover:text-primary-dark"
     }`;
 
   const menus = [
@@ -16,84 +16,85 @@ const Sidebar = () => {
     { name: "Shop", path: "/shop", icon: <FaShoppingBag /> },
     { name: "Wishlist", path: "/wishlist", icon: <FaHeart /> },
     { name: "Pesanan", path: "/orders", icon: <FaShoppingBag /> },
-    { name: "Sale", path: "/sale", icon: <FaTag />, badge: "-50%" }
+    { name: "Sale", path: "/sale", icon: <FaTag />, badge: "-50%", isSale: true }
   ];
 
   return (
-    <div className="w-64 bg-white min-h-screen px-6 py-8 flex flex-col justify-between border-r border-[#f1e5db]">
+    <aside className="w-72 bg-white min-h-screen px-6 py-10 flex flex-col justify-between border-r border-bg-soft sticky top-0">
 
       {/* TOP */}
       <div>
 
         {/* LOGO */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-[var(--font-playfair)] text-teks">
-            Veloura<span className="text-primary">.</span>
+        <div className="mb-12 px-2">
+          <h1 className="text-3xl font-playfair text-primary-dark tracking-tight">
+            Veloura<span className="text-secondary-light">.</span>
           </h1>
-          <p className="text-teks-soft text-sm mt-1">
+          <p className="text-secondary-dark/40 font-quicksand text-[10px] uppercase tracking-[3px] mt-1">
             Fashion Boutique
           </p>
         </div>
 
         {/* MENU */}
-        <ul className="space-y-1">
-
-          {menus.map((item, i) => (
-            <li key={i}>
-              <NavLink
-                to={item.path}
-                end={item.end}
-                className={menuClass}
-              >
-                <div className="flex items-center justify-between w-full">
-
-                  {/* LEFT */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-base">{item.icon}</span>
-                    <span>{item.name}</span>
+        <nav>
+          <ul className="space-y-2">
+            {menus.map((item, i) => (
+              <li key={i}>
+                <NavLink
+                  to={item.path}
+                  end={item.end}
+                  className={menuClass}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className={`text-lg transition-transform group-hover:scale-110 ${item.isSale ? 'text-secondary-light' : ''}`}>
+                      {item.icon}
+                    </span>
+                    <span className="tracking-wide">{item.name}</span>
                   </div>
 
                   {/* BADGE */}
                   {item.badge && (
-                    <span className="text-[10px] bg-primary text-white px-2 py-0.5 rounded-full">
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm ${
+                      item.isSale ? 'bg-secondary-light text-white' : 'bg-primary-dark text-white'
+                    }`}>
                       {item.badge}
                     </span>
                   )}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-                </div>
-              </NavLink>
-            </li>
-          ))}
-
-        </ul>
-
-        {/* HOT DEAL */}
-        <div className="mt-8 bg-white border border-[#f1e5db] rounded-xl p-4 shadow-sm hover:shadow-md transition">
-          <p className="text-xs text-teks-soft mb-1">Hot Deal 🔥</p>
-          <p className="text-sm font-medium text-teks leading-relaxed">
-            Diskon hingga 50% untuk koleksi pilihan
+        {/* HOT DEAL CARD */}
+        <div className="mt-10 bg-bg-soft/50 border border-bg-soft rounded-[30px] p-5 relative overflow-hidden group transition-all hover:shadow-veloura">
+          <div className="absolute -top-4 -right-4 w-12 h-12 bg-secondary-light/10 rounded-full group-hover:scale-150 transition-transform" />
+          <p className="text-[10px] font-bold text-secondary-light uppercase tracking-widest mb-2">Hot Deal 🔥</p>
+          <p className="text-xs font-playfair text-primary-dark leading-relaxed">
+            Dapatkan potongan harga spesial hingga <span className="font-bold text-secondary-dark">50%</span> untuk koleksi musim ini.
           </p>
         </div>
-
       </div>
 
-      {/* BOTTOM */}
-      <div className="bg-[#f6efe9] p-5 rounded-2xl">
-
-        <p className="text-sm text-teks-soft leading-relaxed">
-          Koleksi terbaru sudah hadir ✨
+      {/* BOTTOM PROMO */}
+      <div className="bg-primary-dark rounded-[35px] p-6 text-center shadow-lg relative overflow-hidden">
+        {/* Dekoratif */}
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-10" />
+        
+        <p className="text-white font-playfair text-2xl uppercase tracking-widest mt-1 relative z-10">Koleksi terbaru ✨</p>
+        <p className="text-white/70 text-[10px] font-quicksand uppercase tracking-widest mt-2 relative z-10">
+          Tampil elegan setiap hari
         </p>
 
         <NavLink
           to="/collection"
-          className="block mt-4 bg-primary text-white text-center py-2 rounded-full text-sm hover:opacity-90 hover:scale-[1.02] transition"
+          className="block mt-5 bg-white text-primary-dark font-quicksand font-bold text-xs py-3 rounded-full hover:bg-secondary-light hover:text-white transition-all duration-300 relative z-10"
         >
-          Jelajahi Sekarang
+          LIHAT SEKARANG
         </NavLink>
-
       </div>
 
-    </div>
+    </aside>
   );
 };
 
