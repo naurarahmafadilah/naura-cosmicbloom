@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "slug": "elegant-evening-dress",
+    "name": "Elegant Evening Dress",
+    "price": "250.000",
+    "category": "dress",
+    "img": "https://plus.unsplash.com/premium_photo-1728657358050-58356d4a6c64?q=80&w=1170&auto=format&fit=crop",
+    "description": "Gaun malam eksklusif dengan potongan elegan yang dirancang untuk memberikan kesan mewah dan anggun pada setiap langkah Anda.",
+    "features": ["Bahan Silk Premium", "Fit Tubuh Sempurna", "Tersedia Ukuran S, M, L"]
+  },
+  {
+    "id": 2,
+    "slug": "minimalist-casual-outfit",
+    "name": "Minimalist Casual Outfit",
+    "price": "180.000",
+    "category": "casual",
+    "img": "https://plus.unsplash.com/premium_photo-1689575247968-d1040651e57f?q=80&w=1170&auto=format&fit=crop",
+    "description": "Setelan kasual minimalis yang nyaman untuk aktivitas sehari-hari tanpa mengorbankan gaya modern Anda.",
+    "features": ["Bahan Katun Breathable", "Warna Earth Tone", "Mudah Dipadupadankan"]
+  },
+  {
+    "id": 3,
+    "slug": "summer-breeze-style",
+    "name": "Summer Breeze Style",
+    "price": "300.000",
+    "category": "summer",
+    "img": "https://plus.unsplash.com/premium_photo-1727427850453-144b335cd995?q=80&w=687&auto=format&fit=crop",
+    "description": "Koleksi musim panas yang ringan dan sejuk, cocok untuk liburan di pantai atau sekadar jalan-jalan sore.",
+    "features": ["UV Protection Fabric", "Ringan & Lembut", "Desain Flowy"]
+  },
+  {
+    "id": 4,
+    "slug": "modern-silk-look",
+    "name": "Modern Silk Look",
+    "price": "270.000",
+    "category": "modern",
+    "img": "https://plus.unsplash.com/premium_photo-1755958632983-adbc0ff3b41b?q=80&w=1170&auto=format&fit=crop",
+    "description": "Sentuhan sutra modern untuk tampilan profesional namun tetap feminin dan berkelas.",
+    "features": ["High Quality Silk", "Jahitan Presisi", "Warna Elegan"]
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "w1",
+    "slug": "elegant-evening-dress",
+    "name": "Elegant Evening Dress",
+    "price": "250.000",
+    "date": "2 hari lalu",
+    "img": "https://plus.unsplash.com/premium_photo-1728657358050-58356d4a6c64?q=80&w=1170&auto=format&fit=crop"
+  },
+  {
+    "id": "w2",
+    "slug": "minimalist-silk-outfit",
+    "name": "Minimalist Silk Outfit",
+    "price": "270.000",
+    "date": "5 hari lalu",
+    "img": "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "id": "w3",
+    "slug": "casual-autumn-shirt",
+    "name": "Casual Autumn Style",
+    "price": "180.000",
+    "date": "1 minggu lalu",
+    "img": "https://plus.unsplash.com/premium_photo-1689575247968-d1040651e57f?q=80&w=1170&auto=format&fit=crop"
+  }
+]
