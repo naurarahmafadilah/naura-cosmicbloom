@@ -1,105 +1,231 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaShoppingBag, FaArrowLeft, FaCheckCircle, FaLayerGroup } from "react-icons/fa";
+import { FaArrowLeft, FaCheckCircle, FaLayerGroup, FaEdit, FaDatabase, FaHdd } from "react-icons/fa";
+
+// IMPORT LAYOUT & KOMPONEN INTERNAL PROYEK ANDA
+import DashboardContainer from "../components/DashboardContainer";
 import PageHeader from "../components/PageHeader";
-// ✅ Pastikan path import benar dan nama file sesuai (Shop.json)
+import Footer from "../components/Footer";
+
+// Import data katalog internal toko
 import productsData from "../data/Shop.json";
 
 const ShopDetail = () => {
   const { slug } = useParams();
   
-  // Mencari produk berdasarkan slug dari URL
-  const product = productsData.find((p) => p.slug === slug);
+  // State manajemen admin back-office
+  const [selectedSize, setSelectedSize] = useState("S");
+  const [activeTab, setActiveTab] = useState("deskripsi");
+  const [isLive, setIsLive] = useState(true);
 
-  // Jika produk tidak ditemukan (Error Handling)
+  // Mencari produk berdasarkan slug dari URL
+  const product = productsData.find((p) => p.slug === slug || p.id?.toString() === slug);
+
+  // Jika produk tidak ditemukan (Handling Error Admin)
   if (!product) {
     return (
-      <div className="py-40 text-center animate-fade-in">
-        <h2 className="font-playfair text-3xl text-primary-dark">Produk Tidak Ditemukan</h2>
-        <Link to="/shop" className="text-secondary-light mt-4 inline-block underline font-bold">
-          Kembali ke Koleksi Utama
-        </Link>
-      </div>
+      <DashboardContainer>
+        <div className="py-40 text-center animate-fade-in font-quicksand">
+          <h2 className="font-playfair text-3xl text-primary-dark">Produk Katalog Tidak Ditemukan</h2>
+          <p className="text-xs text-primary-dark/40 mt-1">SKU ID atau Slug produk tidak terdaftar di database master.</p>
+          <Link to="/shop" className="text-secondary-light mt-6 inline-block underline font-bold text-xs uppercase tracking-wider hover:text-primary-dark transition-colors">
+            Kembali ke Manajemen Produk
+          </Link>
+        </div>
+      </DashboardContainer>
     );
   }
 
+  // Data spesifikasi teks penunjang audit tekstil Veloura Atelier
+  const productSizes = ["S", "M", "L", "XL"];
+  const specifications = {
+    material: "Diperoleh langsung dari serat katun organik berdensitas tinggi yang dipadukan dengan premium linen mesh. Memberikan struktur siluet yang tegas, sirkulasi udara maksimal, serta ketahanan tekstur jangka panjang.",
+    perawatan: "Dicuci dengan metode hand-wash menggunakan detergen cair lembut. Hindari memeras terlalu kuat. Setrika dari bagian dalam dengan temperatur medium-low untuk merawat keaslian serat alami.",
+    fit: "Ukuran dirancang dengan pendekatan semi-structured (regular-fit Eropa). Silakan pilih ukuran kurasi reguler Anda atau gunakan satu ukuran di atasnya untuk impresi relaxed-tailoring."
+  };
+
   return (
-    <div className="animate-fade-in pb-20">
-      <PageHeader
-        title="Product Detail"
-        breadcrumb={[
-          { label: "Beranda", link: "/" },
-          { label: "Shop", link: "/shop" },
-          { label: product.name }
-        ]}
-      />
+    <DashboardContainer>
+      <div className="animate-fade-in pb-10 text-primary-dark">
+        
+        {/* HEADER HALAMAN */}
+        <PageHeader
+          title="Data Master Produk"
+          breadcrumb={[
+            { label: "Dashboard", link: "/" },
+            { label: "Katalog Toko", link: "/shop" },
+            { label: product.name }
+          ]}
+        />
 
-      <div className="max-w-6xl mx-auto px-4 mt-12 grid md:grid-cols-2 gap-16 items-start">
-        {/* BAGIAN KIRI: GAMBAR */}
-        <div className="relative group">
-          <div className="rounded-[50px] overflow-hidden shadow-veloura aspect-[4/5] bg-white border border-bg-soft">
-            <img 
-              src={product.img} 
-              alt={product.name} 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
-            />
-          </div>
+        {/* LAYOUT GRID UTAMA */}
+        <div className="max-w-5xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
           
-          {/* Badge Kategori Melayang */}
-          <div className="absolute top-8 left-8 bg-white/80 backdrop-blur-md text-primary-dark px-5 py-2 rounded-full font-bold text-[9px] tracking-widest shadow-sm flex items-center gap-2 uppercase">
-            <FaLayerGroup size={10} className="text-secondary-light" /> {product.category}
-          </div>
-        </div>
-
-        {/* BAGIAN KANAN: INFO DETAIL */}
-        <div className="flex flex-col pt-4">
-          <Link to="/shop" className="flex items-center gap-2 text-secondary-dark/40 text-[10px] font-bold uppercase tracking-[3px] mb-8 hover:text-primary-dark transition-all">
-            <FaArrowLeft /> Kembali ke Katalog
-          </Link>
-
-          <p className="text-secondary-light text-xs font-bold uppercase tracking-[4px] mb-3">Veloura Premium Collection</p>
-          <h1 className="text-5xl font-playfair text-primary-dark mb-6 leading-tight">{product.name}</h1>
-          
-          <div className="flex items-baseline gap-2 mb-8">
-            <span className="text-sm font-medium text-secondary-dark/40 italic">Mulai dari</span>
-            <span className="text-4xl font-bold text-primary-dark font-quicksand flex items-start">
-                <span className="text-sm font-normal mt-1 mr-1">Rp</span>
-                {product.price}
-            </span>
-          </div>
-
-          <div className="h-[1px] bg-bg-soft w-full mb-8"></div>
-
-          <div className="space-y-6 mb-10">
-            <p className="text-secondary-dark/70 leading-relaxed font-quicksand text-lg">
-              {product.description}
-            </p>
+          {/* BAGIAN KIRI: INFRASTRUKTUR MEDIA & PREVIEW */}
+          <div className="relative group">
+            <div className="rounded-[35px] overflow-hidden aspect-[4/5] bg-bg-main border border-primary-light/10 p-3 shadow-veloura bg-white">
+              <div className="w-full h-full rounded-[26px] overflow-hidden relative">
+                <img 
+                  src={product.img} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/50 via-transparent to-transparent" />
+              </div>
+            </div>
             
-            {/* Features List dari JSON */}
-            <div className="grid grid-cols-1 gap-3">
-              {product.features?.map((feature, idx) => (
-                <div key={idx} className="flex items-center gap-3 text-sm text-primary-dark font-medium font-quicksand">
-                  <FaCheckCircle className="text-secondary-light shrink-0" /> {feature}
-                </div>
-              ))}
+            {/* Kategori Kluster Badge */}
+            <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md text-primary-dark px-4 py-2 rounded-xl font-bold text-[9px] tracking-widest border border-border-subtle flex items-center gap-2 uppercase font-quicksand shadow-sm">
+              <FaLayerGroup size={10} className="text-secondary-light" /> {product.category}
+            </div>
+
+            {/* Indikator Status Live Sinkronisasi */}
+            <div className="absolute bottom-6 right-6 bg-primary-dark/95 backdrop-blur-md text-white px-4 py-2 rounded-xl text-[9px] tracking-wider font-mono flex items-center gap-2 border border-white/10 shadow-md">
+              <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-400 animate-pulse' : 'bg-amber-400'}`} />
+              {isLive ? "STATUS: AKTIF DI TOKO LIVE" : "STATUS: DIARSIPKAN / DRAFT"}
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button className="flex-1 bg-primary-dark text-white py-5 rounded-[20px] text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-secondary-dark transition-all shadow-xl shadow-primary-dark/20 active:scale-95">
-              <FaShoppingBag /> Tambah ke Keranjang
-            </button>
-            <button className="px-8 py-5 rounded-[20px] border border-bg-soft text-primary-dark text-[10px] font-bold uppercase tracking-widest hover:bg-bg-main transition-all">
-              Wishlist
-            </button>
-          </div>
+          {/* BAGIAN KANAN: PANEL KONTROL KATALOG & METADATA */}
+          <div className="flex flex-col">
+            
+            {/* Tombol Navigasi Kembali */}
+            <Link 
+              to="/shop" 
+              className="inline-flex items-center gap-2 text-secondary-dark/50 text-[10px] font-bold uppercase tracking-[3px] mb-6 hover:text-secondary-light transition-colors"
+            >
+              <FaArrowLeft className="text-[9px]" /> Kembali ke Katalog Utama
+            </Link>
 
-          <p className="mt-8 text-[10px] text-secondary-dark/30 text-center sm:text-left">
-            *Pengiriman gratis untuk wilayah Jabodetabek. Syarat & Ketentuan berlaku.
-          </p>
+            <span className="text-secondary-light text-[10px] font-bold uppercase tracking-[4px] mb-1 font-quicksand">Node Database Veloura</span>
+            <h1 className="text-4xl font-playfair text-primary-dark mb-5 leading-tight">{product.name}</h1>
+            
+            {/* Box Tag Harga Master Data */}
+            <div className="grid grid-cols-2 gap-4 p-5 rounded-2xl bg-white border border-primary-light/10 mb-6 shadow-sm font-quicksand">
+              <div className="flex flex-col border-r border-border-subtle/60">
+                <span className="text-[10px] text-primary-dark/40 font-bold uppercase tracking-wider">Harga MSRP Dasar</span>
+                <span className="text-2xl font-bold text-primary-dark mt-0.5 flex items-baseline">
+                  <span className="text-xs font-normal text-secondary-light mr-0.5">Rp</span>
+                  {product.price}
+                </span>
+              </div>
+              <div className="flex flex-col pl-2 justify-center">
+                <span className="text-[10px] text-primary-dark/40 font-bold uppercase tracking-wider">Referensi Core SKU</span>
+                <span className="text-sm font-mono font-bold text-secondary-light mt-1">SKU-{product.id || "00"}-{product.slug?.substring(0, 5).toUpperCase()}</span>
+              </div>
+            </div>
+
+            {/* GRID MANAJEMEN MONITOR STOK UKURAN */}
+            <div className="mb-6 font-quicksand">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary-dark">Pantau Alokasi Stok Ukuran</span>
+                <button 
+                  onClick={() => setActiveTab("fit")}
+                  className="text-[10px] text-secondary-light underline uppercase tracking-wider font-bold"
+                >
+                  Lihat Parameter Dimensi
+                </button>
+              </div>
+              <div className="flex gap-3">
+                {productSizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`w-12 h-12 rounded-xl text-xs font-mono border transition-all flex flex-col items-center justify-center gap-0.5 relative cursor-pointer ${
+                      selectedSize === size
+                        ? "border-primary-dark bg-primary-dark text-white"
+                        : "border-border-subtle bg-white text-primary-dark hover:border-secondary-light"
+                    }`}
+                  >
+                    <span className="font-bold">{size}</span>
+                    <span className={`text-[8px] ${selectedSize === size ? 'text-white/60' : 'text-primary-dark/40'}`}>stok: 12</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* TAB EDITOR PREVIEW METADATA */}
+            <div className="mb-6 border border-border-subtle rounded-2xl overflow-hidden font-quicksand bg-white shadow-sm">
+              <div className="flex border-b border-border-subtle bg-bg-main/30 text-[10px] font-bold uppercase tracking-wider">
+                <button 
+                  onClick={() => setActiveTab("deskripsi")}
+                  className={`flex-1 py-3 text-center transition-all ${activeTab === "deskripsi" ? "bg-white text-primary-dark border-b-2 border-primary-dark" : "text-secondary-dark/50"}`}
+                >
+                  Deskripsi Live
+                </button>
+                <button 
+                  onClick={() => setActiveTab("material")}
+                  className={`flex-1 py-3 text-center transition-all ${activeTab === "material" ? "bg-white text-primary-dark border-b-2 border-primary-dark" : "text-secondary-dark/50"}`}
+                >
+                  Komposisi Bahan
+                </button>
+                <button 
+                  onClick={() => setActiveTab("perawatan")}
+                  className={`flex-1 py-3 text-center transition-all ${activeTab === "perawatan" ? "bg-white text-primary-dark border-b-2 border-primary-dark" : "text-secondary-dark/50"}`}
+                >
+                  SOP Perawatan
+                </button>
+              </div>
+              
+              <div className="p-5 text-xs text-primary-dark/70 leading-relaxed min-h-[110px]">
+                {activeTab === "deskripsi" && (
+                  <div className="space-y-2">
+                    <p className="italic font-playfair text-sm text-primary-dark/90">
+                      "Interpretasi modern atas elegansi struktural yang timeless."
+                    </p>
+                    <p>{product.description || "Siluet esensial yang dirancang mengalir, memadukan kenyamanan fungsional harian dengan garis potong premium khas Veloura Atelier."}</p>
+                  </div>
+                )}
+                {activeTab === "material" && <p>{specifications.material}</p>}
+                {activeTab === "perawatan" && <p>{specifications.perawatan}</p>}
+                {activeTab === "fit" && <p>{specifications.fit}</p>}
+              </div>
+            </div>
+
+            {/* Fitur Terpasang List */}
+            {product.features && product.features.length > 0 && (
+              <div className="grid grid-cols-1 gap-2.5 mb-6 font-quicksand border-t border-border-subtle/50 pt-4">
+                {product.features.map((feature, idx) => (
+                  <div key={idx} className="flex items-center gap-3 text-xs text-primary-dark/70">
+                    <FaCheckCircle className="text-secondary-light shrink-0 text-sm" /> {feature}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ACTION PANEL MANAGEMENT SYSTEM */}
+            <div className="flex flex-col sm:flex-row gap-3 font-quicksand">
+              <button 
+                className="flex-[3] py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2.5 bg-primary-dark text-white hover:bg-hover-green shadow-md cursor-pointer transition-all duration-300"
+              >
+                <FaEdit className="text-xs" /> Edit Data Master & Logistik (Ukuran {selectedSize})
+              </button>
+              
+              <button 
+                onClick={() => setIsLive(!isLive)}
+                className={`flex-1 py-4 rounded-xl border text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer ${
+                  isLive 
+                    ? "border-secondary-light/30 bg-secondary-light/5 text-secondary-light" 
+                    : "border-border-subtle bg-white text-primary-dark/60 hover:border-primary-dark"
+                }`}
+              >
+                <FaHdd /> {isLive ? "Arsipkan / Set Draft" : "Terbitkan ke Toko"}
+              </button>
+            </div>
+
+            <p className="mt-5 text-[9px] font-mono tracking-wider text-primary-dark/30 text-center sm:text-left flex items-center gap-1.5 justify-center sm:justify-start">
+              <FaDatabase size={8} /> Kluster server: master-katalog-asia-prod-02
+            </p>
+          </div>
         </div>
+
+        {/* FOOTER GLOBAL */}
+        <div className="mt-16">
+          <Footer />
+        </div>
+
       </div>
-    </div>
+    </DashboardContainer>
   );
 };
 
