@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaTrashAlt, FaEye, FaBullhorn, FaDownload } from "react-icons/fa";
 
-// IMPORT LAYOUT & KOMPONEN INTERNAL PROYEK ANDA
+// IMPORT LAYOUT & KOMKOMEN INTERNAL PROYEK ANDA
 import DashboardContainer from "../components/DashboardContainer";
 import PageHeader from "../components/PageHeader";
 import Footer from "../components/Footer";
@@ -13,9 +13,35 @@ import wishlistData from "../data/Wishlist.json";
 const Wishlist = () => {
   const [adminItems, setAdminItems] = useState(wishlistData || []);
 
+  // ==========================================
+  // GLOBAL INTERACTIVE ACTION HANDLERS
+  // ==========================================
+
+  // Handler mengekspor berkas data logs analitik tren
+  const handleExportCSV = () => {
+    alert("📥 Mempersiapkan Data Tren Wishlist...\nBerkas spreadsheet (.CSV) untuk kluster tren komparatif berhasil diunduh.");
+  };
+
+  // Handler otomatisasi pemasaran massal
+  const handleMassBlastDiscount = () => {
+    if (adminItems.length === 0) {
+      alert("⚠️ Gagal memicu otomatisasi: Tidak ada log antrean pelanggan aktif saat ini.");
+      return;
+    }
+    alert(`📢 Otomatisasi Terpicu!\nBerhasil mengirimkan voucher diskon tertarget via Email & WhatsApp Broadcast ke seluruh akun pemilik wishlist.`);
+  };
+
+  // Handler promosi personalisasi produk spesifik (Push Ads)
+  const handleIndividualPushAds = (productName) => {
+    alert(`🚀 Push Notification Terkirim!\nKampanye iklan pengingat stok terbatas untuk produk "${productName}" berhasil disiarkan ke audiens tertarget.`);
+  };
+
   // Handler untuk menghapus arsip data logs dari sisi admin
-  const handleDeleteLog = (id) => {
-    setAdminItems(adminItems.filter(item => item.id !== id));
+  const handleDeleteLog = (id, productName) => {
+    const confirmDelete = window.confirm(`Apakah Anda yakin ingin menghapus arsip data logs wishlist untuk "${productName}"?`);
+    if (confirmDelete) {
+      setAdminItems(adminItems.filter(item => item.id !== id));
+    }
   };
 
   return (
@@ -37,7 +63,10 @@ const Wishlist = () => {
           
           {/* Kontrol Utilitas Data Admin */}
           <div className="flex items-center gap-3 font-quicksand">
-            <button className="px-5 py-2.5 bg-white border border-border-subtle rounded-full text-xs font-bold text-primary-dark/70 hover:text-secondary-light hover:border-secondary-light shadow-sm transition-all duration-300 flex items-center gap-2 cursor-pointer">
+            <button 
+              onClick={handleExportCSV}
+              className="px-5 py-2.5 bg-white border border-border-subtle rounded-full text-xs font-bold text-primary-dark/70 hover:text-secondary-light hover:border-secondary-light shadow-sm transition-all duration-300 flex items-center gap-2 cursor-pointer"
+            >
               <FaDownload size={10} /> Ekspor Data Tren (.CSV)
             </button>
             <p className="text-[10px] font-bold uppercase tracking-[1px] text-white bg-primary-dark px-4 py-2.5 rounded-full font-mono">
@@ -64,7 +93,10 @@ const Wishlist = () => {
           <div className="space-y-1 md:pl-4">
             <h4 className="text-xs font-mono text-primary-dark/40 uppercase tracking-widest">Aksi Otomatisasi</h4>
             <div className="pt-2">
-              <button className="px-4 py-2 bg-secondary-light/10 text-secondary-light hover:bg-secondary-light hover:text-white border border-secondary-light/20 rounded-xl text-[11px] font-bold uppercase tracking-wider font-quicksand transition-all duration-300 cursor-pointer">
+              <button 
+                onClick={handleMassBlastDiscount}
+                className="px-4 py-2 bg-secondary-light/10 text-secondary-light hover:bg-secondary-light hover:text-white border border-secondary-light/20 rounded-xl text-[11px] font-bold uppercase tracking-wider font-quicksand transition-all duration-300 cursor-pointer"
+              >
                 Blast Diskon ke Pemilik Wishlist
               </button>
             </div>
@@ -91,9 +123,9 @@ const Wishlist = () => {
 
                 {/* Tombol Delete Log (Aksi Manajemen Admin) */}
                 <button 
-                  onClick={() => handleDeleteLog(item.id)}
-                  title="Hapus Log Arisip"
-                  className="absolute top-4 right-4 w-9 h-9 bg-white/90 backdrop-blur-md border border-border-subtle rounded-xl flex items-center justify-center text-primary-dark/40 hover:text-error hover:bg-white transition-all z-10 cursor-pointer shadow-sm"
+                  onClick={() => handleDeleteLog(item.id, item.name)}
+                  title="Hapus Log Arsip"
+                  className="absolute top-4 right-4 w-9 h-9 bg-white/90 backdrop-blur-md border border-border-subtle rounded-xl flex items-center justify-center text-primary-dark/40 hover:text-red-500 hover:bg-white transition-all z-10 cursor-pointer shadow-sm"
                 >
                   <FaTrashAlt size={12} />
                 </button>
@@ -115,7 +147,7 @@ const Wishlist = () => {
                   <span className="text-secondary-light font-bold">Saved {item.date || "Just Now"}</span>
                 </div>
                 
-                {/* Judul juga bisa mengarah ke halaman detail */}
+                {/* Judul mengarah ke halaman detail */}
                 <Link to={`/wishlist/${item.slug || item.id}`}>
                   <h3 className="text-lg font-playfair text-primary-dark group-hover:text-secondary-light transition-colors duration-300 truncate pt-0.5">
                     {item.name}
@@ -127,13 +159,13 @@ const Wishlist = () => {
                     <span className="text-[10px] text-primary-dark/30 font-bold uppercase tracking-wider">MSRP</span>
                     <p className="text-sm font-bold text-primary-dark">Rp {item.price}</p>
                   </div>
-                  <span className="text-[9px] font-mono text-primary-dark/40">slug: {item.slug}</span>
+                  <span className="text-[9px] font-mono text-primary-dark/40 truncate max-w-[90px]">slug: {item.slug}</span>
                 </div>
               </div>
 
               {/* BAR CONTROLS UTAMA ADMIN SISI BAWAH CARD */}
               <div className="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-border-subtle z-10 font-quicksand">
-                {/* Menggunakan Link untuk mengarahkan ke halaman WishlistDetail */}
+                {/* Link navigasi pratinjau data internal */}
                 <Link 
                   to={`/wishlist/${item.slug || item.id}`}
                   title="Pratinjau Halaman Toko" 
@@ -142,7 +174,9 @@ const Wishlist = () => {
                   <FaEye size={11} /> Preview
                 </Link>
                 
+                {/* Tombol Push Ads Tertarget */}
                 <button 
+                  onClick={() => handleIndividualPushAds(item.name)}
                   title="Kirimkan Promosi Tertarget" 
                   className="px-3 py-2.5 bg-primary-dark text-white rounded-xl text-[11px] font-bold uppercase tracking-wider hover:bg-hover-green transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
                 >

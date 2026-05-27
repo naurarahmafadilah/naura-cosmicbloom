@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Casual Style",
+    "desc": "Kenyamanan dalam kesederhanaan modern. Dirancang khusus untuk mobilitas tinggi tanpa mengurangi estetika penampilan sehari-hari.",
+    "img": "https://plus.unsplash.com/premium_photo-1689575247968-d1040651e57f?q=80&w=1170&auto=format&fit=crop",
+    "tag": "Everyday"
+  },
+  {
+    "name": "Elegant Dress",
+    "desc": "Kilau kemewahan untuk momen berhargamu. Menggunakan bahan premium silk dan cuts yang mempertegas siluet anggun.",
+    "img": "https://plus.unsplash.com/premium_photo-1728657358050-58356d4a6c64?q=80&w=1170&auto=format&fit=crop",
+    "tag": "Evening"
+  },
+  {
+    "name": "Summer Outfit",
+    "desc": "Sentuhan ceria untuk hari yang cerah. Material katun ringan yang sejuk, cocok untuk menemani petualangan liburan Anda.",
+    "img": "https://plus.unsplash.com/premium_photo-1727427850453-144b335cd995?q=80&w=687&auto=format&fit=crop",
+    "tag": "Vacation"
+  }
+]

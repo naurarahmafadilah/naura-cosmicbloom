@@ -14,6 +14,24 @@ const WishlistDetail = () => {
   const { slug } = useParams();
   const product = wishlistData.find((p) => p.slug === slug || p.id?.toString() === slug);
 
+  // ==========================================
+  // OPERATIONAL INTERACTIVE ACTION HANDLERS
+  // ==========================================
+
+  // Handler untuk menyebarkan kampanye diskon eksklusif terarah
+  const handleSendExclusiveDiscount = () => {
+    alert(
+      `📧 Pemasaran Terarah Berhasil!\nEmail berisi penawaran diskon eksklusif dan potongan harga khusus untuk produk "${product.name}" telah dikirimkan ke kotak masuk seluruh pengguna yang menyimpannya di wishlist.`
+    );
+  };
+
+  // Handler untuk memicu audit penyesuaian kuota alokasi suplai rantai pasok
+  const handleAdjustStockQuota = () => {
+    alert(
+      `📦 Modul Rantai Pasok Terbuka!\nSistem dialihkan ke konsol manajemen kuota pengiriman logistik untuk mempercepat restock SKU #${product.id || "N/A"}.`
+    );
+  };
+
   if (!product) {
     return (
       <DashboardContainer>
@@ -123,11 +141,17 @@ const WishlistDetail = () => {
 
             {/* AKSI KONTROL OPERASIONAL ADMIN */}
             <div className="flex flex-col gap-3 font-quicksand">
-              <button className="w-full bg-primary-dark text-white py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2.5 hover:bg-hover-green shadow-veloura transition-all duration-300 cursor-pointer">
+              <button 
+                onClick={handleSendExclusiveDiscount}
+                className="w-full bg-primary-dark text-white py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2.5 hover:bg-hover-green shadow-veloura transition-all duration-300 cursor-pointer"
+              >
                 <FaBullhorn size={12} /> Kirim Diskon Eksklusif via Email Pengguna
               </button>
               
-              <button className="w-full py-4 rounded-2xl border border-border-subtle bg-white text-primary-dark/70 text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2.5 hover:border-secondary-light hover:text-secondary-light transition-all duration-300 cursor-pointer shadow-sm">
+              <button 
+                onClick={handleAdjustStockQuota}
+                className="w-full py-4 rounded-2xl border border-border-subtle bg-white text-primary-dark/70 text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2.5 hover:border-secondary-light hover:text-secondary-light transition-all duration-300 cursor-pointer shadow-sm"
+              >
                 <FaBoxOpen size={13} /> Sesuaikan Manajemen Kuota Alokasi Stok
               </button>
             </div>

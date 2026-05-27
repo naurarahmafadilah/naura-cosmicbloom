@@ -10,8 +10,9 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopDetail = lazy(() => import("./pages/ShopDetail"));
 const Collection = lazy(() => import("./pages/Collection"));
+const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
-const WishlistDetail = lazy(() => import("./pages/WishlistDetail")); // ✅ TAMBAHKAN INI
+const WishlistDetail = lazy(() => import("./pages/WishlistDetail"));
 const Orders = lazy(() => import("./pages/Orders"));
 const OrderDetail = lazy(() => import("./pages/OrdersDetail"));
 const Sale = lazy(() => import("./pages/Sale"));
@@ -43,6 +44,7 @@ const App = () => {
           <Route path="/sale/:slug" element={<SaleDetail />} />
           <Route path="/wishlist/:slug" element={<WishlistDetail />} />
           <Route path="/orders/:id" element={<OrderDetail />} />
+          <Route path="/collection/:slug" element={<CollectionDetail />} />
         </Route>
 
         {/* AUTH LAYOUT GROUP */}

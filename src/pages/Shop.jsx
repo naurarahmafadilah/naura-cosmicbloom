@@ -2,15 +2,25 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaFilter, FaSearch } from "react-icons/fa";
 
+// ==========================================
+// 1. INTEGRASI KOMPONEN SHADCN SELECT UI
+// ==========================================
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+
 // IMPORT LAYOUT & KOMPONEN INTERNAL PROYEK ANDA
 import DashboardContainer from "../components/DashboardContainer";
 import PageHeader from "../components/PageHeader";
 import Footer from "../components/Footer";
 import InputField from "../components/InputField";
-import SelectField from "../components/SelectField";
 
 // Import data awal dari Shop.json
-import productsData from "../data/Shop.json"; 
+import productsData from "../data/Shop.json";
 
 const Shop = () => {
   const [showForm, setShowForm] = useState(false);
@@ -20,7 +30,10 @@ const Shop = () => {
   // State manajemen data produk agar bisa bertambah secara dinamis
   const [products, setProducts] = useState(productsData || []);
 
-  // State untuk form input produk baru
+  // NEW: State untuk menandai apakah kita sedang mengedit produk (menyimpan ID produk yang diedit)
+  const [editingProductId, setEditingProductId] = useState(null);
+
+  // State untuk form input produk baru / produk yang sedang diedit
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -30,30 +43,86 @@ const Shop = () => {
     img: ""
   });
 
+  // Gambar cadangan standar jika link input kosong atau rusak
+  const fallbackImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=300&q=80";
+
   // Handler perubahan input form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handler submit form tambah produk
+  // Handler khusus untuk perubahan Shadcn Select
+  const handleCategoryChange = (value) => {
+    setFormData((prev) => ({ ...prev, category: value }));
+  };
+
+  // Safe handler untuk gambar yang gagal dimuat
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = fallbackImage;
+  };
+
+  // NEW: Handler saat tombol "Edit" di tabel ditekan
+  const handleEditClick = (product) => {
+    setFormData({
+      id: product.id || "",
+      name: product.name || "",
+      slug: product.slug || "",
+      category: product.category || "casual",
+      price: product.price || "",
+      img: product.img || ""
+    });
+    setEditingProductId(product.id); // Kunci ID produk yang diedit
+    setShowForm(true); // Otomatis buka panel form
+    
+    // Scroll otomatis ke area form agar admin langsung tahu form sudah terisi
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // NEW: Handler untuk membatalkan proses edit/tambah produk
+  const handleCancel = () => {
+    setFormData({ id: "", name: "", slug: "", category: "casual", price: "", img: "" });
+    setEditingProductId(null);
+    setShowForm(false);
+  };
+
+  // Handler submit form (Bisa mendeteksi TAMBAH BARU atau UPDATE EDIT)
   const handleFormSubmit = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.price) return;
 
-    const newProduct = {
-      id: formData.id || Math.floor(1000 + Math.random() * 9000).toString(),
-      name: formData.name,
-      slug: formData.slug || formData.name.toLowerCase().replace(/ /g, "-"),
-      category: formData.category,
-      price: formData.price,
-      img: formData.img || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=300&q=80"
-    };
-
-    setProducts([newProduct, ...products]);
-    // Reset Form & Tutup Form
-    setFormData({ id: "", name: "", slug: "", category: "casual", price: "", img: "" });
-    setShowForm(false);
+    if (editingProductId) {
+      // MODE EDIT: Update produk yang sudah ada di dalam array state
+      const updatedProducts = products.map((item) => {
+        if (item.id === editingProductId) {
+          return {
+            ...item,
+            name: formData.name,
+            slug: formData.slug || formData.name.toLowerCase().trim().replace(/\s+/g, "-"),
+            category: formData.category,
+            price: formData.price,
+            img: formData.img.trim() || fallbackImage
+          };
+        }
+        return item;
+      });
+      setProducts(updatedProducts);
+    } else {
+      // MODE TAMBAH BARU: Masukkan data baru di urutan paling atas array
+      const newProduct = {
+        id: formData.id || Math.floor(1000 + Math.random() * 9000).toString(),
+        name: formData.name,
+        slug: formData.slug || formData.name.toLowerCase().trim().replace(/\s+/g, "-"),
+        category: formData.category,
+        price: formData.price,
+        img: formData.img.trim() || fallbackImage
+      };
+      setProducts([newProduct, ...products]);
+    }
+    
+    // Bersihkan state form & kunci edit setelah selesai operasi sukses
+    handleCancel();
   };
 
   // Logika Filter Gabungan: Kategori + Form Pencarian Kata Kunci
@@ -79,7 +148,7 @@ const Shop = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-6">
           <div>
             <PageHeader
-              title="Our Collections"
+              title="Shop Catalog"
               breadcrumb={[
                 { label: "Beranda", link: "/" },
                 { label: "Shop" }
@@ -93,7 +162,13 @@ const Shop = () => {
               Ekspor CSV
             </button>
             <button 
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => {
+                if (showForm) {
+                  handleCancel();
+                } else {
+                  setShowForm(true);
+                }
+              }}
               className="px-5 py-2.5 bg-primary-dark text-white rounded-full text-xs font-bold tracking-wider hover:bg-hover-green shadow-veloura transition-all duration-300 cursor-pointer"
             >
               {showForm ? "Tutup Form Kontrol" : "+ Tambah Produk Baru"}
@@ -101,43 +176,70 @@ const Shop = () => {
           </div>
         </div>
 
-        {/* FORM INPUT PRODUK BARU (LUXURY INTERACTIVE PANEL) */}
+        {/* FORM INPUT PRODUK BARU / EDIT PRODUK */}
         {showForm && (
           <div className="bg-white p-8 rounded-[30px] border border-primary-light/20 shadow-[0_20px_50px_rgba(78,86,49,0.06)] animate-fade-in">
             <div className="border-b border-border-subtle pb-4 mb-6">
-              <h3 className="text-lg font-bold font-playfair text-primary-dark">Registrasi Produk Toko</h3>
-              <p className="text-xs text-primary-dark/50 font-quicksand">Tambahkan item busana atau aksesoris baru langsung ke dalam basis data etalase digital.</p>
+              {/* Judul Form dinamis mengikuti keadaan state */}
+              <h3 className="text-lg font-bold font-playfair text-primary-dark">
+                {editingProductId ? "Pembaruan Data Produk Toko" : "Registrasi Produk Toko"}
+              </h3>
+              <p className="text-xs text-primary-dark/50 font-quicksand">
+                {editingProductId ? "Ubah informasi detail produk yang sudah terdaftar pada sistem etalase." : "Tambahkan item busana atau aksesoris baru langsung ke dalam basis data etalase digital."}
+              </p>
             </div>
             
             <form onSubmit={handleFormSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <InputField label="ID Produk (Opsional)" name="id" placeholder="Contoh: 1024 (Otomatis jika kosong)" value={formData.id} onChange={handleInputChange} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
+                {/* ID Produk di-disable ketika dalam posisi mengedit agar ID unik tidak berubah rusak */}
+                <InputField 
+                  label="ID Produk" 
+                  name="id" 
+                  placeholder={editingProductId ? "ID Dikunci" : "Contoh: 1024 (Otomatis jika kosong)"} 
+                  value={formData.id} 
+                  onChange={handleInputChange} 
+                  disabled={!!editingProductId}
+                />
                 <InputField label="Nama Produk" name="name" placeholder="Contoh: Silk Pleated Dress" value={formData.name} onChange={handleInputChange} required />
                 <InputField label="Slug URL (Opsional)" name="slug" placeholder="Contoh: silk-pleated-dress" value={formData.slug} onChange={handleInputChange} />
                 
-                <SelectField 
-                  label="Kategori Koleksi" 
-                  name="category" 
-                  value={formData.category} 
-                  onChange={handleInputChange} 
-                  options={[
-                    { value: "casual", label: "Casual" }, 
-                    { value: "dress", label: "Dress" },
-                    { value: "summer", label: "Summer" },
-                    { value: "modern", label: "Modern" }
-                  ]} 
-                />
+                {/* DROPDOWN KATEGORI DENGAN SHADCN SELECT SUPER KONTRAS */}
+                <div className="flex flex-col space-y-2 font-quicksand">
+                  <label className="text-xs font-bold text-primary-dark/80">
+                    Kategori Koleksi
+                  </label>
+                  <Select value={formData.category} onValueChange={handleCategoryChange}>
+                    <SelectTrigger className="w-full h-11 bg-white border border-border-subtle rounded-xl text-xs font-medium !text-slate-900 [&>span]:!text-slate-900 shadow-sm outline-none focus:border-secondary-light transition-all">
+                      <SelectValue placeholder="Pilih Kategori" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-slate-200 shadow-xl rounded-2xl p-1 z-[9999]">
+                      <SelectItem value="casual" className="text-xs font-bold !text-slate-800 rounded-xl focus:!bg-slate-100 focus:!text-slate-900 cursor-pointer py-2.5">
+                        Casual
+                      </SelectItem>
+                      <SelectItem value="dress" className="text-xs font-bold !text-slate-800 rounded-xl focus:!bg-slate-100 focus:!text-slate-900 cursor-pointer py-2.5">
+                        Dress
+                      </SelectItem>
+                      <SelectItem value="summer" className="text-xs font-bold !text-slate-800 rounded-xl focus:!bg-slate-100 focus:!text-slate-900 cursor-pointer py-2.5">
+                        Summer
+                      </SelectItem>
+                      <SelectItem value="modern" className="text-xs font-bold !text-slate-800 rounded-xl focus:!bg-slate-100 focus:!text-slate-900 cursor-pointer py-2.5">
+                        Modern
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 
                 <InputField label="Harga Jual (Rupiah)" name="price" placeholder="Contoh: 349.000" value={formData.price} onChange={handleInputChange} required />
                 <InputField label="URL Gambar Aset" name="img" placeholder="https://images.unsplash.com/photo-..." value={formData.img} onChange={handleInputChange} />
               </div>
 
               <div className="flex justify-end gap-3 pt-2 font-quicksand">
-                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2 bg-bg-soft text-primary-dark/80 rounded-xl text-xs font-bold hover:bg-border-subtle transition-colors cursor-pointer">
+                <button type="button" onClick={handleCancel} className="px-5 py-2 bg-bg-soft text-primary-dark/80 rounded-xl text-xs font-bold hover:bg-border-subtle transition-colors cursor-pointer">
                   Batalkan Prosedur
                 </button>
+                {/* Teks button dinamis */}
                 <button type="submit" className="px-5 py-2 bg-secondary-light text-white rounded-xl text-xs font-bold hover:bg-hover-rose shadow-sm transition-colors cursor-pointer">
-                  Simpan Ke Etalase
+                  {editingProductId ? "Perbarui Item" : "Simpan Ke Etalase"}
                 </button>
               </div>
             </form>
@@ -211,12 +313,10 @@ const Shop = () => {
                   <div className="col-span-12 sm:col-span-5 flex items-center gap-4">
                     <div className="relative w-14 h-18 rounded-xl overflow-hidden bg-bg-soft border border-border-subtle flex-shrink-0 shadow-inner">
                       <img
-                        src={item.img}
+                        src={item.img || fallbackImage}
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          e.target.src = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=300&q=80";
-                        }}
+                        onError={handleImageError}
                       />
                       <div className="absolute inset-0 bg-primary-dark/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <Link 
@@ -258,7 +358,11 @@ const Shop = () => {
 
                   {/* Aksi Operasional Admin */}
                   <div className="col-span-4 sm:col-span-3 flex items-center justify-end gap-2 font-quicksand">
-                    <button className="px-3 py-1.5 border border-border-subtle bg-white text-primary-dark/70 rounded-xl text-[11px] font-bold hover:border-secondary-light/40 hover:text-secondary-light transition-all shadow-sm cursor-pointer">
+                    {/* MODIFIKASI: Menghubungkan fungsi handleEditClick dengan data item saat ini */}
+                    <button 
+                      onClick={() => handleEditClick(item)}
+                      className="px-3 py-1.5 border border-border-subtle bg-white text-primary-dark/70 rounded-xl text-[11px] font-bold hover:border-secondary-light/40 hover:text-secondary-light transition-all shadow-sm cursor-pointer"
+                    >
                       Edit
                     </button>
                     <Link 

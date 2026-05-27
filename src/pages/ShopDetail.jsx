@@ -1,10 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaArrowLeft, FaCheckCircle, FaLayerGroup, FaEdit, FaDatabase, FaHdd } from "react-icons/fa";
+
+// IMPORT INTEGRASI KOMPONEN SHADCN UI FORMS & DIALOG
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle 
+} from "../components/ui/dialog";
+import { Input } from "../components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "../components/ui/select";
 
 // IMPORT LAYOUT & KOMPONEN INTERNAL PROYEK ANDA
 import DashboardContainer from "../components/DashboardContainer";
 import PageHeader from "../components/PageHeader";
+import Button from "../components/Button"; // Menggunakan komponen Button internal jika dibutuhkan
 import Footer from "../components/Footer";
 
 // Import data katalog internal toko
@@ -18,8 +36,31 @@ const ShopDetail = () => {
   const [activeTab, setActiveTab] = useState("deskripsi");
   const [isLive, setIsLive] = useState(true);
 
+  // State Kontrol Dialog Form Edit Data Master
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    namaProduk: "",
+    hargaProduk: "",
+    kategoriProduk: "",
+    gambarProduk: ""
+  });
+
   // Mencari produk berdasarkan slug dari URL
   const product = productsData.find((p) => p.slug === slug || p.id?.toString() === slug);
+
+  // Efek untuk mengisi data awal form begitu produk berhasil dimuat
+  useEffect(() => {
+    if (product) {
+      // Bersihkan titik format nominal jika harga bawaan berupa string berformat rupiah
+      const rawPrice = product.price ? product.price.toString().replace(/\./g, "") : "";
+      setFormData({
+        namaProduk: product.name || "",
+        hargaProduk: rawPrice,
+        kategoriProduk: product.category?.toLowerCase() || "",
+        gambarProduk: product.img || ""
+      });
+    }
+  }, [product]);
 
   // Jika produk tidak ditemukan (Handling Error Admin)
   if (!product) {
@@ -42,6 +83,20 @@ const ShopDetail = () => {
     material: "Diperoleh langsung dari serat katun organik berdensitas tinggi yang dipadukan dengan premium linen mesh. Memberikan struktur siluet yang tegas, sirkulasi udara maksimal, serta ketahanan tekstur jangka panjang.",
     perawatan: "Dicuci dengan metode hand-wash menggunakan detergen cair lembut. Hindari memeras terlalu kuat. Setrika dari bagian dalam dengan temperatur medium-low untuk merawat keaslian serat alami.",
     fit: "Ukuran dirancang dengan pendekatan semi-structured (regular-fit Eropa). Silakan pilih ukuran kurasi reguler Anda atau gunakan satu ukuran di atasnya untuk impresi relaxed-tailoring."
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.namaProduk || !formData.hargaProduk) return;
+
+    // Logic simulasi penyimpanan pembaruan logistik ke data master
+    alert(`✅ Data Master SKU-${product.id} ("${formData.namaProduk}") berhasil diperbarui secara lokal!`);
+    setIsDialogOpen(false);
   };
 
   return (
@@ -195,7 +250,10 @@ const ShopDetail = () => {
 
             {/* ACTION PANEL MANAGEMENT SYSTEM */}
             <div className="flex flex-col sm:flex-row gap-3 font-quicksand">
+              
+              {/* TOMBOL EDIT UTAMA: MENYALAKAN STATE DIALOG FORM */}
               <button 
+                onClick={() => setIsDialogOpen(true)}
                 className="flex-[3] py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2.5 bg-primary-dark text-white hover:bg-hover-green shadow-md cursor-pointer transition-all duration-300"
               >
                 <FaEdit className="text-xs" /> Edit Data Master & Logistik (Ukuran {selectedSize})
@@ -218,6 +276,93 @@ const ShopDetail = () => {
             </p>
           </div>
         </div>
+
+        {/* ==========================================
+            INTEGRASI MODAL SHADCN DIALOG UNTUK EDIT FORM
+           ========================================== */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[480px] rounded-3xl bg-white p-6 border border-border-subtle shadow-xl !z-[99999]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold font-playfair text-primary-dark">
+                Ubah Informasi Produk Master
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-400 font-quicksand">
+                Lakukan modifikasi data logistik tekstil, nominal harga MSRP, atau tautan gambar untuk SKU referensi ini.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleFormSubmit} className="space-y-5 pt-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-primary-dark font-quicksand">Nama Produk</label>
+                <Input 
+                  name="namaProduk" 
+                  value={formData.namaProduk} 
+                  onChange={handleInputChange} 
+                  required 
+                  className="rounded-xl border-border-subtle focus-visible:ring-primary-light bg-white text-sm"
+                />
+              </div>
+              
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-primary-dark font-quicksand">Harga Produk (Rp)</label>
+                <Input 
+                  name="hargaProduk" 
+                  type="number" 
+                  value={formData.hargaProduk} 
+                  onChange={handleInputChange} 
+                  required 
+                  className="rounded-xl border-border-subtle focus-visible:ring-primary-light bg-white text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-primary-dark font-quicksand">Kategori</label>
+                <Select 
+                  value={formData.kategoriProduk}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, kategoriProduk: value }))}
+                >
+                  <SelectTrigger className="w-full rounded-xl border-border-subtle bg-white text-sm text-left">
+                    <SelectValue placeholder="Pilih Kategori" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white rounded-xl shadow-lg border-border-subtle !z-[100000]">
+                    <SelectItem value="tas" className="cursor-pointer focus:bg-bg-soft">Tas Premium</SelectItem>
+                    <SelectItem value="kaos" className="cursor-pointer focus:bg-bg-soft">Kaos Eksklusif</SelectItem>
+                    <SelectItem value="kacamata" className="cursor-pointer focus:bg-bg-soft">Kacamata Gaya</SelectItem>
+                    <SelectItem value="sepatu" className="cursor-pointer focus:bg-bg-soft">Sepatu Kulit</SelectItem>
+                    <SelectItem value="jam" className="cursor-pointer focus:bg-bg-soft">Jam Tangan Mewah</SelectItem>
+                    <SelectItem value="dress" className="cursor-pointer focus:bg-bg-soft">Gaun / Dress</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-primary-dark font-quicksand">URL Gambar Katalog</label>
+                <Input 
+                  name="gambarProduk" 
+                  value={formData.gambarProduk} 
+                  onChange={handleInputChange} 
+                  className="rounded-xl border-border-subtle focus-visible:ring-primary-light bg-white text-sm"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-bg-soft">
+                <button 
+                  type="button" 
+                  onClick={() => setIsDialogOpen(false)}
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-200 transition-colors"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-4 py-2 bg-primary-dark text-white rounded-xl text-xs font-semibold hover:bg-hover-green transition-colors shadow-sm"
+                >
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {/* FOOTER GLOBAL */}
         <div className="mt-16">
