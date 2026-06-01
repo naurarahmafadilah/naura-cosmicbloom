@@ -15,6 +15,9 @@ const Wishlist = lazy(() => import("./pages/Wishlist"));
 const WishlistDetail = lazy(() => import("./pages/WishlistDetail"));
 const Orders = lazy(() => import("./pages/Orders"));
 const OrderDetail = lazy(() => import("./pages/OrdersDetail"));
+// INTEGRASI LAZY IMPORT MEMBERSHIP BARU
+const Memberships = lazy(() => import("./pages/Memberships"));
+const MembershipsDetail = lazy(() => import("./pages/MembershipsDetail")); // Jika nanti kamu membuat halaman detailnya
 const Sale = lazy(() => import("./pages/Sale"));
 const SaleDetail = lazy(() => import("./pages/SaleDetail"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -36,6 +39,8 @@ const App = () => {
           <Route path="/sale" element={<Sale />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/orders" element={<Orders />} />
+          {/* REGISTER ROUTE MASTER MEMBERSHIP */}
+          <Route path="/memberships" element={<Memberships />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/contact" element={<Contact />} />
           
@@ -44,6 +49,8 @@ const App = () => {
           <Route path="/sale/:slug" element={<SaleDetail />} />
           <Route path="/wishlist/:slug" element={<WishlistDetail />} />
           <Route path="/orders/:id" element={<OrderDetail />} />
+          {/* REGISTER ROUTE DETAIL MEMBERSHIP */}
+          <Route path="/memberships/:id" element={<MembershipsDetail />} />
           <Route path="/collection/:slug" element={<CollectionDetail />} />
         </Route>
 

@@ -81,7 +81,7 @@ const Orders = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-6">
           <div>
             <PageHeader
-              title="My Orders"
+              title="Orders"
               breadcrumb={[{ label: "Beranda", link: "/" }, { label: "Pesanan" }]}
             />
           </div>

@@ -1,4 +1,4 @@
-import { FaHome, FaTshirt, FaShoppingBag, FaHeart, FaTag, FaBoxOpen, FaCrown } from "react-icons/fa";
+import { FaHome, FaTshirt, FaHeart, FaTag, FaBoxOpen, FaCrown, FaIdCard } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
@@ -16,13 +16,15 @@ const Sidebar = () => {
     { name: "Katalog", path: "/shop", icon: <FaTshirt /> },
     { name: "Favorit", path: "/wishlist", icon: <FaHeart /> },
     { name: "Pesanan", path: "/orders", icon: <FaBoxOpen /> },
+    // INTEGRASI MENU MEMBERSHIP BARU
+    { name: "Membership", path: "/memberships", icon: <FaIdCard /> }, 
     { name: "Sale", path: "/sale", icon: <FaTag />, badge: "50%", isSale: true }
   ];
 
   return (
     <aside className="w-80 bg-white h-screen px-8 py-12 flex flex-col border-r border-bg-soft sticky top-0 overflow-hidden">
       
-      {/* 1. BRANDING (Dibuat lebih Bold & Minimalis) */}
+      {/* 1. BRANDING */}
       <div className="mb-16">
         <h1 className="text-4xl font-playfair text-primary-dark tracking-tighter leading-none">
           Veloura<span className="text-secondary-light">.</span>
@@ -32,7 +34,7 @@ const Sidebar = () => {
         </p>
       </div>
 
-      {/* 2. NAVIGATION (Satu aliran, tanpa scrollbar terpisah) */}
+      {/* 2. NAVIGATION */}
       <div className="flex-1 space-y-12">
         <nav>
           <p className="text-[10px] font-bold text-secondary-dark/20 uppercase tracking-[4px] mb-8 px-2">Essential Menu</p>
@@ -62,7 +64,7 @@ const Sidebar = () => {
           </ul>
         </nav>
 
-        {/* ELEGANT TAGLINE (Pengganti Hot Deal yang kaku) */}
+        {/* ELEGANT TAGLINE */}
         <div className="px-2">
           <div className="border-l-2 border-secondary-light/30 pl-4 py-1">
             <p className="text-[11px] font-playfair text-primary-dark italic leading-relaxed">
@@ -73,10 +75,9 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* 3. PROMO CARD (Pro & Luxury Look) */}
+      {/* 3. PROMO CARD */}
       <div className="mt-auto pt-8">
         <div className="bg-[#1A1A1A] rounded-[40px] p-8 text-left shadow-2xl relative overflow-hidden group">
-          {/* Subtle Glow Effect */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-light/10 blur-[50px] rounded-full transition-transform duration-[2s] group-hover:scale-150" />
           
           <div className="relative z-10">
