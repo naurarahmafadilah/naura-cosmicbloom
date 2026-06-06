@@ -29,7 +29,6 @@ const Membership = () => {
   const [members, setMembers] = useState(initialMembersData);
   const [editingMemberId, setEditingMemberId] = useState(null);
   
-  // State untuk mengelola data member yang sedang dilihat di modal detail
   const [selectedMember, setSelectedMember] = useState(null);
 
   const [formData, setFormData] = useState({

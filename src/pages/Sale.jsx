@@ -39,7 +39,7 @@ const Sale = () => {
     const [selectedDiscount, setSelectedDiscount] = useState("all");
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [isEventActive, setIsEventActive] = useState(true); // Fitur: Saklar Event Kontrol
+    const [isEventActive, setIsEventActive] = useState(true); 
 
     // State untuk mengontrol jam countdown bergerak
     const [timeLeft, setTimeLeft] = useState({ hours: 24, minutes: 12, seconds: 59 });
