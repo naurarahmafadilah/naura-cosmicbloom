@@ -3,11 +3,12 @@ import { useParams, Link } from "react-router-dom";
 import { 
   FaArrowLeft, FaBox, FaMapMarkerAlt, FaCreditCard, 
   FaTruck, FaRegCalendarAlt, FaUser, FaBarcode, 
-  FaEdit, FaCheckCircle, FaRoute, FaHashtag, FaSave, FaTimes 
+  FaEdit, FaCheckCircle, FaRoute, FaHashtag, FaSave, FaTimes,
+  FaClock, FaSpinner, FaCheck, FaCopy, FaStickyNote, FaPrint, FaTrash
 } from "react-icons/fa";
 
 // ==========================================
-// 1. INTEGRASI KOMPONEN SHADCN UI
+// INTEGRASI KOMPONEN SHADCN UI
 // ==========================================
 import { Badge } from "../components/ui/badge";
 import { 
@@ -26,364 +27,412 @@ import {
   SelectValue,
 } from "../components/ui/select";
 
-// ==========================================
-// 2. LAYOUT & DATA SOURCE EXISTING
-// ==========================================
 import DashboardContainer from "../components/DashboardContainer";
 import PageHeader from "../components/PageHeader";
 import Footer from "../components/Footer";
-import InputField from "../components/InputField"; // Form input komponen utilitas Anda
 import ordersData from "../data/Orders.json";
 
 const OrderDetail = () => {
   const { id } = useParams();
   
-  // State manajemen manifest data pesanan dinamis
+  // State manajemen data pesanan
   const [currentOrder, setCurrentOrder] = useState(null);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [addressInput, setAddressInput] = useState("");
+  const [copied, setCopied] = useState(false);
 
-  // State lokal kontrol dialog manifest logistik
+  // State Fitur Catatan Internal Admin (Keren & Fungsional)
+  const [notes, setNotes] = useState([]);
+  const [newNote, setNewNote] = useState("");
+
+  // State kontrol dialog manifest logistik
   const [openRouteModal, setOpenRouteModal] = useState(false);
   const [openResiModal, setOpenResiModal] = useState(false);
 
-  // Efek inisialisasi memuat entitas berdasarkan ID parameter URL
   useEffect(() => {
     const foundOrder = ordersData.find((o) => o.id === id);
     if (foundOrder) {
       setCurrentOrder(foundOrder);
       setAddressInput(foundOrder.address || "");
+      // Mock data catatan internal awal
+      setNotes([
+        { id: 1, text: "Klien meminta bungkus tambahan kain organza.", time: "10:30 WIB" }
+      ]);
     }
   }, [id]);
 
-  // Jika data transaksi tidak ditemukan (Handling Error Admin)
   if (!currentOrder) {
     return (
       <DashboardContainer>
-        <div className="py-40 text-center animate-fade-in font-quicksand">
-          <h2 className="font-playfair text-3xl text-primary-dark">Manifest Pesanan Tidak Ditemukan</h2>
-          <p className="text-xs text-primary-dark/40 mt-1">ID Transaksi tidak terdaftar atau telah diarsipkan oleh sistem.</p>
-          <Link to="/orders" className="text-secondary-light font-bold text-xs uppercase tracking-wider underline mt-4 inline-block hover:text-primary-dark transition-colors">
-            Kembali ke Daftar Pesanan
+        <div className="py-24 text-center font-quicksand max-w-sm mx-auto px-4">
+          <div className="w-12 h-12 bg-[#FAF9F5] border border-[#8C6239]/20 text-[#8C6239] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <FaTimes size={16} />
+          </div>
+          <h2 className="font-playfair text-xl font-bold text-slate-900 tracking-tight">Manifest Tidak Ditemukan</h2>
+          <p className="text-xs text-slate-400 mt-1.5">ID Transaksi tidak terdaftar di sistem Veloura Atelier.</p>
+          <Link to="/orders" className="mt-6 inline-flex items-center gap-1.5 bg-[#4E5631] text-white px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider hover:bg-[#3d4426] transition-all shadow-sm">
+            <FaArrowLeft size={10} /> Kembali ke Pesanan
           </Link>
         </div>
       </DashboardContainer>
     );
   }
 
-  // Handler update status pesanan dari dropdown menu kontrol admin
+  // Handler Salin Alamat Pintar
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(`Penerima: ${currentOrder.customer}\nAlamat: ${currentOrder.address}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Handler Tambah Catatan Internal
+  const handleAddNote = (e) => {
+    e.preventDefault();
+    if (!newNote.trim()) return;
+    const timeNow = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB";
+    setNotes([...notes, { id: Date.now(), text: newNote, time: timeNow }]);
+    setNewNote("");
+  };
+
+  // Handler Hapus Catatan
+  const handleDeleteNote = (noteId) => {
+    setNotes(notes.filter(note => note.id !== noteId));
+  };
+
+  // Handler Cetak / Print Mode Instan
+  const handlePrintInvoice = () => {
+    window.print();
+  };
+
   const handleStatusChange = (newStatus) => {
     setCurrentOrder((prev) => ({ ...prev, status: newStatus }));
   };
 
-  // Handler simpan perubahan data alamat domestik
   const handleSaveAddress = (e) => {
     e.preventDefault();
     setCurrentOrder((prev) => ({ ...prev, address: addressInput }));
     setIsEditingAddress(false);
   };
 
-  // Penyesuai warna badge status audit berbasis Shadcn UI untuk back-office Veloura
   const renderStatusBadge = (status) => {
     switch (status) {
       case "Completed": 
         return (
-          <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 rounded-lg text-[10px] font-bold uppercase tracking-wider px-3 py-1 border shadow-none font-mono">
-            Selesai
+          <Badge className="bg-[#FAF9F5] text-[#4E5631] border-[#4E5631]/20 rounded-lg text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 border shadow-none flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-[#4E5631] rounded-full"></span> Selesai
           </Badge>
         );
       case "Pending": 
         return (
-          <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50 rounded-lg text-[10px] font-bold uppercase tracking-wider px-3 py-1 border shadow-none font-mono">
-            Menunggu
+          <Badge className="bg-[#FAF9F5] text-[#8C6239] border-[#8C6239]/20 rounded-lg text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 border shadow-none flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-[#8C6239] rounded-full animate-pulse"></span> Menunggu
           </Badge>
         );
       case "Cancelled": 
         return (
-          <Badge className="bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-100 rounded-lg text-[10px] font-bold uppercase tracking-wider px-3 py-1 border shadow-none font-mono line-through">
-            Dibatalkan
+          <Badge className="bg-slate-50 text-slate-400 border-slate-200 rounded-lg text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 border shadow-none flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span> Batal
           </Badge>
         );
       default: 
-        return (
-          <Badge className="bg-bg-soft text-primary-dark/60 border-border-subtle hover:bg-bg-soft rounded-lg text-[10px] font-bold uppercase tracking-wider px-3 py-1 border shadow-none font-mono">
-            {status}
-          </Badge>
-        );
+        return <Badge className="bg-slate-50 text-slate-600 border-slate-200 rounded-lg text-[10px] font-bold uppercase px-2.5 py-0.5 border shadow-none">{status}</Badge>;
     }
   };
 
   return (
     <DashboardContainer>
-      <div className="animate-fade-in pb-10 text-primary-dark">
-        
-        {/* HEADER HALAMAN */}
-        <PageHeader
-          title="Manajemen Manifest Order"
-          breadcrumb={[
-            { label: "Dashboard", link: "/" },
-            { label: "Daftar Pesanan", link: "/orders" },
-            { label: currentOrder.id }
-          ]}
-        />
+      {/* STYLE CSS KHUSUS UNTUK METODE PRINT (Menyembunyikan sidebar/footer saat cetak nota belanja) */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          .printable-area, .printable-area * { visibility: visible; }
+          .printable-area { position: absolute; left: 0; top: 0; width: 100%; }
+          .no-print { display: none !important; }
+        }
+      `}</style>
 
-        <div className="max-w-5xl mx-auto mt-12 px-4 sm:px-0">
+      <div className="animate-fade-in pb-8 text-slate-800 relative pt-2 px-4 max-w-6xl mx-auto">
+        
+        {/* ==========================================
+            PERBAIKAN PENGGUNAAN KOMPONEN PAGE HEADER
+           ========================================== */}
+        <div className="no-print">
+          <PageHeader
+            title="Manajemen Manifest Order"
+            breadcrumbs={["Dashboard", "Pesanan", currentOrder.id]}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto mt-2 printable-area">
           
-          {/* Top Admin Action Row */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 font-quicksand">
-            <Link 
-              to="/orders" 
-              className="inline-flex items-center gap-2 text-secondary-dark/50 text-[10px] font-bold uppercase tracking-widest hover:text-secondary-light transition-colors"
-            >
-              <FaArrowLeft className="text-[9px]" /> Kembali ke Log Transaksi
+          {/* BAR AKSI ATAS - NO PRINT */}
+          <div className="flex items-center justify-between font-quicksand mb-4 no-print">
+            <Link to="/orders" className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#8C6239] hover:text-[#4E5631] transition-colors group">
+              <FaArrowLeft className="text-[10px] transform group-hover:-translate-x-0.5 transition-transform" /> Log Transaksi
             </Link>
 
-            {/* QUICK CONTROL STATUS SYSTEM */}
-            <div className="flex items-center gap-3 bg-white border border-border-subtle rounded-2xl px-4 py-2 shadow-sm w-full sm:w-auto">
-              <span className="text-xs font-bold text-primary-dark/60 whitespace-nowrap">Otoritas Status:</span>
-              <Select value={currentOrder.status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-[140px] h-8 bg-bg-main border-none text-xs font-mono font-bold text-slate-900 rounded-lg focus:ring-1 focus:ring-primary-light">
-                  <SelectValue placeholder="Ubah Status" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border border-slate-200 shadow-xl rounded-xl p-1 font-quicksand z-[9999]">
-                  <SelectItem value="Pending" className="text-xs font-bold text-amber-700 focus:bg-amber-50 rounded-lg cursor-pointer">Pending</SelectItem>
-                  <SelectItem value="Completed" className="text-xs font-bold text-emerald-700 focus:bg-emerald-50 rounded-lg cursor-pointer">Completed</SelectItem>
-                  <SelectItem value="Cancelled" className="text-xs font-bold text-slate-500 focus:bg-slate-100 rounded-lg cursor-pointer">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2">
+              {/* FITUR PRINT */}
+              <button 
+                onClick={handlePrintInvoice}
+                className="h-7 px-2.5 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 shadow-sm flex items-center gap-1 hover:bg-slate-50 cursor-pointer"
+                title="Cetak Label Nota"
+              >
+                <FaPrint size={11} className="text-slate-400" /> Cetak Nota
+              </button>
+
+              {/* DROPDOWN EDIT STATUS */}
+              <div className="flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-2.5 py-1.5 shadow-sm">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status:</span>
+                <Select value={currentOrder.status} onValueChange={handleStatusChange}>
+                  <SelectTrigger className="w-[120px] h-7 bg-[#FAF9F5]/50 border border-slate-200 text-[11px] font-bold text-slate-700 rounded-lg focus:ring-0">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-slate-100 shadow-xl rounded-xl p-1 font-quicksand z-[9999]">
+                    <SelectItem value="Pending" className="text-xs font-semibold text-[#8C6239] focus:bg-[#FAF9F5] rounded-lg cursor-pointer py-1.5">Pending</SelectItem>
+                    <SelectItem value="Completed" className="text-xs font-semibold text-[#4E5631] focus:bg-[#FAF9F5] rounded-lg cursor-pointer py-1.5">Completed</SelectItem>
+                    <SelectItem value="Cancelled" className="text-xs font-semibold text-slate-400 focus:bg-slate-50 rounded-lg cursor-pointer py-1.5">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
-          {/* UTAMA: PANEL INVOICE AUDIT SYSTEM */}
-          <div className="bg-white rounded-[35px] border border-primary-light/10 overflow-hidden shadow-veloura">
+          {/* WORKSPACE UTAMA */}
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
             
-            {/* Top Info Bar Master Node */}
-            <div className="bg-bg-main/40 p-8 border-b border-border-subtle flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            {/* Top Bar Master Node */}
+            <div className="bg-[#FAF9F5]/60 p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <span className="text-[9px] font-mono font-bold text-primary-dark/40 uppercase tracking-widest bg-bg-main border border-border-subtle px-2 py-0.5 rounded">
+                <span className="text-[9px] font-bold text-[#8C6239] uppercase tracking-wider bg-white border border-[#8C6239]/10 px-2 py-0.5 rounded-md">
                   Arsip Dokumen Finansial
                 </span>
-                <h2 className="text-2xl font-playfair text-primary-dark mt-1.5">{currentOrder.id}</h2>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-primary-dark/40 font-quicksand mt-1">
-                  <p className="flex items-center gap-1.5"><FaRegCalendarAlt className="text-[10px]" /> Waktu Transaksi: {currentOrder.date}</p>
-                  <p className="flex items-center gap-1.5"><FaUser className="text-[10px]" /> ID Pembeli: {currentOrder.customer}</p>
+                <h2 className="text-lg font-bold tracking-tight text-slate-900 font-quicksand mt-1.5">{currentOrder.id}</h2>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-400 font-quicksand">
+                  <p className="flex items-center gap-1"><FaRegCalendarAlt /> {currentOrder.date}</p>
+                  <p className="flex items-center gap-1"><FaUser /> Klien: <span className="font-semibold text-slate-700">{currentOrder.customer}</span></p>
                 </div>
               </div>
-              
-              <div>
-                {renderStatusBadge(currentOrder.status)}
+              <div>{renderStatusBadge(currentOrder.status)}</div>
+            </div>
+
+            {/* PROGRESS TRACKER VISUAL (NO PRINT) */}
+            <div className="px-6 py-4 bg-white border-b border-slate-100 font-quicksand no-print">
+              <div className="flex items-center justify-between max-w-md mx-auto relative py-1">
+                <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[1px] bg-slate-100 z-0"></div>
+                <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-[1px] bg-[#4E5631] z-0 transition-all duration-500 ${currentOrder.status === 'Completed' ? 'w-full' : currentOrder.status === 'Pending' ? 'w-0' : 'w-1/2'}`}></div>
+                
+                <div className="z-10 flex flex-col items-center">
+                  <div className="w-5 h-5 rounded-full bg-[#4E5631] text-white flex items-center justify-center text-[9px] shadow-sm"><FaCheck /></div>
+                  <span className="text-[10px] font-bold text-slate-700 mt-1 bg-white px-1">Dibuat</span>
+                </div>
+                <div className="z-10 flex flex-col items-center">
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] shadow-sm border transition-all ${currentOrder.status !== 'Pending' && currentOrder.status !== 'Cancelled' ? 'bg-[#4E5631] border-[#4E5631] text-white' : 'bg-white border-slate-200 text-slate-400'}`}>
+                    {currentOrder.status !== 'Pending' && currentOrder.status !== 'Cancelled' ? <FaCheck /> : <FaSpinner className="animate-spin" />}
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 mt-1 bg-white px-1">Diproses</span>
+                </div>
+                <div className="z-10 flex flex-col items-center">
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] shadow-sm border transition-all ${currentOrder.status === 'Completed' ? 'bg-[#4E5631] border-[#4E5631] text-white' : 'bg-white border-slate-200 text-slate-400'}`}>
+                    <span className="w-1.5 h-1.5 bg-current rounded-full" />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 mt-1 bg-white px-1">Selesai</span>
+                </div>
               </div>
             </div>
 
-            {/* Grid Konten Pemrosesan */}
-            <div className="grid lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-border-subtle/70">
+            {/* SPLIT LAYOUT */}
+            <div className="grid md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-100">
               
-              {/* SISI KIRI: DATA ITEM & BREAKDOWN AUDIT NOMINAL */}
-              <div className="lg:col-span-7 p-8 space-y-8">
+              {/* SISI KIRI: DETAIL PRODUK */}
+              <div className="md:col-span-7 p-4 space-y-4">
                 <div>
-                  <h4 className="font-playfair text-lg text-primary-dark flex items-center gap-2.5 mb-4">
-                    <FaBox className="text-secondary-light text-sm" /> Rincian Muatan Produk
+                  <h4 className="font-quicksand font-bold text-[10px] uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-3">
+                    <FaBox /> Muatan Produk
                   </h4>
                   
-                  {/* Kartu Komponen Produk */}
-                  <div className="flex flex-col sm:flex-row gap-5 p-5 rounded-2xl bg-bg-main/20 border border-border-subtle/60">
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border border-border-subtle shrink-0 bg-white">
-                      <img 
-                        src={currentOrder.img} 
-                        alt={currentOrder.product} 
-                        className="w-full h-full object-cover" 
-                        onError={(e) => {
-                          e.target.src = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=500&q=80";
-                        }}
-                      />
+                  <div className="flex gap-4 p-3 rounded-xl bg-[#FAF9F5]/40 border border-slate-100">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-white no-print">
+                      <img src={currentOrder.img} alt={currentOrder.product} className="w-full h-full object-cover" />
                     </div>
-                    <div className="flex flex-col justify-between py-1 flex-1">
+                    <div className="flex flex-col justify-between py-0.5 flex-1 font-quicksand">
                       <div>
-                        <h5 className="font-playfair text-lg text-primary-dark leading-snug">{currentOrder.product}</h5>
-                        <p className="text-xs font-quicksand text-primary-dark/40 mt-1">Volume Alokasi: 1 Unit</p>
+                        <h5 className="font-bold text-slate-900 text-sm leading-snug">{currentOrder.product}</h5>
+                        <p className="text-[11px] text-slate-400 mt-0.5">Kuantitas: <span className="font-semibold text-slate-600">1 Unit</span></p>
                       </div>
-                      <p className="font-quicksand font-bold text-primary-dark text-base mt-2 sm:mt-0">
-                        <span className="text-xs font-normal text-secondary-light mr-0.5">Rp</span> {currentOrder.price}
+                      <p className="font-bold text-slate-950 text-sm">
+                        <span className="text-[11px] font-normal text-[#8C6239] mr-0.5">Rp</span> {currentOrder.price}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Rincian Finansial Rekonsiliasi */}
-                <div className="border-t border-border-subtle/60 pt-6 font-quicksand space-y-3 text-xs">
-                  <div className="flex justify-between text-primary-dark/60">
+                <div className="border-t border-slate-100 pt-3 font-quicksand space-y-2 text-[11px]">
+                  <div className="flex justify-between text-slate-500">
                     <span>Subtotal Nilai Barang</span>
-                    <span>Rp {currentOrder.price}</span>
+                    <span className="font-semibold text-slate-700">Rp {currentOrder.price}</span>
                   </div>
-                  <div className="flex justify-between text-primary-dark/60">
-                    <span>Subsidi Ongkos Kirim ({currentOrder.shipping})</span>
-                    <span className="text-secondary-light uppercase font-bold text-[10px] tracking-wider">Toko Bebas Ongkir</span>
+                  <div className="flex justify-between text-slate-500 items-center">
+                    <span>Subsidi Ongkos Kirim</span>
+                    <span className="bg-[#FAF9F5] text-[#8C6239] font-bold text-[9px] tracking-wider px-2 py-0.5 rounded-md border border-[#8C6239]/10 uppercase">Bebas Ongkir</span>
                   </div>
-                  <div className="flex justify-between text-primary-dark/60">
-                    <span>Pajak Konsumsi (PPN) & Biaya Gerbang Tol</span>
-                    <span>Rp 0</span>
-                  </div>
+                </div>
+
+                {/* MEMO INTERNAL */}
+                <div className="border-t border-slate-100 pt-4 font-quicksand no-print">
+                  <h4 className="font-bold text-[10px] uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
+                    <FaStickyNote /> Memo Internal Atelier
+                  </h4>
+                  <form onSubmit={handleAddNote} className="flex gap-1.5 mb-2.5">
+                    <input 
+                      type="text" 
+                      placeholder="Tambahkan catatan koordinasi tim..." 
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      className="flex-1 text-[11px] px-3 h-8 border border-slate-200 rounded-lg focus:outline-none focus:border-[#8C6239] bg-[#FAF9F5]/30"
+                    />
+                    <button type="submit" className="bg-[#8C6239] text-white px-3 text-[11px] font-bold rounded-lg hover:bg-[#73512e]">Sematkan</button>
+                  </form>
+                  
+                  {notes.length > 0 ? (
+                    <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
+                      {notes.map(note => (
+                        <div key={note.id} className="flex justify-between items-start bg-slate-50 border border-slate-100 p-2 rounded-lg text-[11px]">
+                          <div className="text-slate-600 leading-relaxed pr-2">
+                            <span className="text-[9px] text-[#8C6239] font-bold mr-1.5 bg-white border border-[#8C6239]/10 px-1 rounded">{note.time}</span>
+                            {note.text}
+                          </div>
+                          <button onClick={() => handleDeleteNote(note.id)} className="text-slate-300 hover:text-rose-600 transition-colors cursor-pointer p-0.5">
+                            <FaTrash size={9} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-slate-400 italic">Belum ada memo internal disematkan pada manifest ini.</p>
+                  )}
                 </div>
               </div>
 
-              {/* SISI KANAN: INSTRUKSI LOGISTIK & VALIDASI GATEWAY */}
-              <div className="lg:col-span-5 p-8 space-y-8 font-quicksand">
-                {/* Alamat Penerima dengan fitur Edit Inline */}
-                <div className="space-y-2">
+              {/* SISI KANAN: DETAIL LOGISTIK */}
+              <div className="md:col-span-5 p-4 space-y-3 font-quicksand bg-[#FAF9F5]/20">
+                
+                {/* Alamat Penerima */}
+                <div className="bg-white p-3 rounded-xl border border-slate-100 space-y-2">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-primary-dark font-bold text-xs uppercase tracking-wider flex items-center gap-2">
-                      <FaMapMarkerAlt className="text-secondary-light text-xs" /> Alamat Pengiriman Domestik
+                    <h4 className="text-slate-400 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+                      <FaMapMarkerAlt /> Alamat Tujuan
                     </h4>
-                    {!isEditingAddress && (
+                    <div className="flex gap-1 no-print">
                       <button 
-                        onClick={() => setIsEditingAddress(true)}
-                        className="text-[10px] text-secondary-light font-bold flex items-center gap-1 hover:text-primary-dark transition-colors cursor-pointer"
+                        onClick={handleCopyAddress}
+                        className={`text-[10px] font-bold flex items-center gap-1 px-1.5 py-0.5 rounded-md border transition-all ${copied ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}`}
                       >
-                        <FaEdit size={10} /> Ubah
+                        <FaCopy size={9} /> {copied ? "Tersalin!" : "Salin Cepat"}
                       </button>
-                    )}
+                      {!isEditingAddress && (
+                        <button onClick={() => setIsEditingAddress(true)} className="text-[10px] text-[#8C6239] font-bold flex items-center gap-1 bg-[#FAF9F5] px-1.5 py-0.5 rounded-md border border-[#8C6239]/10"><FaEdit size={9} /> Ubah</button>
+                      )}
+                    </div>
                   </div>
                   
-                  <div className="pl-5 text-sm text-primary-dark/60 leading-relaxed border-l border-border-subtle relative">
-                    <p className="font-bold text-primary-dark mb-0.5">{currentOrder.customer}</p>
-                    
+                  <div className="text-slate-600">
+                    <p className="font-bold text-slate-900 text-xs mb-0.5">{currentOrder.customer}</p>
                     {isEditingAddress ? (
-                      <form onSubmit={handleSaveAddress} className="mt-2 space-y-2 animate-fade-in">
+                      <form onSubmit={handleSaveAddress} className="mt-1.5 space-y-1.5">
                         <textarea
                           value={addressInput}
                           onChange={(e) => setAddressInput(e.target.value)}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-primary-dark text-primary-dark font-quicksand bg-bg-main/30"
-                          rows={3}
+                          className="w-full text-[11px] p-2 border border-slate-200 rounded-lg bg-white text-slate-700"
+                          rows={2}
                           required
                         />
-                        <div className="flex gap-2 justify-end">
-                          <button 
-                            type="button" 
-                            onClick={() => { setIsEditingAddress(false); setAddressInput(currentOrder.address); }}
-                            className="p-1.5 bg-bg-soft text-slate-700 rounded-lg hover:bg-border-subtle transition-colors cursor-pointer"
-                          >
-                            <FaTimes size={10} />
-                          </button>
-                          <button 
-                            type="submit" 
-                            className="p-1.5 bg-secondary-light text-white rounded-lg hover:bg-hover-rose transition-colors cursor-pointer"
-                          >
-                            <FaSave size={10} />
-                          </button>
+                        <div className="flex gap-1 justify-end">
+                          <button type="button" onClick={() => { setIsEditingAddress(false); setAddressInput(currentOrder.address); }} className="p-1 bg-slate-50 text-slate-400 rounded-md border border-slate-200"><FaTimes size={9} /></button>
+                          <button type="submit" className="p-1 bg-[#4E5631] text-white rounded-md"><FaSave size={9} /></button>
                         </div>
                       </form>
                     ) : (
-                      <p className="text-xs">{currentOrder.address}</p>
+                      <p className="text-[11px] text-slate-500 leading-relaxed">{currentOrder.address}</p>
                     )}
                   </div>
                 </div>
 
-                {/* Informasi Kurir & Kode Resi */}
-                <div className="space-y-2">
-                  <h4 className="text-primary-dark font-bold text-xs uppercase tracking-wider flex items-center gap-2">
-                    <FaTruck className="text-secondary-light text-xs" /> Rekomendasi Ekspedisi Mitra
+                {/* Ekspedisi */}
+                <div className="bg-white p-3 rounded-xl border border-slate-100 space-y-1.5">
+                  <h4 className="text-slate-400 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+                    <FaTruck /> Mitra Ekspedisi
                   </h4>
-                  <div className="pl-5 border-l border-border-subtle space-y-2.5">
-                    <div>
-                      <span className="text-[10px] bg-bg-main border border-border-subtle px-2.5 py-1 rounded-md font-mono font-bold text-primary-dark/60 uppercase tracking-wider">
-                        {currentOrder.shipping}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-primary-dark/40 flex items-center gap-1.5">
-                      <FaBarcode /> ID Pelacakan Manifest: <span className="font-mono font-bold text-primary-dark">VLR-{currentOrder.id}</span>
+                  <div className="flex flex-wrap items-center justify-between gap-1">
+                    <div className="text-[11px] font-bold text-slate-700">{currentOrder.shipping}</div>
+                    <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                      <FaBarcode /> <span className="font-mono font-bold text-slate-600 bg-slate-50 px-1 py-0.5 rounded">VLR-{currentOrder.id}</span>
                     </p>
                   </div>
                 </div>
 
                 {/* Metode Pembayaran */}
-                <div className="space-y-2">
-                  <h4 className="text-primary-dark font-bold text-xs uppercase tracking-wider flex items-center gap-2">
-                    <FaCreditCard className="text-secondary-light text-xs" /> Kluster Settlement Transaksi
+                <div className="bg-white p-3 rounded-xl border border-slate-100 flex items-center justify-between">
+                  <h4 className="text-slate-400 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+                    <FaCreditCard /> Gateway
                   </h4>
-                  <div className="pl-5 text-xs text-primary-dark/70 font-mono tracking-widest uppercase border-l border-border-subtle">
-                    {currentOrder.payment}
-                  </div>
+                  <div className="text-[11px] font-bold text-slate-700 bg-[#FAF9F5] px-2 py-0.5 rounded-md border border-[#8C6239]/10">{currentOrder.payment}</div>
                 </div>
               </div>
 
             </div>
 
-            {/* PANEL AKSI DAN TOTAL SETTLEMENT ADMIN */}
-            <div className="p-8 bg-primary-dark text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-t border-white/10">
-              <div className="font-playfair">
-                <span className="text-lg italic text-white/90">Total Nilai Penjualan</span>
-                <p className="text-[10px] font-quicksand tracking-wider text-white/40 uppercase mt-0.5">
-                  Telah Di-settle otomatis via kanal {currentOrder.payment}
-                </p>
+            {/* PANEL AKSI BAWAH */}
+            <div className="p-4 bg-slate-900 text-white flex items-center justify-between gap-4">
+              <div className="font-quicksand">
+                <span className="text-[11px] text-slate-400 block font-medium">Settlement Akhir Penjualan</span>
+                <span className="text-lg sm:text-xl font-bold tracking-tight flex items-baseline">
+                  <span className="text-[11px] font-normal text-slate-400 mr-0.5">Rp</span>{currentOrder.price}
+                </span>
               </div>
               
-              <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                <div className="text-right font-quicksand">
-                  <span className="text-2xl sm:text-3xl font-bold tracking-wide flex items-baseline">
-                    <span className="text-xs sm:text-sm font-normal text-secondary-light mr-1">Rp</span>
-                    {currentOrder.price}
-                  </span>
-                </div>
-                
-                <div className="flex gap-2 font-quicksand">
-                  
-                  {/* MODAL DIALOG SHADCN: UBAH RUTE */}
-                  <Dialog open={openRouteModal} onOpenChange={setOpenRouteModal}>
-                    <DialogTrigger asChild>
-                      <button className="bg-white text-primary-dark px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-bg-main transition-all cursor-pointer shadow-md">
-                        <FaEdit size={10} /> Ubah Rute
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-white p-6 rounded-3xl border border-border-subtle max-w-sm">
-                      <DialogHeader>
-                        <DialogTitle className="font-playfair text-lg flex items-center gap-2 text-primary-dark">
-                          <FaRoute className="text-secondary-light" /> Pengalihan Rute Kurir
-                        </DialogTitle>
-                        <DialogDescription className="text-xs font-quicksand pt-2 text-slate-500 leading-relaxed">
-                          Anda sedang mencoba merubah manifestasi logs domestik untuk pelanggan <strong>{currentOrder.customer}</strong>. Fitur rute kurir fisik eksternal terkunci otomatis untuk menjaga validitas logistik gateway utama.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex justify-end pt-4">
-                        <button onClick={() => setOpenRouteModal(false)} className="px-4 py-2 bg-bg-soft rounded-xl text-xs font-bold text-primary-dark/80 hover:bg-border-subtle transition-colors cursor-pointer">
-                          Mengerti
-                        </button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+              <div className="flex gap-1.5 font-quicksand no-print">
+                <Dialog open={openRouteModal} onOpenChange={setOpenRouteModal}>
+                  <DialogTrigger asChild>
+                    <button className="bg-white text-slate-900 px-3 h-8 rounded-lg text-[11px] font-bold flex items-center gap-1 hover:bg-slate-100 transition-all cursor-pointer">
+                      <FaRoute size={10} /> Rute
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-white p-5 rounded-2xl border border-slate-100 max-w-xs z-[99999]">
+                    <DialogHeader>
+                      <DialogTitle className="font-quicksand font-bold text-sm flex items-center gap-1.5 text-slate-900"><FaRoute /> Pengalihan Logistik</DialogTitle>
+                      <DialogDescription className="text-[11px] pt-1.5 text-slate-400 leading-relaxed">Pengalihan rute fisik dikunci sementara demi proteksi jalur distribusi utama Veloura Atelier.</DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end pt-2">
+                      <button onClick={() => setOpenRouteModal(false)} className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-[11px] font-bold">Mengerti</button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
-                  {/* MODAL DIALOG SHADCN: VALIDASI RESI */}
-                  <Dialog open={openResiModal} onOpenChange={setOpenResiModal}>
-                    <DialogTrigger asChild>
-                      <button className="bg-secondary-light text-white px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-secondary-light/90 transition-all cursor-pointer shadow-md">
-                        <FaCheckCircle size={10} /> Validasi Resi
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-white p-6 rounded-3xl border border-border-subtle max-w-sm">
-                      <DialogHeader>
-                        <DialogTitle className="font-playfair text-lg flex items-center gap-2 text-primary-dark">
-                          <FaHashtag className="text-secondary-light" /> Status Validasi Resi
-                        </DialogTitle>
-                        <DialogDescription className="text-xs font-quicksand pt-2 text-slate-500 leading-relaxed">
-                          Sistem mendeteksi resi <strong>VLR-{currentOrder.id}</strong> menggunakan metode kirim otomatis via ekspedisi <strong>{currentOrder.shipping}</strong> dengan status audit saat ini: <strong className="text-secondary-light">{currentOrder.status}</strong>.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex justify-end pt-4">
-                        <button onClick={() => setOpenResiModal(false)} className="px-4 py-2 bg-primary-dark text-white rounded-xl text-xs font-bold hover:bg-hover-green transition-colors cursor-pointer">
-                          Selesai Audit
-                        </button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                </div>
+                <Dialog open={openResiModal} onOpenChange={setOpenResiModal}>
+                  <DialogTrigger asChild>
+                    <button className="bg-[#4E5631] text-white px-3 h-8 rounded-lg text-[11px] font-bold flex items-center gap-1 hover:bg-[#3d4426] transition-all cursor-pointer">
+                      <FaCheckCircle size={10} /> Validasi Resi
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-white p-5 rounded-2xl border border-slate-100 max-w-xs z-[99999]">
+                    <DialogHeader>
+                      <DialogTitle className="font-quicksand font-bold text-sm flex items-center gap-1.5 text-slate-900"><FaHashtag className="text-[#8C6239]" /> Audit Resi</DialogTitle>
+                      <DialogDescription className="text-[11px] pt-1.5 text-slate-400 leading-relaxed">Token pelacakan <strong className="font-mono text-slate-700">VLR-{currentOrder.id}</strong> sinkron dengan kurir {currentOrder.shipping}.</DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end pt-2">
+                      <button onClick={() => setOpenResiModal(false)} className="px-3 py-1.5 bg-[#4E5631] text-white rounded-lg text-[11px] font-bold">Selesai Audit</button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 
           </div>
         </div>
 
-        {/* FOOTER GLOBAL */}
-        <div className="mt-16">
+        {/* FOOTER GLOBAL - NO PRINT */}
+        <div className="mt-8 no-print">
           <Footer />
         </div>
 

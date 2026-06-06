@@ -1,0 +1,502 @@
+[
+  {
+    "id": 1,
+    "slug": "elegant-evening-dress",
+    "name": "Elegant Evening Dress",
+    "price": "250000",
+    "category": "dress",
+    "img": "https://plus.unsplash.com/premium_photo-1728657358050-58356d4a6c64?q=80&w=1170&auto=format&fit=crop",
+    "description": "Gaun malam eksklusif dengan potongan elegan yang dirancang untuk memberikan kesan mewah dan anggun pada setiap langkah Anda.",
+    "features": ["Bahan Silk Premium", "Fit Tubuh Sempurna", "Tersedia Ukuran S, M, L"]
+  },
+  {
+    "id": 2,
+    "slug": "minimalist-casual-outfit",
+    "name": "Minimalist Casual Outfit",
+    "price": "180000",
+    "category": "casual",
+    "img": "https://plus.unsplash.com/premium_photo-1689575247968-d1040651e57f?q=80&w=1170&auto=format&fit=crop",
+    "description": "Setelan kasual minimalis yang nyaman untuk aktivitas sehari-hari tanpa mengorbankan gaya modern Anda.",
+    "features": ["Bahan Katun Breathable", "Warna Earth Tone", "Mudah Dipadupadankan"]
+  },
+  {
+    "id": 3,
+    "slug": "summer-breeze-style",
+    "name": "Summer Breeze Style",
+    "price": "300000",
+    "category": "summer",
+    "img": "https://plus.unsplash.com/premium_photo-1727427850453-144b335cd995?q=80&w=687&auto=format&fit=crop",
+    "description": "Koleksi musim panas yang ringan dan sejuk, cocok untuk liburan di pantai atau sekadar jalan-jalan sore.",
+    "features": ["UV Protection Fabric", "Ringan & Lembut", "Desain Flowy"]
+  },
+  {
+    "id": 4,
+    "slug": "modern-silk-look",
+    "name": "Modern Silk Look",
+    "price": "270000",
+    "category": "modern",
+    "img": "https://plus.unsplash.com/premium_photo-1755958632983-adbc0ff3b41b?q=80&w=1170&auto=format&fit=crop",
+    "description": "Sentuhan sutra modern untuk tampilan profesional namun tetap feminin dan berkelas.",
+    "features": ["High Quality Silk", "Jahitan Presisi", "Warna Elegan"]
+  },
+  {
+    "id": 5,
+    "slug": "velvet-gala-gown",
+    "name": "Velvet Gala Gown",
+    "price": "450000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun beludru mewah dengan potongan slit tinggi yang memancarkan aura glamor di karpet merah.",
+    "features": ["Premium Heavy Velvet", "High Side Slit", "Aksen Manik Hand-made"]
+  },
+  {
+    "id": 6,
+    "slug": "linen-linen-breeze-blouse",
+    "name": "Linen Breeze Blouse",
+    "price": "165000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop",
+    "description": "Blouse linen murni bertekstur lembut, memberikan kesejukan alami sepanjang hari.",
+    "features": ["100% Pure Linen", "Kancing Kayu Estetik", "Loose Fit Design"]
+  },
+  {
+    "id": 7,
+    "slug": "tropical-floral-maxi",
+    "name": "Tropical Floral Maxi Dress",
+    "price": "320000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun maxi motif botani tropis yang melambai indah ditiup angin pantai.",
+    "features": ["Chiffon Ceruti Grade A", "Full Furing Katun", "Tali Bahu Adjustable"]
+  },
+  {
+    "id": 8,
+    "slug": "monochrome-blazer-set",
+    "name": "Monochrome Office Blazer",
+    "price": "380000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?q=80&w=600&auto=format&fit=crop",
+    "description": "Blazer bersiluet tegas untuk wanita urban cerdas dengan standar fashion tinggi.",
+    "features": ["Semi-Wool Berstruktur", "Padding Bahu Lembut", "Saku Dalam Fungsional"]
+  },
+  {
+    "id": 9,
+    "slug": "satin-slip-dress",
+    "name": "Satin Slip Luxury Dress",
+    "price": "290000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun satin minimalis berkilau lembut yang mengikuti lekuk tubuh dengan anggun.",
+    "features": ["Mulberry Satin Glossy", "Backless Criss-Cross", "Hemline Jatuh Elegan"]
+  },
+  {
+    "id": 10,
+    "slug": "oversized-earthy-cardigan",
+    "name": "Oversized Earthy Cardigan",
+    "price": "195000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop",
+    "description": "Rajutan longgar bernuansa hangat, pelengkap gaya layering yang santai namun berkelas.",
+    "features": ["Soft Knit Premium", "Kerapatan Benang Tinggi", "Kantong Sisi Ganda"]
+  },
+  {
+    "id": 11,
+    "slug": "boho-chic-tunic",
+    "name": "Boho Chic Tunic",
+    "price": "210000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?q=80&w=600&auto=format&fit=crop",
+    "description": "Tunik beraksen bordir etnik bohemian, membawa kebebasan gaya dalam kenyamanan mutlak.",
+    "features": ["Rayon Twill Lembut", "Bordir Manual Rapih", "Rumbai Katun Eksklusif"]
+  },
+  {
+    "id": 12,
+    "slug": "pleated-culottes-luxury",
+    "name": "Pleated Culottes Luxury",
+    "price": "240000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop",
+    "description": "Celana kulot lipit presisi tinggi yang memberikan ilusi jenjang dan gerak dinamis.",
+    "features": ["High-Waist Elastic Band", "Lipit Permanen Anti-Pudar", "Stretch Nyaman"]
+  },
+  {
+    "id": 13,
+    "slug": "royal-lace-gown",
+    "name": "Royal Lace Cocktail Dress",
+    "price": "520000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1518049360964-6a418621174c?q=80&w=600&auto=format&fit=crop",
+    "description": "Perpaduan brokat Prancis dan furing premium untuk menghadiri pesta formal malam hari.",
+    "features": ["French Chantilly Lace", "Kerah V Klasik", "Resleting Invisible Belakang"]
+  },
+  {
+    "id": 14,
+    "slug": "denim-aesthetic-jacket",
+    "name": "Denim Aesthetic Jacket",
+    "price": "280000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?q=80&w=600&auto=format&fit=crop",
+    "description": "Jaket denim dengan efek washed washed pudar yang memberikan kesan retro kasual yang kuat.",
+    "features": ["13oz Non-Stretch Denim", "Aksen Ripped Tipis", "Kancing Besi Emboss"]
+  },
+  {
+    "id": 15,
+    "slug": "pastels-sun-dress",
+    "name": "Pastel Sun Dress",
+    "price": "225000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun gantung warna pastel cerah yang menyerap keringat dengan baik, esensial liburan tropis.",
+    "features": ["Katun Jepang Orisinil", "Smocked Back Panel", "Kantong Tersembunyi"]
+  },
+  {
+    "id": 16,
+    "slug": "asymmetrical-tunic-pro",
+    "name": "Asymmetrical Tunic Pro",
+    "price": "260000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1534126511673-b6899657816a?q=80&w=600&auto=format&fit=crop",
+    "description": "Tunik potongan asimetris kontemporer untuk tampilan semi-formal yang berani tampil beda.",
+    "features": ["Poly-Crepe Tebal", "Warna Blok Kontras", "Bahan Jatuh & Anti-Kusut"]
+  },
+  {
+    "id": 17,
+    "slug": "mermaid-silhouette-dress",
+    "name": "Mermaid Silhouette Dress",
+    "price": "590000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1549064482-6779ba329226?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun panjang siluet duyung bertabur payet premium, memeluk pinggul dan melebar anggun di bagian bawah.",
+    "features": ["Premium Tulle Base", "Full Payet Swarovski Replika", "Ekor Gaun Menyapu Lantai"]
+  },
+  {
+    "id": 18,
+    "slug": "stripes-urban-shirt",
+    "name": "Stripes Urban Shirt",
+    "price": "175000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=600&auto=format&fit=crop",
+    "description": "Kemeja garis-garis vertikal klasik yang memberikan efek tubuh langsing dan kasual trendi.",
+    "features": ["Katun Poplin Ringan", "Kerah Kemeja Tegak", "Manset Lengan Adjustable"]
+  },
+  {
+    "id": 19,
+    "slug": "safari-adventurer-outer",
+    "name": "Safari Adventurer Outer",
+    "price": "310000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=600&auto=format&fit=crop",
+    "description": "Outerwear fungsional bergaya militer-safari dengan tali serut pinggang untuk mempertegas siluet.",
+    "features": ["Baby Canvas Premium", "4 Kantong Kargo Depan", "Tali Serut Pinggang Dalam"]
+  },
+  {
+    "id": 20,
+    "slug": "structured-palazzo-pants",
+    "name": "Structured Palazzo Pants",
+    "price": "265000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=600&auto=format&fit=crop",
+    "description": "Celana panjang palazzo berserat tegas yang cocok dipadukan dengan stiletto kekasih Anda.",
+    "features": ["Bahan Semi-Wool Khaki", "Garis Lipatan Setrika Awet", "Belt Loops Lebar"]
+  },
+  {
+    "id": 21,
+    "slug": "embroidered-kaftan-luxury",
+    "name": "Embroidered Kaftan Luxury",
+    "price": "480000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop",
+    "description": "Kaftan sutra digital print dengan hiasan payet leher buatan tangan, megah untuk momen perayaan.",
+    "features": ["Sutra Silk Armani", "Bordir Benang Emas Leher", "Potongan Batwing Loose Fit"]
+  },
+  {
+    "id": 22,
+    "slug": "waffle-knit-pullover",
+    "name": "Waffle Knit Pullover",
+    "price": "190000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop",
+    "description": "Atasan rajut bertekstur waffle unik yang memberikan kehangatan ideal di musim hujan.",
+    "features": ["Knit Cotton Waffle", "Kerah Bulat Ribbed", "Bahan Menyerap Keringat"]
+  },
+  {
+    "id": 23,
+    "slug": "ocean-wave-kimono",
+    "name": "Ocean Wave Outer Kimono",
+    "price": "215000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=600&auto=format&fit=crop",
+    "description": "Kimono pantai berpotongan longgar dengan motif ombak abstrak cair, sangat estetik di bawah sinar matahari.",
+    "features": ["Premium Rayon Crinkle", "Lengan Melebar Longgar", "Sisi Samping Ber-slit"]
+  },
+  {
+    "id": 24,
+    "slug": "geometric-midi-skirt",
+    "name": "Geometric Midi Skirt",
+    "price": "230000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1583496661160-fb4886284a20?q=80&w=600&auto=format&fit=crop",
+    "description": "Rok midi bermotif geometris retro monokrom yang siap mengupgrade gaya kantor Anda.",
+    "features": ["Bahan Scuba Premium", "Resleting Jepang Samping", "A-Line Silhouette"]
+  },
+  {
+    "id": 25,
+    "slug": "classic-ball-gown",
+    "name": "Classic Ball Gown Veloura",
+    "price": "750000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1518049360964-6a418621174c?q=80&w=600&auto=format&fit=crop",
+    "description": "Mahakarya gaun pesta dengan rok mengembang berlapis organza untuk malam magis tak terlupakan.",
+    "features": ["Lapisan Dalam Hard-Tulle", "Korset Pembentuk Pinggang", "Bordir Kristal Manual"]
+  },
+  {
+    "id": 26,
+    "slug": "french-terry-sweatpants",
+    "name": "French Terry Sweatpants",
+    "price": "185000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1551854838-212c50b4c184?q=80&w=600&auto=format&fit=crop",
+    "description": "Celana jogger santai berbahan katun tebal, teman terbaik untuk olahraga ringan atau santai di rumah.",
+    "features": ["French Terry Cotton", "Tali Pinggang Katun Rajut", "Ujung Kaki Karet Ribbed"]
+  },
+  {
+    "id": 27,
+    "slug": "crochet-crop-top",
+    "name": "Crochet Artisan Crop Top",
+    "price": "245000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1562157873-818bc0726f68?q=80&w=600&auto=format&fit=crop",
+    "description": "Atasan rajutan tangan seniman lokal bermotif jaring bunga, esensi fashion festival musim panas.",
+    "features": ["100% Benang Katun Rajut", "Hand-Made Limited", "Tekstur Unik Bertingkat"]
+  },
+  {
+    "id": 28,
+    "slug": "minimalist-wrap-blouse",
+    "name": "Minimalist Wrap Blouse",
+    "price": "199000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=600&auto=format&fit=crop",
+    "description": "Blouse model ikat samping yang bisa disesuaikan dengan lingkar pinggang, minimalis nan rapi.",
+    "features": ["Bahan Premium Toyobo", "Tali Ikat Panjang Fleksibel", "Kerah V Modis"]
+  },
+  {
+    "id": 29,
+    "slug": "organza-puff-dress",
+    "name": "Organza Puff Sleeve Dress",
+    "price": "390000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun berstruktur dengan lengan balon organza transparan, memadukan gaya vintage dan modern.",
+    "features": ["Lengan Organza Kaku", "Body Suede Lembut", "Furing Katun Adem"]
+  },
+  {
+    "id": 30,
+    "slug": "linen-button-up-shorts",
+    "name": "Linen Button-Up Shorts",
+    "price": "140000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?q=80&w=600&auto=format&fit=crop",
+    "description": "Celana pendek linen dengan barisan kancing dekoratif di depan, santai namun tetap terlihat tertata.",
+    "features": ["Lenen Slub Bertekstur", "Kancing Tempurung Kelapa", "Karet Pinggang Belakang"]
+  },
+  {
+    "id": 31,
+    "slug": "citrus-paradise-romper",
+    "name": "Citrus Paradise Romper",
+    "price": "260000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop",
+    "description": "Setelan terusan pendek motif buah jeruk yang segar, sangat fleksibel untuk aktivitas pantai yang aktif.",
+    "features": ["Bahan Rayon Viscose", "Belakang Model Kerut", "Kantong Samping Aktif"]
+  },
+  {
+    "id": 32,
+    "slug": "monochrome-grid-pants",
+    "name": "Monochrome Grid Pants",
+    "price": "220000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1506152983158-b4a74a01c721?q=80&w=600&auto=format&fit=crop",
+    "description": "Celana lurus dengan motif kotak grid halus, membawa kesan arsitektural modern ke dalam gaya busana.",
+    "features": ["Cotton Polyester Stretch", "Slim Fit Cutting", "Saku Paspoal Belakang"]
+  },
+  {
+    "id": 33,
+    "slug": "tier-ruffle-gown",
+    "name": "Tier Ruffle Gown Luxury",
+    "price": "680000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1549064482-6779ba329226?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun bertingkat ruffles dari bahan tulle halus, menciptakan volume dramatis yang anggun saat berputar.",
+    "features": ["Multi-Layer Fine Tulle", "Bodice Satin Fit", "Pilihan Warna Bold"]
+  },
+  {
+    "id": 34,
+    "slug": "denim-pinafore-skirt",
+    "name": "Denim Pinafore Retro Skirt",
+    "price": "210000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop",
+    "description": "Rok kodok denim retro yang imut, pas dipadukan dengan kaos bergaris atau turtleneck andalan Anda.",
+    "features": ["Denim Katun Tebal", "Buckle Logam Adjustable", "Saku Kanguru Depan"]
+  },
+  {
+    "id": 35,
+    "slug": "sunset-ombre-maxi",
+    "name": "Sunset Ombre Maxi Dress",
+    "price": "340000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=600&auto=format&fit=crop",
+    "description": "Gradasi warna senja jingga ke ungu sutra yang menakjubkan, gaun impian untuk sesi foto golden hour.",
+    "features": ["Silk Chiffon Premium", "Gradasi Warna Sempurna", "Tali Kalung Model Halter"]
+  },
+  {
+    "id": 36,
+    "slug": "tailored-vest-modern",
+    "name": "Tailored Minimalist Vest",
+    "price": "185000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=600&auto=format&fit=crop",
+    "description": "Rompi formal tanpa lengan bersiluet tajam, ideal dipakai langsung atau sebagai luaran kemeja.",
+    "features": ["Kain Drill Premium", "Full Furing Satin Dalam", "Kancing Ganda Resin"]
+  },
+  {
+    "id": 37,
+    "slug": "vintage-polka-dress",
+    "name": "Vintage Polka Midi Dress",
+    "price": "280000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?q=80&w=600&auto=format&fit=crop",
+    "description": "Sentuhan nostalgia era 60-an dengan motif polkadot klasik dan kerah Peter Pan yang manis.",
+    "features": ["Kain Rayon Twill", "Kerah Peter Pan Kontras", "Karet Manset Lengan"]
+  },
+  {
+    "id": 38,
+    "slug": "pocket-cargo-pants",
+    "name": "Urban Pocket Cargo Pants",
+    "price": "250000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=600&auto=format&fit=crop",
+    "description": "Celana kargo wanita modern dengan potongan high-waist dan pergelangan kaki yang bisa diserut tight.",
+    "features": ["Katun Twill Stretch", "Saku Samping Ber-Volume", "Tali Serut Kaki Stopper"]
+  },
+  {
+    "id": 39,
+    "slug": "safari-linen-jumpsuit",
+    "name": "Safari Linen Jumpsuit",
+    "price": "330000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop",
+    "description": "Baju monyet terusan panjang berbahan linen berserat, kokoh sekaligus adem untuk petualangan luar ruangan.",
+    "features": ["Pure Linen Heavy-Weight", "Sabuk Bahan Senada", "Kancing Depan Busui Friendly"]
+  },
+  {
+    "id": 40,
+    "slug": "high-neck-ribbed-top",
+    "name": "High-Neck Ribbed Top",
+    "price": "135000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop",
+    "description": "Atasan ketat berleher tinggi dengan serat rajut rusuk vertikal yang elastis menyesuaikan bentuk tubuh.",
+    "features": ["Premium Ribbed Cotton", "Kerah Turtle Neck Lembut", "Bahan Tebal Gak Menerawang"]
+  },
+  {
+    "id": 41,
+    "slug": "gothic-romance-dress",
+    "name": "Gothic Romance Black Dress",
+    "price": "420000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun hitam misterius berhias renda labah-labah halus di bagian dada, memancarkan aura anggun gotik.",
+    "features": ["Black Velvet Mix Brokat", "Corset Lace-Up Belakang", "Lengan Model Terompet"]
+  },
+  {
+    "id": 42,
+    "slug": "boxy-heavyweight-tee",
+    "name": "Boxy Heavyweight Tee",
+    "price": "120000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop",
+    "description": "Kaos polos potongan kotak oversized berbahan katun tebal standar internasional, tidak gampang melar.",
+    "features": ["Cotton Combed 20s Heavy", "Kerah Rib Tebal 3cm", "Unisex Anti-S shrink"]
+  },
+  {
+    "id": 43,
+    "slug": "islander-straw-hat-match",
+    "name": "Islander Straw Kaftan Set",
+    "price": "315000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=600&auto=format&fit=crop",
+    "description": "Setelan outer longgar tipis bermotif anyaman jerami abstrak, pelindung kulit estetik saat terik.",
+    "features": ["Voal Ultrafine Breathable", "Digital Printing Anti-Luntur", "Pinggiran Jahit Tepi Rapi"]
+  },
+  {
+    "id": 44,
+    "slug": "peplum-structured-blouse",
+    "name": "Peplum Structured Blouse",
+    "price": "215000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=600&auto=format&fit=crop",
+    "description": "Blouse berpotongan peplum di pinggang yang menyamarkan perut dan memberikan siluet jam pasir proporsional.",
+    "features": ["Kain Cotton Jacquard", "Tekstur Emboss Timbul", "Resleting Metal Belakang"]
+  },
+  {
+    "id": 45,
+    "slug": "glitter-sequin-mini",
+    "name": "Glitter Sequin Party Mini",
+    "price": "360000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=600&auto=format&fit=crop",
+    "description": "Gaun mini berkilau penuh payet holografik yang menangkap cahaya lampu dansa dari segala sudut.",
+    "features": ["Full Sequin Hologram", "Furing Melar Elastis", "Potongan Mini Seksi"]
+  },
+  {
+    "id": 46,
+    "slug": "slouchy-distressed-jeans",
+    "name": "Slouchy Distressed Jeans",
+    "price": "295000",
+    "category": "casual",
+    "img": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop",
+    "description": "Celana denim model gombrang longgar dengan aksen sobekan lutut buatan tangan yang berkarakter kuat.",
+    "features": ["Authentic Denim Jeans", "Hand-Made Distressed", "High Rise Waistline"]
+  },
+  {
+    "id": 47,
+    "slug": "marrakesh-fringe-kimono",
+    "name": "Marrakesh Fringe Kimono",
+    "price": "275000",
+    "category": "summer",
+    "img": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?q=80&w=600&auto=format&fit=crop",
+    "description": "Outer rumbai panjang terinspirasi motif mosaik Marrakesh, memberikan dinamika indah di setiap gerak.",
+    "features": ["Kain Sifon Silk Lembut", "Rumbai Benang Sutra 10cm", "Motif Etnik Eksklusif"]
+  },
+  {
+    "id": 48,
+    "slug": "paperbag-waist-trousers",
+    "name": "Paperbag Waist Trousers",
+    "price": "240000",
+    "category": "modern",
+    "img": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=600&auto=format&fit=crop",
+    "description": "Celana kerja kerut pinggang ber-sabuk besar yang memperkecil visual lingkar pinggang Anda.",
+    "features": ["Bahan Gabardin Premium", "Kerut Ruffle Pinggang", "Termasuk Belt Kulit Sintetis"]
+  },
+  {
+    "id": 49,
+    "slug": "silk-symphony-robe",
+    "name": "Silk Symphony Luxury Robe",
+    "price": "620000",
+    "category": "modern",
+    "img": "https://plus.unsplash.com/premium_photo-1755958632983-adbc0ff3b41b?q=80&w=1170&auto=format&fit=crop",
+    "description": "Jubah tidur sutra panjang premium bercorak seni kontemporer, kemewahan hakiki untuk waktu santai kelas atas.",
+    "features": ["100% Pure Mulberry Silk", "Corak Abstrak Eksklusif", "Saku Samping Tersembunyi"]
+  },
+  {
+    "id": 50,
+    "slug": "aurora-borealis-gown",
+    "name": "Aurora Borealis Evening Gown",
+    "price": "890000",
+    "category": "dress",
+    "img": "https://images.unsplash.com/photo-1518049360964-6a418621174c?q=80&w=600&auto=format&fit=crop",
+    "description": "Karya puncak gaun malam Veloura dengan warna bunglon duokrom satin yang terinspirasi dari keindahan aurora utara.",
+    "features": ["Imported Duochrome Satin", "Struktur Korset Internal", "Ekor Panjang Flowy Drapery"]
+  }
+]

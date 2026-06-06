@@ -1,6 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaTag, FaEdit, FaPlus, FaTimes, FaSave } from "react-icons/fa";
+import {
+    FaTag,
+    FaEdit,
+    FaPlus,
+    FaTimes,
+    FaSave,
+    FaTrashAlt,
+    FaSearch,
+    FaChartPie,
+    FaPercentage,
+    FaPowerOff
+} from "react-icons/fa";
 
 // ==========================================
 // 1. INTEGRASI KOMPONEN SHADCN SELECT UI
@@ -17,17 +28,21 @@ import {
 // 2. LAYOUT & DATA SOURCE EXISTING
 // ==========================================
 import DashboardContainer from "../components/DashboardContainer";
-import PageHeader from "../components/PageHeader";
 import Footer from "../components/Footer";
-import InputField from "../components/InputField"; // Pastikan path ini sesuai dengan struktur proyek Anda
+import InputField from "../components/InputField";
 import saleData from "../data/Sale.json";
 
 const Sale = () => {
     // State manajemen data promosi dinamis
     const [promotions, setPromotions] = useState(saleData || []);
+    const [searchQuery, setSearchQuery] = useState("");
     const [selectedDiscount, setSelectedDiscount] = useState("all");
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [isEventActive, setIsEventActive] = useState(true); // Fitur: Saklar Event Kontrol
+
+    // State untuk mengontrol jam countdown bergerak
+    const [timeLeft, setTimeLeft] = useState({ hours: 24, minutes: 12, seconds: 59 });
 
     // State untuk form input (Tambah / Edit)
     const [formData, setFormData] = useState({
@@ -42,13 +57,45 @@ const Sale = () => {
 
     const fallbackImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=500&q=80";
 
-    // Handler Perubahan Input Form
+    // EFFECT LOGIC: JAM BERGERAK REAL-TIME
+    useEffect(() => {
+        if (!isEventActive) return; // Jam berhenti jika event dimatikan admin
+
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+                const { hours, minutes, seconds } = prev;
+                if (hours === 0 && minutes === 0 && seconds === 0) {
+                    clearInterval(timer);
+                    return prev;
+                }
+                if (seconds > 0) return { ...prev, seconds: seconds - 1 };
+                if (minutes > 0) return { hours, minutes: minutes - 1, seconds: 59 };
+                if (hours > 0) return { hours: hours - 1, minutes: 59, seconds: 59 };
+                return prev;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [isEventActive]);
+
+    // Fitur: Auto-Calculate Diskon saat admin mengisi Harga Coret dan Harga Baru
+    useEffect(() => {
+        const oldNum = parseInt(formData.oldPrice) || 0;
+        const newNum = parseInt(formData.price) || 0;
+
+        if (oldNum > 0 && newNum > 0 && oldNum > newNum && !editingId) {
+            const calculated = Math.round(((oldNum - newNum) / oldNum) * 100);
+            setFormData(prev => ({ ...prev, discount: `${calculated}%` }));
+        }
+    }, [formData.oldPrice, formData.price, editingId]);
+
+    const formatTime = (num) => String(num).padStart(2, "0");
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handler picu mode edit dari kartu produk
     const handleEditClick = (item) => {
         setFormData({
             id: item.id || "",
@@ -64,248 +111,326 @@ const Sale = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    // Batalkan Prosedur Form
+    const handleDeleteClick = (id) => {
+        if (window.confirm("Apakah Anda yakin ingin menghapus item promo ini dari etalase?")) {
+            setPromotions(promotions.filter(item => item.id !== id));
+        }
+    };
+
     const handleCancel = () => {
         setFormData({ id: "", name: "", slug: "", oldPrice: "", price: "", discount: "", img: "" });
         setEditingId(null);
         setShowForm(false);
     };
 
-    // Handler Submit Form (Tambah Baru / Simpan Perubahan)
     const handleFormSubmit = (e) => {
         e.preventDefault();
         if (!formData.name || !formData.price || !formData.discount) return;
 
+        const cleanPrice = formData.price.toString().replace(/\D/g, "");
+        const cleanOldPrice = formData.oldPrice ? formData.oldPrice.toString().replace(/\D/g, "") : cleanPrice;
+
         if (editingId) {
-            // MODE UPDATE DATA
-            const updatedData = promotions.map((item) => 
-                item.id === editingId 
-                    ? { 
-                        ...item, 
+            const updatedData = promotions.map((item) =>
+                item.id === editingId
+                    ? {
+                        ...item,
                         name: formData.name,
                         slug: formData.slug || formData.name.toLowerCase().trim().replace(/\s+/g, "-"),
-                        oldPrice: formData.oldPrice,
-                        price: formData.price,
-                        discount: formData.discount,
+                        oldPrice: cleanOldPrice,
+                        price: cleanPrice,
+                        discount: formData.discount.includes("%") ? formData.discount : `${formData.discount}%`,
                         img: formData.img.trim() || fallbackImage
-                      }
+                    }
                     : item
             );
             setPromotions(updatedData);
         } else {
-            // MODE TAMBAH BARU
             const newItem = {
                 id: formData.id || Math.floor(1000 + Math.random() * 9000).toString(),
                 name: formData.name,
                 slug: formData.slug || formData.name.toLowerCase().trim().replace(/\s+/g, "-"),
-                oldPrice: formData.oldPrice || formData.price,
-                price: formData.price,
+                oldPrice: cleanOldPrice,
+                price: cleanPrice,
                 discount: formData.discount.includes("%") ? formData.discount : `${formData.discount}%`,
                 img: formData.img.trim() || fallbackImage
             };
             setPromotions([newItem, ...promotions]);
         }
-
         handleCancel();
     };
 
-    // Filter kalkulasi berdasarkan diskon besar / semua potongan harga
+    // FILTER LOGIC COMBINED (Search Query + Dropdown Filter)
     const filteredData = promotions.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+
         if (selectedDiscount === "high") {
             const numericDiscount = parseInt(item.discount) || 0;
-            return numericDiscount >= 30;
+            return matchesSearch && numericDiscount >= 30;
         }
-        return true;
+        return matchesSearch;
     });
+
+    const formatRupiah = (val) => {
+        if (!val) return "0";
+        const num = parseInt(val.toString().replace(/\D/g, ""), 10);
+        return isNaN(num) ? "0" : num.toLocaleString("id-ID");
+    };
+
+    // Perhitungan Real-time Analytics untuk Dashboard Admin
+    const avgDiscount = promotions.length > 0
+        ? Math.round(promotions.reduce((acc, curr) => acc + (parseInt(curr.discount) || 0), 0) / promotions.length)
+        : 0;
 
     return (
         <DashboardContainer>
-            <div className="space-y-12 animate-fade-in pb-10 text-primary-dark">
+            <div className="animate-fade-in pb-12 text-slate-800 px-4 sm:px-6 lg:px-8 pt-6 select-none bg-transparent font-quicksand max-w-7xl mx-auto">
 
-                {/* ADMIN CONTROL TOP BAR DENGAN DROPDOWN FILTER & AKSES FORM */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-6">
+                {/* HEADER CONTROL */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/60 pb-6 mb-8">
                     <div>
-                        <PageHeader
-                            title="End of Season Sale"
-                            breadcrumb={[
-                                { label: "Beranda", link: "/" },
-                                { label: "Sale" }
-                            ]}
-                        />
+                        <h1 className="text-2xl sm:text-3xl font-playfair tracking-wide text-[#4E5631]">
+                            Pusat Kendali Promosi & Penjualan Terkurasi
+                        </h1>
+                        <div className="h-[2px] w-14 bg-[#A47174] mt-2"></div>
+                        <p className="text-xs text-slate-500 font-medium tracking-wide mt-3 max-w-2xl">
+                            Panel sinkronisasi strategi markdowns musiman Veloura. Kelola aktivasi potongan harga, otorisasi kode promosi eksklusif, serta kurasi label harga khusus untuk periode penjualan tertentu.
+                        </p>
                     </div>
 
-                    {/* Tombol Kontrol Aksi & Dropdown Filter */}
-                    <div className="flex flex-wrap items-center gap-4 font-quicksand">
+                    <div className="flex flex-wrap items-center gap-3 font-quicksand">
+                        {/* SAKLAR INTERAKTIF EVENT */}
                         <button
-                            onClick={() => (showForm ? handleCancel() : setShowForm(true))}
-                            className="px-5 py-2.5 bg-primary-dark text-white rounded-full text-xs font-bold tracking-wider hover:bg-hover-green shadow-sm transition-all duration-300 flex items-center gap-2 cursor-pointer"
+                            onClick={() => setIsEventActive(!isEventActive)}
+                            className={`px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 cursor-pointer ${isEventActive
+                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                    : "bg-rose-50 text-rose-700 border border-rose-200"
+                                }`}
                         >
-                            {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Tutup Form Kontrol" : "Tambah Item Promo"}
+                            <FaPowerOff className={isEventActive ? "animate-pulse" : ""} />
+                            STATUS EVENT: {isEventActive ? "LIVE" : "OFFLINE"}
                         </button>
 
-                        <div className="flex items-center gap-3">
-                            <label className="text-xs font-bold text-primary-dark/60 whitespace-nowrap">
-                                Filter Besaran Diskon:
-                            </label>
+                        <button
+                            onClick={() => (showForm ? handleCancel() : setShowForm(true))}
+                            className="px-5 py-2.5 bg-[#4E5631] text-white rounded-xl text-xs font-bold tracking-wider hover:bg-[#4E5631]/90 shadow-sm transition-all duration-300 flex items-center gap-2 cursor-pointer uppercase"
+                        >
+                            {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Tutup Form" : "Tambah Promo"}
+                        </button>
+                    </div>
+                </div>
+
+                {/* PANEL MINI ANALYTICS UNTUK ADMIN */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 font-quicksand">
+                    <div className="bg-white p-4 rounded-xl border border-border-subtle shadow-xs flex items-center gap-4">
+                        <div className="p-3 bg-slate-50 text-[#4E5631] rounded-lg border border-border-subtle"><FaTag /></div>
+                        <div>
+                            <p className="text-[10px] uppercase font-bold text-primary-dark/40 tracking-wider">Total Item Aktif</p>
+                            <p className="text-lg font-bold text-slate-800">{promotions.length} Produk</p>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-border-subtle shadow-xs flex items-center gap-4">
+                        <div className="p-3 bg-slate-50 text-[#A47174] rounded-lg border border-border-subtle"><FaPercentage /></div>
+                        <div>
+                            <p className="text-[10px] uppercase font-bold text-primary-dark/40 tracking-wider">Rata-Rata Diskon</p>
+                            <p className="text-lg font-bold text-slate-800">{avgDiscount}% Potongan</p>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-border-subtle shadow-xs flex items-center gap-4">
+                        <div className="p-3 bg-slate-50 text-emerald-700 rounded-lg border border-border-subtle"><FaChartPie /></div>
+                        <div>
+                            <p className="text-[10px] uppercase font-bold text-primary-dark/40 tracking-wider">Katalog Diskon Besar</p>
+                            <p className="text-lg font-bold text-slate-800">{promotions.filter(i => parseInt(i.discount) >= 30).length} Item (&gt;=30%)</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* KONTEN UTAMA */}
+                <div className="max-w-7xl mx-auto space-y-8">
+
+                    {/* FORM INPUT PARAMETER */}
+                    {showForm && (
+                        <div className="bg-white p-6 rounded-xl border border-border-subtle shadow-sm animate-fade-in">
+                            <div className="border-b border-bg-soft pb-3 mb-4 flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-base font-bold font-playfair text-primary-dark">
+                                        {editingId ? "Ubah Konfigurasi Kampanye Diskon" : "Registrasi Kampanye Baru"}
+                                    </h3>
+                                    <p className="text-[11px] text-primary-dark/50 font-quicksand">
+                                        💡 *Tips: Masukkan MSRP Awal dan Harga Diskon, maka Sistem akan menghitung persentase label diskon secara otomatis!*
+                                    </p>
+                                </div>
+                                <button onClick={handleCancel} className="text-primary-dark/30 hover:text-primary-dark cursor-pointer"><FaTimes size={14} /></button>
+                            </div>
+
+                            <form onSubmit={handleFormSubmit} className="space-y-4 font-quicksand text-xs">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                                    <InputField label="Nama Koleksi Produk" name="name" placeholder="Contoh: Silk Pleated Dress" value={formData.name} onChange={handleInputChange} required />
+                                    <InputField label="MSRP Awal (Harga Coret)" name="oldPrice" placeholder="Contoh: 500000" value={formData.oldPrice} onChange={handleInputChange} />
+                                    <InputField label="Harga Diskon Efektif" name="price" placeholder="Contoh: 350000" value={formData.price} onChange={handleInputChange} required />
+                                    <InputField label="Label Diskon (Terhitung Otomatis)" name="discount" placeholder="Contoh: 30%" value={formData.discount} onChange={handleInputChange} required />
+                                    <div className="lg:col-span-4 w-full">
+                                        <InputField label="Tautan Aset Gambar Utama" name="img" placeholder="Masukkan URL Gambar..." value={formData.img} onChange={handleInputChange} />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-2 pt-3 border-t border-bg-soft">
+                                    <button type="button" onClick={handleCancel} className="px-4 py-2 bg-bg-soft text-primary-dark/80 rounded-xl text-xs font-bold hover:bg-border-subtle">Batal</button>
+                                    <button type="submit" className="px-4 py-2 bg-[#4E5631] text-white rounded-xl text-xs font-bold hover:opacity-90 shadow-xs flex items-center gap-1.5 uppercase tracking-wider"><FaSave size={11} /> Simpan Katalog</button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* PROMO BANNER DENGAN KONTROL TIMEOUT */}
+                    <div className={`${isEventActive ? "bg-primary-dark" : "bg-slate-400"} rounded-xl p-8 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between transition-colors duration-500 border border-white/10`}>
+                        <div className="relative z-10 space-y-1.5 text-center md:text-left">
+                            <div className="inline-flex items-center gap-2 text-secondary-light text-[10px] font-bold uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded-md border border-white/10">
+                                <FaTag /> LIVE MARKETING SYSTEM
+                            </div>
+                            <h2 className="text-3xl font-playfair tracking-wide">
+                                Etalase Kampanye <span className="italic text-secondary-light">Flash Sale</span>
+                            </h2>
+                            <p className="font-quicksand text-xs text-white/70">
+                                Status modul hitung mundur saat ini sedang {isEventActive ? "memancarkan data ke etasale pembeli." : "dihentikan sementara oleh admin."}
+                            </p>
+                        </div>
+
+                        {/* Timer Box Glassmorphism */}
+                        <div className="mt-6 md:mt-0 relative z-10 font-quicksand shrink-0">
+                            <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-xl border border-white/10 min-w-[200px]">
+                                <p className="text-[9px] uppercase tracking-[3px] text-center text-white/60 mb-1.5 font-bold">Sisa Waktu Event</p>
+                                <p className="text-xl font-mono font-bold tracking-widest text-center text-white flex justify-center gap-1">
+                                    {isEventActive ? (
+                                        <>
+                                            <span>{formatTime(timeLeft.hours)}</span>:
+                                            <span>{formatTime(timeLeft.minutes)}</span>:
+                                            <span className="text-secondary-light">{formatTime(timeLeft.seconds)}</span>
+                                        </>
+                                    ) : (
+                                        <span className="text-xs tracking-normal uppercase text-white/40">PAUSED</span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* BAR PENCARIAN & FILTER KONSOLIDASI */}
+                    <div className="bg-white p-4 rounded-xl border border-border-subtle shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 font-quicksand">
+                        {/* LIVE SEARCH BAR */}
+                        <div className="relative w-full sm:w-96 flex items-center">
+                            <FaSearch className="absolute left-3.5 text-primary-dark/30 text-xs pointer-events-none" />
+                            <input
+                                type="text"
+                                placeholder="Cari nama koleksi promo secara instan..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full h-9 bg-bg-soft border border-border-subtle rounded-xl pl-9 pr-4 text-xs font-medium focus:outline-none focus:border-[#4E5631]/60 transition-colors placeholder-primary-dark/30"
+                            />
+                            {searchQuery && (
+                                <button onClick={() => setSearchQuery("")} className="absolute right-3 text-primary-dark/40 hover:text-primary-dark text-[10px]">CLEAR</button>
+                            )}
+                        </div>
+
+                        {/* SELECT DROPDOWN SHADCN */}
+                        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <span className="text-[10px] font-bold text-primary-dark/40 uppercase tracking-wider">Filter Besaran:</span>
                             <Select value={selectedDiscount} onValueChange={setSelectedDiscount}>
-                                <SelectTrigger className="w-[210px] bg-white border border-slate-300 rounded-full text-xs font-bold !text-slate-900 [&>span]:!text-slate-900 shadow-sm hover:border-slate-500 transition-all">
-                                    <SelectValue placeholder="Pilih Potongan Harga" />
+                                <SelectTrigger className="w-full sm:w-[180px] h-9 bg-white border border-border-subtle rounded-xl text-xs font-bold text-slate-900 shadow-xs focus:ring-0">
+                                    <SelectValue placeholder="Pilih Potongan" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-white border border-slate-200 shadow-xl rounded-2xl p-1 font-quicksand z-[9999]">
-                                    <SelectItem
-                                        value="all"
-                                        className="text-xs font-bold !text-slate-800 rounded-xl focus:!bg-slate-100 focus:!text-slate-900 data-[state=checked]:!bg-slate-100 data-[state=checked]:!text-slate-900 cursor-pointer py-2.5"
-                                    >
-                                        Semua Potongan Harga
-                                    </SelectItem>
-                                    <SelectItem
-                                        value="high"
-                                        className="text-xs font-bold !text-emerald-700 rounded-xl focus:!bg-emerald-50 focus:!text-emerald-900 data-[state=checked]:!bg-emerald-50 data-[state=checked]:!text-emerald-900 cursor-pointer py-2.5"
-                                    >
-                                        Diskon Besar (≥ 30%)
-                                    </SelectItem>
+                                <SelectContent className="bg-white border border-border-subtle font-quicksand z-[9999]">
+                                    <SelectItem value="all" className="text-xs font-semibold py-2">Semua Potongan Harga</SelectItem>
+                                    <SelectItem value="high" className="text-xs font-semibold text-emerald-700 py-2">Diskon Besar (≥ 30%)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
-                </div>
 
-                {/* FORM INPUT PROMOSI BARU / EDIT PROMOSI */}
-                {showForm && (
-                    <div className="bg-white p-8 rounded-[30px] border border-primary-light/20 shadow-[0_20px_50px_rgba(78,86,49,0.06)] animate-fade-in">
-                        <div className="border-b border-border-subtle pb-4 mb-6">
-                            <h3 className="text-lg font-bold font-playfair text-primary-dark">
-                                {editingId ? "Ubah Parameter Kampanye Diskon" : "Registrasi Kampanye Diskon Baru"}
-                            </h3>
-                            <p className="text-xs text-primary-dark/50 font-quicksand">
-                                {editingId ? "Ubah nilai MSRP asli, nominal harga promo efektif, dan label diskon produk terdaftar." : "Masukkan item busana baru untuk dimasukkan ke dalam rangkaian event markdown musiman."}
-                            </p>
-                        </div>
-                        
-                        <form onSubmit={handleFormSubmit} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
-                                <InputField label="Nama Produk" name="name" placeholder="Contoh: Silk Pleated Dress" value={formData.name} onChange={handleInputChange} required />
-                                <InputField label="MSRP Awal (Harga Coret)" name="oldPrice" placeholder="Contoh: 599.000" value={formData.oldPrice} onChange={handleInputChange} />
-                                <InputField label="Harga Diskon Efektif" name="price" placeholder="Contoh: 299.000" value={formData.price} onChange={handleInputChange} required />
-                                <InputField label="Label Diskon (Persen)" name="discount" placeholder="Contoh: 50%" value={formData.discount} onChange={handleInputChange} required />
-                                <div className="lg:col-span-2 w-full">
-                                    <InputField label="URL Gambar Aset" name="img" placeholder="https://images.unsplash.com/photo-..." value={formData.img} onChange={handleInputChange} />
-                                </div>
-                                <div className="lg:col-span-2 w-full">
-                                    <InputField label="Slug URL / Kode Kunci (Opsional)" name="slug" placeholder="Otomatis digenerate jika kosong" value={formData.slug} onChange={handleInputChange} disabled={!!editingId} />
-                                </div>
-                            </div>
+                    {/* GRID SECTIONS KATALOG */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {filteredData.length > 0 ? (
+                            filteredData.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="group relative bg-white p-3 rounded-xl border border-border-subtle shadow-xs transition-all duration-400 hover:-translate-y-1 hover:shadow-sm"
+                                >
+                                    <div className="block relative overflow-hidden rounded-lg bg-bg-soft aspect-[3/4] shadow-inner">
+                                        <img
+                                            src={item.img || fallbackImage}
+                                            alt={item.name}
+                                            className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-103"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = fallbackImage;
+                                            }}
+                                        />
 
-                            <div className="flex justify-end gap-3 pt-2 font-quicksand">
-                                <button type="button" onClick={handleCancel} className="px-5 py-2 bg-bg-soft text-primary-dark/80 rounded-xl text-xs font-bold hover:bg-border-subtle transition-colors cursor-pointer">
-                                    Batalkan Prosedur
-                                </button>
-                                <button type="submit" className="px-5 py-2 bg-secondary-light text-white rounded-xl text-xs font-bold hover:bg-hover-rose shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer">
-                                    <FaSave size={11} /> {editingId ? "Perbarui Item Promo" : "Simpan Ke Etalase Promo"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                )}
-
-                {/* PROMO BANNER LUXURY VELOURA */}
-                <div className="bg-primary-dark rounded-[35px] p-10 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-veloura border border-primary-light/10">
-                    <div className="relative z-10 space-y-2">
-                        <div className="flex items-center gap-2 text-secondary-light text-[10px] font-bold uppercase tracking-widest animate-pulse">
-                            <FaTag /> Flash Sale Event
-                        </div>
-                        <h2 className="text-4xl font-playfair leading-tight">
-                            Penawaran <span className="italic text-secondary-light">Terbatas</span>
-                        </h2>
-                        <p className="font-quicksand text-sm text-white/70">
-                            Gunakan kode <span className="font-bold border-b border-secondary-light text-white tracking-wide">VELOURA50</span> untuk tambahan diskon.
-                        </p>
-                    </div>
-
-                    {/* Timer Box Glassmorphism */}
-                    <div className="mt-6 md:mt-0 relative z-10 font-quicksand">
-                        <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 shadow-sm">
-                            <p className="text-[10px] uppercase tracking-[3px] text-center text-white/60 mb-1">Berakhir dalam</p>
-                            <p className="text-2xl font-bold tracking-widest text-center text-white">24 : 12 : 59</p>
-                        </div>
-                    </div>
-
-                    <div className="absolute -right-20 -top-20 w-64 h-64 bg-secondary-light/20 rounded-full blur-3xl pointer-events-none" />
-                    <div className="absolute left-1/3 -bottom-10 w-40 h-40 bg-hover-green/20 rounded-full blur-2xl pointer-events-none" />
-                </div>
-
-                {/* GRID SECTION DENGAN AKSES TOMBOL EDIT */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {filteredData.length > 0 ? (
-                        filteredData.map((item) => (
-                            <div
-                                key={item.id}
-                                className="group relative bg-white p-3 rounded-[40px] border border-primary-light/5 shadow-veloura transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(78,86,49,0.07)] hover:border-secondary-light/30"
-                            >
-                                {/* Wrapper Utama Foto */}
-                                <div className="block relative overflow-hidden rounded-[32px] bg-bg-soft aspect-[3/4] shadow-inner">
-                                    <img
-                                        src={item.img || fallbackImage}
-                                        alt={item.name}
-                                        className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = fallbackImage;
-                                        }}
-                                    />
-
-                                    {/* Label Diskon Atas */}
-                                    <div className="absolute top-4 right-4 bg-secondary-light text-white text-[10px] font-bold font-mono px-3 py-1.5 rounded-full z-20 shadow-sm">
-                                        -{item.discount}
-                                    </div>
-
-                                    {/* Tombol Akses Edit Cepat (Floating Over Photo) */}
-                                    <button
-                                        onClick={() => handleEditClick(item)}
-                                        className="absolute top-4 left-4 bg-white/90 hover:bg-white text-primary-dark p-2.5 rounded-full z-20 shadow-md border border-slate-200/50 transition-colors opacity-0 group-hover:opacity-100 duration-300 cursor-pointer"
-                                        title="Ubah Konfigurasi Diskon"
-                                    >
-                                        <FaEdit size={12} />
-                                    </button>
-
-                                    {/* Hover Overlay Smooth System */}
-                                    <Link
-                                        to={`/sale/${item.slug || item.id}`}
-                                        className="absolute inset-0 bg-primary-dark/30 opacity-0 group-hover:opacity-100 transition-opacity duration-400 flex flex-col justify-end p-5 backdrop-blur-[2px]"
-                                    >
-                                        <div className="bg-white text-primary-dark w-full py-3 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500 ease-out font-quicksand shadow-md">
-                                            Lihat Detail
+                                        {/* Label Diskon Atas */}
+                                        <div className="absolute top-3 right-3 bg-[#A47174] text-white text-[9px] font-bold px-2 py-1 rounded-md z-20 shadow-xs tracking-wider uppercase">
+                                            {item.discount.includes("%") ? item.discount : `${item.discount} OFF`}
                                         </div>
-                                    </Link>
-                                </div>
 
-                                {/* Metadata Deskripsi Produk */}
-                                <div className="mt-4 pb-2 text-center">
-                                    <Link to={`/sale/${item.slug || item.id}`}>
-                                        <h3 className="text-base font-playfair text-primary-dark group-hover:text-secondary-light transition-colors duration-300 line-clamp-1 px-1">
-                                            {item.name}
-                                        </h3>
-                                    </Link>
-                                    <div className="flex items-center justify-center gap-2 mt-1.5 font-quicksand">
-                                        <p className="text-primary-dark/30 text-xs line-through">Rp {item.oldPrice}</p>
-                                        <p className="text-primary-dark font-bold text-sm">
-                                            <span className="text-[10px] text-secondary-light align-baseline mr-0.5">Rp</span>
-                                            {item.price}
-                                        </p>
+                                        {/* CORE FLOATING ACTION BUTTONS */}
+                                        <div className="absolute top-3 left-3 flex gap-1.5 z-20 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <button
+                                                onClick={() => handleEditClick(item)}
+                                                className="bg-white hover:bg-slate-50 text-primary-dark p-2 rounded-lg shadow-md border border-border-subtle transition-colors cursor-pointer"
+                                                title="Ubah Konfigurasi Diskon"
+                                            >
+                                                <FaEdit size={11} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteClick(item.id)}
+                                                className="bg-white hover:bg-rose-50 text-rose-600 p-2 rounded-lg shadow-md border border-border-subtle transition-colors cursor-pointer"
+                                                title="Hapus Dari Etalase"
+                                            >
+                                                <FaTrashAlt size={11} />
+                                            </button>
+                                        </div>
+
+                                        <Link
+                                            to={`/sale/${item.slug || item.id}`}
+                                            className="absolute inset-0 bg-primary-dark/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 backdrop-blur-[1px]"
+                                        >
+                                            <div className="bg-white text-primary-dark w-full py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest text-center shadow-sm">
+                                                Pratinjau Live
+                                            </div>
+                                        </Link>
+                                    </div>
+
+                                    {/* Metadata Deskripsi Produk */}
+                                    <div className="mt-3.5 pb-1 text-center space-y-1">
+                                        <Link to={`/sale/${item.slug || item.id}`}>
+                                            <h3 className="text-sm font-bold font-playfair text-primary-dark group-hover:text-[#4E5631] transition-colors duration-300 line-clamp-1 px-1 tracking-wide">
+                                                {item.name}
+                                            </h3>
+                                        </Link>
+                                        <div className="flex items-center justify-center gap-2 font-quicksand">
+                                            {item.oldPrice && (
+                                                <p className="text-primary-dark/30 text-[11px] line-through font-medium">
+                                                    Rp {formatRupiah(item.oldPrice)}
+                                                </p>
+                                            )}
+                                            <p className="text-[#4E5631] font-extrabold text-xs">
+                                                <span className="text-[10px] font-semibold align-baseline mr-0.5 text-primary-dark/60">Rp</span>
+                                                {formatRupiah(item.price)}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center py-16 bg-white border border-dashed border-border-subtle rounded-xl text-primary-dark/40 font-quicksand text-xs italic">
+                                Tidak ada produk promo terdaftar yang cocok dengan pencarian atau filter diskon Anda.
                             </div>
-                        ))
-                    ) : (
-                        <div className="col-span-full text-center py-16 bg-white border border-dashed border-border-subtle rounded-[35px] text-primary-dark/40 font-quicksand text-sm italic">
-                            Tidak ada produk promo terdaftar yang cocok dengan filter diskon ini.
-                        </div>
-                    )}
+                        )}
+                    </div>
+
+                    {/* GLOBAL INTEGRATED FOOTER */}
+                    <Footer />
+
                 </div>
-
-                {/* GLOBAL INTEGRATED FOOTER */}
-                <Footer />
-
             </div>
         </DashboardContainer>
     );
