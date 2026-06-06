@@ -1,411 +1,424 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import PageHeader from "../components/PageHeader";
+import { Link } from "react-router-dom";
+import { FaEdit, FaPlus, FaTimes, FaSave, FaTrashAlt, FaSearch, FaEye, FaEyeSlash, FaInfoCircle } from "react-icons/fa";
 
-// ==========================================
-// 1. INTEGRASI KOMPONEN SHADCN UI
-// ==========================================
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from "../components/ui/dialog";
-import { Input } from "../components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "../components/ui/select";
-
-// IMPORT IKON UNTUK NOTIFIKASI
-import { FiCheckCircle, FiInfo, FiAlertCircle } from "react-icons/fi";
-
-// ==========================================
-// 2. LAYOUT & COMPONENTS EXISTING
-// ==========================================
+// Import komponen internal yang sama dengan komponen Sale
 import DashboardContainer from "../components/DashboardContainer";
 import Footer from "../components/Footer";
-
-// FILE JSON YANG DIPISAHKAN
-import initialCollections from "../data/collectionsData.json"; 
+import InputField from "../components/InputField";
+import collectionData from "../data/collectionsData.json"; // Pastikan file JSON sudah dibuat
 
 const Collection = () => {
-  const navigate = useNavigate();
-  
-  // State Utama Data Koleksi
-  const [collections, setCollections] = useState(initialCollections);
-  
-  // State Management Form & Dialog
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  // State yang mirip dengan logic di Sale ditambah fitur penampung filter
+  const [collections, setCollections] = useState(collectionData || []);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
+  // Fitur Baru: State untuk melihat detail koleksi (Modal)
+  const [selectedCollection, setSelectedCollection] = useState(null);
+
+  // Fitur Admin: State untuk pencarian dan filter kategori
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("All");
+
+  // State form disesuaikan variabelnya + Fitur Admin: status publikasi (isPublished)
   const [formData, setFormData] = useState({
+    id: "",
     name: "",
-    desc: "",
-    tag: "Everyday",
-    img: ""
+    slug: "",
+    category: "",
+    totalItems: "",
+    img: "",
+    isPublished: true // Default langsung aktif/terpublikasi
   });
 
-  // State Management untuk Floating Alert Web
-  const [alerts, setAlerts] = useState([]);
+  const fallbackImage = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=500&q=80";
 
-  // Fungsi memicu munculnya alert kustom
-  const triggerAlert = (message, type = "success") => {
-    const id = Date.now();
-    setAlerts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setAlerts((prev) => prev.filter((alert) => alert.id !== id));
-    }, 3500);
-  };
-
-  // Fungsi membuka form untuk "Tambah Koleksi Baru"
-  const handleOpenCreateModal = () => {
-    setIsEditMode(false);
-    setEditIndex(null);
-    setFormData({ name: "", desc: "", tag: "Everyday", img: "" });
-    setIsDialogOpen(true);
-  };
-
-  // Fungsi membuka form untuk "Edit Konten" (Data otomatis terisi)
-  const handleOpenEditModal = (item, index) => {
-    setIsEditMode(true);
-    setEditIndex(index);
-    setFormData({
-      name: item.name,
-      desc: item.desc,
-      tag: item.tag || "Everyday",
-      img: item.img
-    });
-    setIsDialogOpen(true);
-  };
-
+  // Handle change input (Persis seperti di Sale)
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handler Submit Tunggal (Bisa membedakan Save Baru vs Update Edit)
+  // Fitur Admin: Toggle status publish/draft langsung dari form
+  const handleTogglePublishForm = () => {
+    setFormData((prev) => ({ ...prev, isPublished: !prev.isPublished }));
+  };
+
+  // Fitur Admin: Toggle status publish/draft langsung dari kartu koleksi (Quick Action)
+  const handleTogglePublishCard = (id) => {
+    setCollections(collections.map(item =>
+      item.id === id ? { ...item, isPublished: !item.isPublished } : item
+    ));
+  };
+
+  // Fungsi Edit (Persis seperti di Sale)
+  const handleEditClick = (item) => {
+    setFormData({
+      id: item.id || "",
+      name: item.name || "",
+      slug: item.slug || "",
+      category: item.category || "",
+      totalItems: item.totalItems || "",
+      img: item.img || "",
+      isPublished: item.isPublished !== undefined ? item.isPublished : true
+    });
+    setEditingId(item.id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Fungsi Hapus (Persis seperti di Sale)
+  const handleDeleteClick = (id) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus koleksi ini dari pusat data?")) {
+      setCollections(collections.filter(item => item.id !== id));
+    }
+  };
+
+  // Fungsi Batal/Reset (Persis seperti di Sale)
+  const handleCancel = () => {
+    setFormData({ id: "", name: "", slug: "", category: "", totalItems: "", img: "", isPublished: true });
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  // Fungsi Submit Form Tambah/Edit (Persis seperti di Sale + Auto Slug Generator)
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.desc) return;
+    if (!formData.name) return;
 
-    const fallbackImg = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=700&q=80";
-    
-    if (isEditMode && editIndex !== null) {
-      // PROSES UPDATE DATA (EDIT MODE)
-      const updatedCollections = [...collections];
-      updatedCollections[editIndex] = {
-        ...formData,
-        img: formData.img.trim() !== "" ? formData.img : fallbackImg
-      };
-      setCollections(updatedCollections);
-      triggerAlert(`Perubahan pada "${formData.name}" berhasil disimpan!`, "success");
+    // Fitur Admin: Otomatis buat slug jika admin mengosongkannya
+    const finalSlug = formData.slug
+      ? formData.slug.toLowerCase().trim().replace(/\s+/g, "-")
+      : formData.name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+
+    if (editingId) {
+      // Update data lama
+      const updatedData = collections.map((item) =>
+        item.id === editingId
+          ? {
+            ...item,
+            name: formData.name,
+            slug: finalSlug,
+            category: formData.category || "Uncategorized",
+            totalItems: formData.totalItems || "0",
+            img: formData.img || fallbackImage,
+            isPublished: formData.isPublished
+          }
+          : item
+      );
+      setCollections(updatedData);
     } else {
-      // PROSES TAMBAH DATA BARU
-      const newCollection = {
-        ...formData,
-        img: formData.img.trim() !== "" ? formData.img : fallbackImg
+      // Tambah data baru
+      const newItem = {
+        id: formData.id || Math.floor(1000 + Math.random() * 9000).toString(),
+        name: formData.name,
+        slug: finalSlug,
+        category: formData.category || "Uncategorized",
+        totalItems: formData.totalItems || "0",
+        img: formData.img || fallbackImage,
+        isPublished: formData.isPublished
       };
-      setCollections([...collections, newCollection]);
-      triggerAlert(`Koleksi "${newCollection.name}" sukses diterbitkan!`, "success");
+      setCollections([newItem, ...collections]);
     }
-
-    setIsDialogOpen(false); 
+    handleCancel();
   };
 
-  const handleDeleteCollection = (index, name) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus koleksi "${name}"?`)) {
-      const updated = collections.filter((_, i) => i !== index);
-      setCollections(updated);
-      triggerAlert(`Koleksi "${name}" telah dihapus dari sistem.`, "error");
-    }
-  };
+  // Fitur Admin: Logika filter pencarian dan drop-down kategori secara bersamaan
+  const filteredCollections = collections.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = filterCategory === "All" || item.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
 
-  // Handler interaktif pelengkap lainnya
-  const handleLayoutConfig = () => triggerAlert("Membuka konfigurasi tata letak...", "info");
-  const handleChangeHeroImage = () => triggerAlert("Media library berhasil dimuat.", "info");
-  const handleViewEmailDatabase = () => triggerAlert("Database pelanggan CRM berhasil disinkronkan.", "success");
-
-  const generateSlug = (name) => name.toLowerCase().replace(/ /g, "-");
+  // Fitur Admin: Mengambil daftar kategori unik secara dinamis untuk opsi filter
+  const categoriesList = ["All", ...new Set(collections.map(item => item.category).filter(Boolean))];
 
   return (
     <DashboardContainer>
-      {/* FLOATING TOAST ALERT */}
-      <div className="fixed top-6 right-6 z-[99999] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
-        {alerts.map((alert) => (
-          <div
-            key={alert.id}
-            className={`p-4 rounded-2xl shadow-xl border flex items-start gap-3 animate-slide-in pointer-events-auto backdrop-blur-md transition-all ${
-              alert.type === "success" 
-                ? "bg-emerald-50/95 border-emerald-500/20 text-emerald-900" 
-                : alert.type === "error"
-                ? "bg-rose-50/95 border-rose-500/20 text-rose-900"
-                : "bg-amber-50/95 border-amber-500/20 text-amber-950"
-            }`}
-          >
-            {alert.type === "success" && <FiCheckCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />}
-            {alert.type === "error" && <FiAlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />}
-            {alert.type === "info" && <FiInfo className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />}
-            <div className="text-xs font-medium font-quicksand leading-relaxed">{alert.message}</div>
-          </div>
-        ))}
-      </div>
+      <div className="animate-fade-in pb-12 text-slate-800 px-4 sm:px-6 lg:px-8 pt-6 select-none bg-transparent font-quicksand max-w-7xl mx-auto">
 
-      <div className="space-y-12 animate-fade-in pb-10 text-primary-dark relative z-10">
-        
-        {/* TOP CONTROL BAR */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-6 relative z-20">
+        {/* HEADER CONTROL */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/60 pb-6 mb-8">
           <div>
-            <PageHeader
-              title="Our Collection"
-              breadcrumb={[{ label: "Beranda", link: "/" }, { label: "Collection" }]}
-            />
+            <h1 className="text-2xl sm:text-3xl font-playfair tracking-wide text-[#4E5631]">
+              Kurasi Koleksi VIP & Haute Couture
+            </h1>
+            <div className="h-[2px] w-14 bg-[#A47174] mt-2"></div>
+            <p className="text-xs text-slate-500 font-medium tracking-wide mt-3 max-w-2xl">
+              Gerbang otorisasi produk eksklusif dan lini terbatas Veloura. Atur batasan akses SKU berbasis tier keanggotaan, kurasi mahakarya *Atelier*, serta kelola reservasi privat untuk klien VVIP.
+            </p>
           </div>
-          
-          <div className="flex items-center gap-3 font-quicksand relative z-30">
-            <button 
-              onClick={handleLayoutConfig}
-              className="px-5 py-2.5 bg-white border border-border-subtle rounded-full text-xs font-bold text-secondary-dark/80 hover:text-secondary-light hover:border-secondary-light shadow-sm transition-all duration-300 cursor-pointer"
+
+          <div className="font-quicksand">
+            <button
+              onClick={() => (showForm ? handleCancel() : setShowForm(true))}
+              className="px-5 py-2.5 bg-[#4E5631] text-white rounded-xl text-xs font-bold tracking-wider hover:opacity-90 shadow-sm transition-all flex items-center gap-2 cursor-pointer uppercase"
             >
-              Pengaturan Layout
+              {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Tutup Panel" : "Buat Koleksi Baru"}
             </button>
-
-            {/* INTEGRASI DIALOG SHADCN MULTIFUNGSI (TAMBAH & EDIT) */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <button 
-                onClick={handleOpenCreateModal}
-                className="px-5 py-2.5 bg-primary-dark text-white rounded-full text-xs font-bold tracking-wider hover:bg-hover-green shadow-veloura transition-all duration-300 cursor-pointer"
-              >
-                + Rilis Koleksi Baru
-              </button>
-              
-              <DialogContent className="sm:max-w-[520px] rounded-3xl bg-white p-6 border border-border-subtle shadow-xl !z-[99999]">
-                <DialogHeader>
-                  <DialogTitle className="text-xl font-bold font-playfair text-primary-dark">
-                    {isEditMode ? "Ubah Data Koleksi" : "Arsip Master Koleksi"}
-                  </DialogTitle>
-                  <DialogDescription className="text-xs text-slate-400 font-quicksand">
-                    {isEditMode 
-                      ? "Modifikasi data kampanye visual ritel busana yang sudah terdaftar di database."
-                      : "Daftarkan konsep tema atau pagelaran busana terbaru ke dalam database interface internal."}
-                  </DialogDescription>
-                </DialogHeader>
-
-                <form onSubmit={handleFormSubmit} className="space-y-5 pt-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-primary-dark font-quicksand">Nama Tema Koleksi</label>
-                    <Input 
-                      name="name" 
-                      placeholder="Contoh: Midnight Silk" 
-                      value={formData.name} 
-                      onChange={handleInputChange} 
-                      required 
-                      className="rounded-xl border-border-subtle focus-visible:ring-primary-light bg-white text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-primary-dark font-quicksand">Deskripsi Kampanye / Tema</label>
-                    <Input 
-                      name="desc" 
-                      placeholder="Contoh: Gabungan potongan minimalis..." 
-                      value={formData.desc} 
-                      onChange={handleInputChange} 
-                      required 
-                      className="rounded-xl border-border-subtle focus-visible:ring-primary-light bg-white text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-primary-dark font-quicksand">Tag Klasifikasi Sesi</label>
-                    <Select 
-                      value={formData.tag}
-                      onValueChange={(value) => setFormData((prev) => ({ ...prev, tag: value }))}
-                    >
-                      <SelectTrigger className="w-full rounded-xl border-border-subtle focus:ring-primary-light bg-white text-sm text-left">
-                        <SelectValue placeholder="Pilih Tag Sesi" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white rounded-xl shadow-lg border-border-subtle !z-[100000]">
-                        <SelectItem value="Everyday">Everyday (Casual)</SelectItem>
-                        <SelectItem value="Evening">Evening (Formal)</SelectItem>
-                        <SelectItem value="Vacation">Vacation (Resort)</SelectItem>
-                        <SelectItem value="Limited">Limited Edition</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-primary-dark font-quicksand">Aset Gambar Utama (URL)</label>
-                    <Input 
-                      name="img" 
-                      placeholder="https://images.unsplash.com/photo-..." 
-                      value={formData.img} 
-                      onChange={handleInputChange} 
-                      className="rounded-xl border-border-subtle focus-visible:ring-primary-light bg-white text-sm"
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-3 border-t border-bg-soft">
-                    <button 
-                      type="button" 
-                      onClick={() => setIsDialogOpen(false)} 
-                      className="px-5 py-2 bg-bg-soft text-primary-dark/80 rounded-xl text-xs font-bold hover:bg-border-subtle transition-colors cursor-pointer"
-                    >
-                      Batalkan
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="px-5 py-2 bg-secondary-light text-white rounded-xl text-xs font-bold hover:bg-hover-rose shadow-sm transition-colors cursor-pointer"
-                    >
-                      {isEditMode ? "Simpan Perubahan" : "Simpan Ke Katalog"}
-                    </button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
 
-        {/* FEATURED HERO BANNER CARD */}
-        <section className="relative group overflow-hidden rounded-[35px] bg-white border border-primary-light/10 shadow-veloura transition-all duration-500 hover:shadow-[0_25px_60px_-15px_rgba(78,86,49,0.12)] hover:border-primary-light/30 z-10">
-          <div className="grid md:grid-cols-12 items-center">
-            <div className="md:col-span-5 h-[400px] overflow-hidden border-r border-border-subtle relative">
-              <img
-                src="https://plus.unsplash.com/premium_photo-1664202525979-80d1da46b34b?q=80&w=1171&auto=format&fit=crop"
-                alt="Autumn Collection"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-              />
+        {/* Form Input Section (Persis strukturnya dengan Sale + Fitur Saklar Status) */}
+        {showForm && (
+          <div className="bg-white p-6 rounded-xl border border-border-subtle shadow-sm mb-8 animate-fade-in">
+            <div className="border-b border-bg-soft pb-3 mb-4 flex justify-between items-center">
+              <h3 className="text-sm font-bold font-quicksand text-primary-dark">
+                {editingId ? "⚙️ Modifikasi Parameter Koleksi" : "✨ Registrasi Koleksi Rilisan Baru"}
+              </h3>
+              <button onClick={handleCancel} className="text-primary-dark/30 hover:text-primary-dark cursor-pointer"><FaTimes size={14} /></button>
             </div>
 
-            <div className="md:col-span-7 p-12 relative z-20">
-              <span className="absolute top-8 right-12 font-accent text-6xl text-bg-soft opacity-40 select-none">Veloura</span>
-              
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[9px] font-mono font-bold bg-bg-soft border border-border-subtle text-primary-dark/60 px-2 py-0.5 rounded">ID: HERO_COL_01</span>
-                <p className="text-[10px] tracking-[5px] uppercase font-bold text-secondary-light">New Arrival 2026</p>
+            <form onSubmit={handleFormSubmit} className="space-y-4 font-quicksand text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <InputField label="Nama Koleksi" name="name" placeholder="Contoh: Winter Warmth 2026" value={formData.name} onChange={handleInputChange} required />
+                <InputField label="Slug URL (Opsional - Otomatis Terisi)" name="slug" placeholder="Contoh: winter-warmth-2026" value={formData.slug} onChange={handleInputChange} />
+                <InputField label="Kategori Divisi" name="category" placeholder="Contoh: Outerwear" value={formData.category} onChange={handleInputChange} />
+                <InputField label="Kuantitas Item Terikat" name="totalItems" placeholder="Contoh: 28" value={formData.totalItems} onChange={handleInputChange} />
+                <div className="md:col-span-2">
+                  <InputField label="Tautan URL Gambar Sampul" name="img" placeholder="Masukkan link gambar resolusi tinggi..." value={formData.img} onChange={handleInputChange} />
+                </div>
               </div>
 
-              <h2 className="text-4xl sm:text-5xl font-playfair text-primary-dark leading-[1.1] mb-4">
-                Autumn <span className="italic text-secondary-light">Collection</span>
-              </h2>
-
-              <p className="text-primary-dark/70 font-quicksand text-sm leading-relaxed mb-6 max-w-xl">
-                Membawa kehangatan warna tanah ke dalam lemari pakaian Anda. Temukan potongan timeless yang mendefinisikan ulang arti elegan musim ini.
-              </p>
-
-              <div className="flex items-center gap-3 font-quicksand relative z-30">
-                <button 
-                  onClick={() => navigate("/collection/autumn-collection")}
-                  className="px-8 py-3 bg-primary-dark text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-hover-green hover:shadow-md transition-all cursor-pointer"
+              {/* Fitur Admin Tambahan di Form: Pengaturan Visibilitas Toko */}
+              <div className="flex items-center gap-3 bg-bg-soft/50 p-3 rounded-lg border border-border-subtle w-fit">
+                <span className="font-bold text-primary-dark/70">Status Publikasi:</span>
+                <button
+                  type="button"
+                  onClick={handleTogglePublishForm}
+                  className={`px-3 py-1.5 rounded-md font-bold tracking-wide text-[11px] transition-all cursor-pointer ${formData.isPublished
+                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                      : "bg-amber-100 text-amber-800 border border-amber-300"
+                    }`}
                 >
-                  Explore Collection
-                </button>
-                <button 
-                  onClick={handleChangeHeroImage}
-                  className="px-4 py-3 border border-border-subtle text-primary-dark/70 rounded-full text-xs font-semibold hover:bg-bg-soft transition-all cursor-pointer"
-                >
-                  Ganti Gambar
+                  {formData.isPublished ? "🟢 LIVE (Terbuka di Etalase)" : "🟡 DRAFT (Disembunyikan)"}
                 </button>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* COLLECTION LIST GRID */}
-        <section className="bg-white p-8 rounded-[35px] border border-primary-light/10 shadow-veloura z-10 relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-border-subtle pb-4">
-            <div>
-              <h3 className="text-2xl font-playfair text-primary-dark">Browse by Theme</h3>
-              <p className="text-xs text-primary-dark/50 font-quicksand mt-0.5">Kelola kluster tema produk yang tampil di sistem navigasi</p>
-            </div>
+              <div className="flex justify-end gap-2 pt-3 border-t border-bg-soft">
+                <button type="button" onClick={handleCancel} className="px-4 py-2 bg-bg-soft text-primary-dark/80 rounded-xl font-bold hover:bg-border-subtle cursor-pointer">Batal</button>
+                <button type="submit" className="px-4 py-2 bg-[#4E5631] text-white rounded-xl font-bold hover:opacity-90 flex items-center gap-1.5 uppercase cursor-pointer"><FaSave size={11} /> Simpan Data</button>
+              </div>
+            </form>
           </div>
+        )}
 
-          <div className="space-y-4">
-            {collections.map((item, i) => (
-              <div 
-                key={i} 
-                className="group/card flex flex-col lg:flex-row lg:items-center justify-between p-5 bg-bg-soft/30 rounded-2xl border border-transparent hover:bg-white hover:border-primary-light/20 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(78,86,49,0.05)] transition-all duration-500 ease-out relative z-20"
+        {/* Fitur Admin Baru: Kontrol Filter & Live Search Toolbar */}
+        <div className="bg-white p-4 rounded-xl border border-border-subtle shadow-2xs mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center font-quicksand">
+          {/* Live Search */}
+          <div className="relative w-full sm:w-80 flex items-center">
+            <FaSearch className="absolute left-3 text-primary-dark/30 text-xs" />
+            <input
+              type="text"
+              placeholder="Cari koleksi spesifik..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full text-xs h-9 bg-bg-soft pl-9 pr-4 rounded-xl border border-border-subtle focus:outline-none focus:border-[#4E5631]/50"
+            />
+          </div>
+          {/* Filter Kategori Dinamis */}
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end text-xs">
+            <span className="text-primary-dark/50 font-bold">Filter Divisi:</span>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="h-9 bg-white border border-border-subtle rounded-xl px-3 font-semibold text-primary-dark focus:outline-none cursor-pointer"
+            >
+              {categoriesList.map((cat, idx) => (
+                <option key={idx} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Grid Tampilan Item Koleksi (Persis strukturnya dengan Sale + Fitur Badge Status) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+          {filteredCollections.length > 0 ? (
+            filteredCollections.map((item) => (
+              <div
+                key={item.id}
+                className={`group relative bg-white p-3 rounded-xl border shadow-2xs transition-all duration-300 hover:-translate-y-1 ${item.isPublished === false ? "border-amber-300/60 bg-amber-50/10" : "border-border-subtle"
+                  }`}
               >
-                <div className="flex items-center gap-6">
-                  <span className="font-mono text-xs text-primary-dark/30 font-bold hidden sm:block">0{i+1}</span>
-                  <div className="relative w-20 h-24 rounded-xl overflow-hidden border border-border-subtle flex-shrink-0 shadow-inner">
-                    <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
-                    <span className="absolute bottom-1 left-1 bg-primary-dark/90 text-white text-[8px] px-1.5 py-0.5 rounded font-mono tracking-wider z-10">
-                      {item.tag}
+                <div className="block relative overflow-hidden rounded-lg bg-bg-soft aspect-[3/4]">
+                  <img
+                    src={item.img || fallbackImage}
+                    alt={item.name}
+                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-102 ${item.isPublished === false ? "opacity-65 grayscale-30" : ""
+                      }`}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = fallbackImage;
+                    }}
+                  />
+
+                  {/* Badge Kanan Atas: Jumlah Item */}
+                  <div className="absolute top-3 right-3 bg-[#4E5631] text-white text-[9px] font-bold px-2 py-1 rounded-md z-20 uppercase">
+                    {item.totalItems || 0} ITEMS
+                  </div>
+
+                  {/* Fitur Admin: Badge Kiri Atas Penanda Status Draf/Live */}
+                  <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
+                    <span className={`text-[8px] font-extrabold px-2 py-0.5 rounded shadow-sm tracking-wider uppercase text-center ${item.isPublished !== false
+                        ? "bg-emerald-500 text-white"
+                        : "bg-amber-500 text-white"
+                      }`}>
+                      {item.isPublished !== false ? "LIVE" : "DRAFT"}
                     </span>
                   </div>
 
-                  <div>
-                    <h4 className="text-xl font-playfair text-primary-dark group-hover/card:text-secondary-light transition-colors duration-300">
+                  {/* Action Buttons (Hover) + Fitur Cepat Ganti Status Publikasi */}
+                  <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleEditClick(item)}
+                        className="bg-white hover:bg-slate-50 text-primary-dark p-2 rounded-lg shadow-md border border-border-subtle cursor-pointer"
+                        title="Edit"
+                      >
+                        <FaEdit size={11} />
+                      </button>
+                      <button
+                        onClick={() => setSelectedCollection(item)}
+                        className="bg-white hover:bg-slate-50 text-[#4E5631] p-2 rounded-lg shadow-md border border-border-subtle cursor-pointer"
+                        title="Lihat Detail"
+                      >
+                        <FaInfoCircle size={11} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(item.id)}
+                        className="bg-white hover:bg-rose-50 text-rose-600 p-2 rounded-lg shadow-md border border-border-subtle cursor-pointer"
+                        title="Hapus"
+                      >
+                        <FaTrashAlt size={11} />
+                      </button>
+                    </div>
+
+                    {/* Quick Switch Visibility */}
+                    <button
+                      onClick={() => handleTogglePublishCard(item.id)}
+                      className="bg-white hover:bg-slate-50 text-slate-700 px-2 py-1.5 rounded-lg shadow-md border border-border-subtle text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                      title="Ubah Visibilitas Instan"
+                    >
+                      {item.isPublished !== false ? <FaEyeSlash size={11} /> : <FaEye size={11} />}
+                      {item.isPublished !== false ? "Draft-kan" : "Live-kan"}
+                    </button>
+                  </div>
+
+                  {/* Link Detail (Sama dengan format Sale) */}
+                  <Link
+                    to={`/collection/${item.slug || item.id}`}
+                    className="absolute inset-0 bg-primary-dark/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 z-10"
+                  >
+                    <div className="bg-white text-primary-dark w-full py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest text-center shadow-xs mb-10">
+                      Preview Etalase
+                    </div>
+                  </Link>
+                </div>
+
+                {/* Bagian Teks Bawah Gambar */}
+                <div className="mt-3 text-center space-y-0.5">
+                  <span className="text-[10px] text-primary-dark/40 font-bold uppercase tracking-widest font-quicksand">
+                    {item.category || "Uncategorized"}
+                  </span>
+                  <Link to={`/collection/${item.slug || item.id}`}>
+                    <h3 className="text-sm font-bold font-playfair text-primary-dark group-hover:text-[#4E5631] transition-colors line-clamp-1 px-1">
                       {item.name}
-                    </h4>
-                    <p className="text-xs text-primary-dark/60 font-quicksand mt-1 max-w-md line-clamp-2">
-                      {item.desc}
-                    </p>
+                    </h3>
+                  </Link>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12 text-primary-dark/40 font-quicksand text-xs italic bg-white rounded-xl border border-dashed border-border-subtle">
+              Tidak ditemukan data koleksi yang cocok dengan kata kunci pencarian Anda.
+            </div>
+          )}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* MODAL POPUP: DETAIL PARAMETER DATA KOLEKSI */}
+        {/* ========================================================================= */}
+        {selectedCollection && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 font-quicksand animate-fade-in">
+            <div className="bg-white max-w-md w-full rounded-2xl overflow-hidden border border-border-subtle shadow-xl flex flex-col max-h-[90vh]">
+              {/* Gambar modal */}
+              <div className="relative aspect-video w-full bg-bg-soft">
+                <img
+                  src={selectedCollection.img || fallbackImage}
+                  alt={selectedCollection.name}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  onClick={() => setSelectedCollection(null)}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-primary-dark flex items-center justify-center shadow-sm cursor-pointer transition-all"
+                >
+                  <FaTimes size={14} />
+                </button>
+                <div className="absolute bottom-3 left-3 bg-[#4E5631] text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">
+                  {selectedCollection.totalItems || 0} ITEMS
+                </div>
+              </div>
+
+              {/* Konten detail */}
+              <div className="p-5 flex-1 overflow-y-auto space-y-4 text-xs">
+                <div>
+                  <span className="text-[9px] text-[#A47174] font-extrabold tracking-widest uppercase">
+                    {selectedCollection.category || "Uncategorized"}
+                  </span>
+                  <h2 className="text-lg font-bold font-playfair text-[#4E5631] mt-0.5">
+                    {selectedCollection.name}
+                  </h2>
+                </div>
+
+                <div className="space-y-2 border-t border-b border-bg-soft py-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-primary-dark/40 font-bold">ID Koleksi:</span>
+                    <span className="font-mono bg-bg-soft px-2 py-0.5 rounded text-[11px] font-semibold text-primary-dark/80">{selectedCollection.id}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-primary-dark/40 font-bold">Slug URL:</span>
+                    <span className="font-mono bg-bg-soft px-2 py-0.5 rounded text-[11px] text-[#4E5631] font-semibold break-all max-w-[200px] truncate" title={selectedCollection.slug}>
+                      {selectedCollection.slug || "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-primary-dark/40 font-bold">Status Visibilitas:</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${selectedCollection.isPublished !== false
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-100 text-amber-800"
+                      }`}>
+                      {selectedCollection.isPublished !== false ? "LIVE (Etalase Aktif)" : "DRAFT (Disembunyikan)"}
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 mt-4 lg:mt-0 pt-4 lg:pt-0 border-t border-border-subtle lg:border-t-0 justify-end font-quicksand opacity-90 lg:opacity-60 group-hover/card:opacity-100 transition-opacity duration-300 relative z-30">
-                  <button 
-                    onClick={() => navigate(`/collection/${generateSlug(item.name)}`)}
-                    className="px-4 py-2 text-primary-dark border border-border-subtle rounded-xl text-xs font-bold hover:bg-bg-soft transition-all cursor-pointer"
+                <div className="pt-2 flex gap-2">
+                  <button
+                    onClick={() => {
+                      handleEditClick(selectedCollection);
+                      setSelectedCollection(null);
+                    }}
+                    className="flex-1 py-2 bg-bg-soft text-primary-dark rounded-xl font-bold hover:bg-border-subtle transition-all cursor-pointer text-center"
                   >
-                    View Details
+                    Ubah Parameter
                   </button>
-                  
-                  {/* TOMBOL EDIT KONTEN AKTIF: MEMBUKA MODAL SEKALIGUS MELEMPAR DATA */}
-                  <button 
-                    onClick={() => handleOpenEditModal(item, i)}
-                    className="px-4 py-2 bg-white border border-border-subtle text-secondary-dark rounded-xl text-xs font-bold hover:border-secondary-light/40 hover:text-secondary-light hover:shadow-sm transition-all cursor-pointer"
+                  <Link
+                    to={`/collection/${selectedCollection.slug || selectedCollection.id}`}
+                    className="flex-1 py-2 bg-[#4E5631] text-white rounded-xl font-bold hover:opacity-90 transition-all text-center"
                   >
-                    Edit Konten
-                  </button>
-                  
-                  <button 
-                    onClick={() => handleDeleteCollection(i, item.name)}
-                    className="p-2 text-primary-dark/30 hover:text-red-500 transition-colors cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                  </button>
+                    Buka Etalase
+                  </Link>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* MARKETING CONTROL BAR */}
-        <section className="bg-primary-dark text-white rounded-[35px] p-8 lg:p-12 border border-transparent shadow-veloura flex flex-col lg:flex-row items-center justify-between gap-6 z-10 relative">
-          <div className="text-center lg:text-left">
-            <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-secondary-light animate-pulse" />
-              <span className="text-[10px] uppercase tracking-wider text-white/50 font-mono">Modul Integrasi CRM</span>
             </div>
-            <h3 className="text-2xl font-playfair mb-1">Be the first to know</h3>
-            <p className="text-xs text-white/60 font-quicksand">Modul pengumpulan email newsletter pelanggan.</p>
           </div>
+        )}
 
-          <div className="flex w-full lg:max-w-md gap-2 relative z-20">
-            <input 
-              type="email" 
-              placeholder="Sistem Sinkronisasi Otomatis" 
-              disabled
-              className="flex-1 px-5 py-3 rounded-xl bg-white/10 border border-white/5 outline-none text-xs font-quicksand text-white/40 cursor-not-allowed opacity-60"
-            />
-            <button 
-              onClick={handleViewEmailDatabase}
-              className="bg-white text-primary-dark px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-bg-soft shadow-sm transition-all flex-shrink-0 cursor-pointer"
-            >
-              Lihat Database Email
-            </button>
-          </div>
-        </section>
-
+        {/* Footer Bawah */}
         <Footer />
+
       </div>
     </DashboardContainer>
   );

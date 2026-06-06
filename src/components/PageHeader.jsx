@@ -1,36 +1,36 @@
-import { Link } from "react-router-dom";
+import React from "react";
 
-const PageHeader = ({ title, breadcrumb, children }) => {
+const PageHeader = ({ title, breadcrumbs = [] }) => {
   return (
-    <div className="mb-10 animate-fade-in">
-
-      <h1 className="text-5xl font-playfair text-primary-dark tracking-tight">
+    <div className="mb-6 pt-2 font-quicksand">
+      {/* 1. Judul Utama dengan Font Serif */}
+      <h1 className="text-2xl sm:text-3xl font-playfair tracking-wide text-[#4E5631] font-medium">
         {title}
       </h1>
-
-      <div className="w-16 h-[3px] bg-secondary-light mt-4 mb-5 rounded-full"></div>
-
-      <nav className="text-sm font-quicksand font-medium flex items-center gap-2">
-        {breadcrumb?.map((item, i) => (
-          <span key={i} className="flex items-center gap-2">
-            {i !== 0 && <span className="text-secondary-dark/30">/</span>}
-
-            {item.link ? (
-              <Link 
-                to={item.link} 
-                className="text-secondary-dark/60 hover:text-primary-light transition-colors"
+      
+      {/* 2. Aksen Garis Marun/Terakota Khas Veloura */}
+      <div className="w-16 h-[3px] bg-[#9A6060] mt-2.5 rounded-full" />
+      
+      {/* 3. Breadcrumbs Dinamis di Bawah Garis */}
+      {breadcrumbs.length > 0 && (
+        <div className="flex items-center gap-1.5 text-[12px] sm:text-[13px] text-slate-400 mt-4 font-medium tracking-wide">
+          {breadcrumbs.map((item, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && <span className="text-slate-300 font-light">/</span>}
+              <span 
+                className={`
+                  ${index === breadcrumbs.length - 1 
+                    ? "text-[#4E5631] font-semibold" 
+                    : "text-slate-400 hover:text-[#8C6239] transition-colors"
+                  }
+                `}
               >
-                {item.label}
-              </Link>
-            ) : (
-              <span className="text-primary-dark">{item.label}</span>
-            )}
-          </span>
-        ))}
-      </nav>
-
-      {children && <div className="mt-6">{children}</div>}
-
+                {item}
+              </span>
+            </React.Fragment>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

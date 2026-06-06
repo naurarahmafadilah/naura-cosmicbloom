@@ -1,33 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft, FaCheckCircle, FaTag, FaRegClock, FaEdit, FaToggleOn, FaToggleOff, FaTimes, FaSave } from "react-icons/fa";
+import { 
+  ArrowLeft, 
+  CheckCircle2, 
+  Tag, 
+  Clock, 
+  Edit3, 
+  ToggleLeft, 
+  ToggleRight, 
+  X, 
+  Save, 
+  AlertTriangle,
+  Sparkles,
+  Info,
+  ShieldCheck,
+  Zap
+} from "lucide-react";
 
-// ==========================================
-// 1. INTEGRASI KOMPONEN SHADCN TABS UI
-// ==========================================
+// Import UI Tabs & Layout
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-
-// ==========================================
-// 2. LAYOUT & DATA SOURCE EXISTING
-// ==========================================
 import DashboardContainer from "../components/DashboardContainer";
-import PageHeader from "../components/PageHeader";
 import Footer from "../components/Footer";
 import saleData from "../data/Sale.json";
 
+// ==========================================
+// IMPORT PAGE HEADER YANG BARU DIBUAT
+// ==========================================
+import PageHeader from "../components/PageHeader";
+
 const SaleDetail = () => {
   const { slug } = useParams();
-  
-  // State manajemen kampanye promosi admin
   const [selectedSize, setSelectedSize] = useState("M");
   const [isCampaignActive, setIsCampaignActive] = useState(true);
   
-  // State dinamis untuk menampung data produk agar perubahan nominal diskon langsung terlihat di layar
   const [currentProduct, setCurrentProduct] = useState(() => {
     return saleData.find((p) => p.slug === slug || p.id?.toString() === slug) || null;
   });
 
-  // State kendali modal edit rasio & harga diskon
+  const [timeLeft, setTimeLeft] = useState({ hours: 24, minutes: 12, seconds: 59 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     price: currentProduct?.price || "",
@@ -35,32 +45,51 @@ const SaleDetail = () => {
     discount: currentProduct?.discount || ""
   });
 
-  // Jika produk tidak ditemukan (Handling Error Admin)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        const { hours, minutes, seconds } = prev;
+        if (hours === 0 && minutes === 0 && seconds === 0) {
+          clearInterval(timer);
+          return prev;
+        }
+        if (seconds > 0) return { ...prev, seconds: seconds - 1 };
+        else if (minutes > 0) return { hours, minutes: minutes - 1, seconds: 59 };
+        else if (hours > 0) return { hours: hours - 1, minutes: 59, seconds: 59 };
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (num) => String(num).padStart(2, "0");
+
   if (!currentProduct) {
     return (
       <DashboardContainer>
-        <div className="py-40 text-center animate-fade-in font-quicksand">
-          <h2 className="font-playfair text-3xl text-primary-dark">Arsip Promosi Tidak Ditemukan</h2>
-          <p className="text-xs text-primary-dark/40 mt-1">Token diskon atau SKU promosi ini sudah kedaluwarsa atau dihapus.</p>
-          <Link to="/sale" className="text-secondary-light mt-6 inline-block underline font-bold text-xs uppercase tracking-wider hover:text-primary-dark transition-colors">
-            Kembali ke Panel Kampanye
+        <div className="py-24 text-center animate-fade-in font-quicksand max-w-sm mx-auto px-4">
+          <div className="w-12 h-12 bg-[#FAF9F5] border border-[#8C6239]/20 text-[#8C6239] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <AlertTriangle size={20} className="stroke-[1.5]" />
+          </div>
+          <h2 className="font-playfair text-xl font-bold text-slate-900 tracking-tight">Arsip Tidak Ditemukan</h2>
+          <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">SKU promosi ini sudah kedaluwarsa atau ditarik dari katalog Veloura Atelier.</p>
+          <Link to="/sale" className="mt-6 inline-flex items-center gap-1.5 bg-[#4E5631] text-white px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider hover:bg-[#3d4426] transition-all shadow-sm">
+            <ArrowLeft size={10} /> Kembali ke Panel
           </Link>
         </div>
       </DashboardContainer>
     );
   }
 
-  // Token spesifikasi penunjang audit tekstil Veloura Atelier
   const productSizes = ["S", "M", "L", "XL"];
   const details = {
-    bahan: "100% Premium Mulberry Silk Blend. Memiliki jalinan serat alami yang sangat halus, memberikan efek kilau elegan yang subtil, sekaligus adem dan jatuh dengan sempurna saat dikenakan.",
-    perawatan: "Disarankan untuk dry clean atau dicuci manual dengan tangan menggunakan air dingin. Setrika dengan suhu rendah (mode sutra) dan hindari penggunaan pemutih pakaian agar serat kain tetap terjaga presisinya.",
-    panduan: "Manekin/Model mengenakan ukuran M (Tinggi: 174cm, Lingkar Dada: 82cm). Pilih ukuran reguler untuk siluet klasik, atau satu ukuran di atasnya untuk tampilan yang lebih mengalir dan kontemporer."
+    bahan: "100% Premium Mulberry Silk Blend. Serat alami halus, efek kilau subtil, adem, dan jatuh dengan sempurna saat dikenakan.",
+    perawatan: "Disarankan dry clean atau cuci manual air dingin. Setrika suhu rendah (mode sutra) dan hindari penggunaan pemutih.",
+    panduan: "Model mengenakan M (Tinggi: 174cm). Pilih ukuran reguler untuk siluet klasik, atau satu nomor di atasnya untuk tampilan mengalir."
   };
 
-  const fallbackImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=300&q=80";
+  const fallbackImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=500&q=80";
 
-  // Handler simpan konfigurasi harga baru dari modal
   const handleSaveMetrics = (e) => {
     e.preventDefault();
     setCurrentProduct(prev => ({
@@ -74,248 +103,210 @@ const SaleDetail = () => {
 
   return (
     <DashboardContainer>
-      <div className="animate-fade-in pb-10 text-primary-dark relative">
+      <div className="animate-fade-in pb-8 text-slate-800 relative pt-2 px-4 max-w-6xl mx-auto">
         
-        {/* HEADER HALAMAN */}
-        <PageHeader
-          title="Detail Matriks Kampanye"
-          breadcrumb={[
-            { label: "Dashboard", link: "/" },
-            { label: "Promosi & Markdown", link: "/sale" },
-            { label: currentProduct.name }
-          ]}
+        {/* ==========================================
+            PENGGUNAAN KOMPONEN PAGE HEADER
+           ========================================== */}
+        <PageHeader 
+          title="Manajemen Manifest Order" 
+          breadcrumbs={["Dashboard", "Pesanan", currentProduct.id || "VL-2026101"]} 
         />
 
+        {/* TOP NAV & BACK BUTTON */}
+        <div className="flex items-center justify-between font-quicksand mb-4 mt-2">
+          <Link 
+            to="/sale" 
+            className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#8C6239] hover:text-[#4E5631] transition-colors group"
+          >
+            <ArrowLeft size={12} className="transform group-hover:-translate-x-0.5 transition-transform stroke-[2.5]" /> 
+            Kembali ke Panel
+          </Link>
+          <span className="text-[10px] font-mono font-bold text-[#8C6239] bg-[#FAF9F5] border border-[#8C6239]/10 px-2.5 py-0.5 rounded-lg shadow-sm">
+            SKU: {currentProduct.id || "VLR-PROMO"}
+          </span>
+        </div>
+
         {/* LAYOUT GRID UTAMA PROMOSI */}
-        <div className="max-w-5xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
           
-          {/* SISI KIRI: MEDIA AUDIT & BADGE DISKON */}
-          <div className="relative group">
-            <div className="rounded-[35px] overflow-hidden aspect-[4/5] bg-white border border-primary-light/10 p-3 shadow-veloura">
-              <div className="w-full h-full rounded-[26px] overflow-hidden relative">
+          {/* KOLOM KIRI: BANNER PREVIEW IMAGE */}
+          <div className="md:col-span-4 relative group">
+            <div className="bg-white border border-[#FAF9F5] p-2 rounded-2xl shadow-sm">
+              <div className="w-full aspect-[4/5] rounded-xl overflow-hidden relative bg-[#FAF9F5]">
                 <img 
                   src={currentProduct.img || fallbackImage} 
                   alt={currentProduct.name} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                  className="w-full h-full object-cover" 
                   onError={(e) => { e.target.onerror = null; e.target.src = fallbackImage; }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/50 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
               </div>
             </div>
             
-            {/* Tag Badge Potongan Harga */}
-            {isCampaignActive ? (
-              <div className="absolute top-6 left-6 bg-secondary-light text-white px-4 py-2 rounded-xl font-bold font-mono text-[10px] tracking-widest border border-secondary-light/20 flex items-center gap-2 shadow-md animate-fade-in">
-                <FaTag size={9} /> POTONGAN HARGA LIVE (-{currentProduct.discount})
-              </div>
-            ) : (
-              <div className="absolute top-6 left-6 bg-slate-500 text-white px-4 py-2 rounded-xl font-bold font-mono text-[10px] tracking-widest border border-slate-400 flex items-center gap-2 shadow-md animate-fade-in">
-                <FaTimes size={9} /> KAMPANYE DIJEDA
-              </div>
-            )}
+            <div className="absolute top-4 left-4">
+              {isCampaignActive ? (
+                <span className="bg-[#8C6239] text-white px-2 py-1 rounded-md font-bold font-quicksand text-[9px] tracking-wider border border-white/10 flex items-center gap-1 shadow-md">
+                  <Tag size={10} className="stroke-[2.5]" /> LIVE (-{currentProduct.discount})
+                </span>
+              ) : (
+                <span className="bg-slate-700 text-white px-2 py-1 rounded-md font-bold font-quicksand text-[9px] tracking-wider border border-white/10 flex items-center gap-1 shadow-md">
+                  <X size={10} className="stroke-[2.5]" /> DIJEDA
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* SISI KANAN: PANEL AUDIT MARGIN & MANAJEMEN EVENT */}
-          <div className="flex flex-col">
+          {/* KOLOM KANAN: CONTROL PANEL DETIL */}
+          <div className="md:col-span-8 flex flex-col font-quicksand space-y-4">
             
-            {/* Navigasi Kembali */}
-            <Link 
-              to="/sale" 
-              className="inline-flex items-center gap-2 text-secondary-dark/50 text-[10px] font-bold uppercase tracking-[3px] mb-6 hover:text-secondary-light transition-colors"
-            >
-              <FaArrowLeft className="text-[9px]" /> Kembali ke Manajemen Kampanye
-            </Link>
-
-            <div className="flex items-center gap-2 text-secondary-light text-[10px] font-bold uppercase tracking-[3px] mb-2 font-quicksand">
-               <FaRegClock size={11} /> Siklus Kampanye Aktif
-            </div>
-            
-            <h1 className="text-4xl font-playfair text-primary-dark mb-5 leading-tight">{currentProduct.name}</h1>
-            
-            {/* BOX KOMPARASI AUDIT HARGA BARU & LAMA */}
-            <div className="grid grid-cols-2 gap-4 p-5 rounded-2xl bg-white border border-primary-light/10 mb-6 shadow-sm font-quicksand">
-              <div className="flex flex-col border-r border-border-subtle/60">
-                <span className="text-[10px] text-primary-dark/40 font-bold uppercase tracking-wider">MSRP Asli Awal</span>
-                <span className="text-xl text-primary-dark/30 line-through mt-0.5">Rp {currentProduct.oldPrice}</span>
+            <div className="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between gap-2 bg-[#FAF9F5] border border-[#8C6239]/10 rounded-xl p-2.5 px-3">
+                <div className="flex items-center gap-1.5 text-[#8C6239] text-[10px] font-bold uppercase tracking-widest">
+                  <Clock size={12} className="stroke-[2.5]" /> Batas Margin
+                </div>
+                <div className="flex items-center gap-0.5 font-mono text-[11px] font-bold">
+                  <span className="bg-[#4E5631] text-white px-1.5 py-0.5 rounded-md shadow-sm">{formatTime(timeLeft.hours)}j</span>
+                  <span className="text-[#8C6239] font-sans px-0.5 animate-pulse">:</span>
+                  <span className="bg-[#4E5631] text-white px-1.5 py-0.5 rounded-md shadow-sm">{formatTime(timeLeft.minutes)}m</span>
+                  <span className="text-[#8C6239] font-sans px-0.5 animate-pulse">:</span>
+                  <span className="bg-[#8C6239] text-white px-1.5 py-0.5 rounded-md shadow-sm">{formatTime(timeLeft.seconds)}d</span>
+                </div>
               </div>
-              <div className="flex flex-col pl-2">
-                <span className="text-[10px] text-secondary-light font-bold uppercase tracking-wider">Harga Diskon Efektif</span>
-                <span className="text-2xl font-bold text-primary-dark flex items-baseline mt-0.5">
-                  <span className="text-xs font-normal text-secondary-light mr-0.5">Rp</span>
-                  {isCampaignActive ? currentProduct.price : currentProduct.oldPrice}
-                </span>
+
+              <div>
+                <h1 className="text-xl font-playfair font-bold text-slate-900 tracking-tight">
+                  {currentProduct.name}
+                </h1>
+                <p className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                  <Sparkles size={10} className="text-[#8C6239] fill-[#8C6239]" /> Konsol Ritel Veloura Atelier
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+                <div className="flex flex-col justify-center">
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">MSRP Butik</span>
+                  <span className="text-xs font-medium text-slate-400 line-through mt-0.5">Rp {currentProduct.oldPrice}</span>
+                </div>
+                <div className="flex flex-col border-l border-slate-100 pl-4">
+                  <span className="text-[9px] text-[#8C6239] font-bold uppercase tracking-wider flex items-center gap-1">
+                    <Zap size={10} className="fill-[#8C6239] stroke-none" /> Live Promo
+                  </span>
+                  <span className="text-xl font-bold text-slate-950 flex items-baseline tracking-tight">
+                    <span className="text-[11px] font-normal text-[#8C6239] mr-0.5">Rp</span>
+                    {isCampaignActive ? currentProduct.price : currentProduct.oldPrice}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* MONITORING ALOKASI SIZE PROMOSI */}
-            <div className="mb-6 font-quicksand">
-              <span className="block text-xs font-bold uppercase tracking-wider text-primary-dark mb-3">
-                Gudang Alokasi Ukuran Terpaut
+            {/* ALOKASI UKURAN */}
+            <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-2">
+              <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                Alokasi Ukuran
               </span>
-              <div className="flex gap-3">
+              <div className="flex gap-1.5">
                 {productSizes.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 rounded-xl text-xs font-mono border transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                    className={`w-8 h-8 rounded-lg text-[11px] font-mono font-bold border transition-all flex items-center justify-center cursor-pointer ${
                       selectedSize === size
-                        ? "border-primary-dark bg-primary-dark text-white shadow-sm"
-                        : "border-border-subtle bg-white text-primary-dark hover:border-secondary-light"
+                        ? "border-[#4E5631] bg-[#4E5631] text-white ring-2 ring-[#4E5631]/10"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-[#8C6239] hover:bg-[#FAF9F5]"
                     }`}
                   >
-                    <span className="font-bold">{size}</span>
-                    <span className={`text-[8px] ${selectedSize === size ? 'text-white/60' : 'text-primary-dark/40'}`}>sale ok</span>
+                    {size}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* TAB DETIL INFORMASI PRODUK MENGGUNAKAN SHADCN TABS */}
-            <Tabs defaultValue="bahan" className="w-full mb-6 font-quicksand bg-white border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
-              <TabsList className="w-full grid grid-cols-3 bg-bg-main/30 rounded-none h-auto p-0 border-b border-border-subtle">
-                <TabsTrigger 
-                  value="bahan" 
-                  className="py-3 text-[10px] font-bold uppercase tracking-wider text-secondary-dark/60 rounded-none data-[state=active]:bg-white data-[state=active]:text-primary-dark data-[state=active]:border-b-2 data-[state=active]:border-primary-dark transition-all"
-                >
-                  Struktur Material
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="perawatan" 
-                  className="py-3 text-[10px] font-bold uppercase tracking-wider text-secondary-dark/60 rounded-none data-[state=active]:bg-white data-[state=active]:text-primary-dark data-[state=active]:border-b-2 data-[state=active]:border-primary-dark transition-all"
-                >
-                  SOP Perawatan
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="panduan" 
-                  className="py-3 text-[10px] font-bold uppercase tracking-wider text-secondary-dark/60 rounded-none data-[state=active]:bg-white data-[state=active]:text-primary-dark data-[state=active]:border-b-2 data-[state=active]:border-primary-dark transition-all"
-                >
-                  Dimensi Manekin
-                </TabsTrigger>
+            {/* TABS KONDISIONAL COMPACT */}
+            <Tabs defaultValue="bahan" className="w-full bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+              <TabsList className="w-full grid grid-cols-3 bg-[#FAF9F5]/60 rounded-none h-auto p-1 border-b border-slate-100">
+                <TabsTrigger value="bahan" className="py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#4E5631] transition-all">Tekstur</TabsTrigger>
+                <TabsTrigger value="perawatan" className="py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#4E5631] transition-all">SOP Rawat</TabsTrigger>
+                <TabsTrigger value="panduan" className="py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#4E5631] transition-all">Dimensi</TabsTrigger>
               </TabsList>
-              
-              <div className="p-5 text-xs text-primary-dark/70 leading-relaxed min-h-[100px] bg-white">
-                <TabsContent value="bahan" className="m-0 focus-visible:outline-none">
-                  <p>{details.bahan}</p>
+              <div className="p-3.5 text-[11px] text-slate-500 leading-relaxed min-h-[75px] bg-white">
+                <TabsContent value="bahan" className="m-0 focus-visible:outline-none animate-fade-in">
+                  <p className="flex items-start gap-1.5"><Info size={12} className="shrink-0 mt-0.5 text-[#8C6239]" /> {details.bahan}</p>
                 </TabsContent>
-                <TabsContent value="perawatan" className="m-0 focus-visible:outline-none">
-                  <p>{details.perawatan}</p>
+                <TabsContent value="perawatan" className="m-0 focus-visible:outline-none animate-fade-in">
+                  <p className="flex items-start gap-1.5"><ShieldCheck size={12} className="shrink-0 mt-0.5 text-[#8C6239]" /> {details.perawatan}</p>
                 </TabsContent>
-                <TabsContent value="panduan" className="m-0 focus-visible:outline-none">
-                  <p>{details.panduan}</p>
+                <TabsContent value="panduan" className="m-0 focus-visible:outline-none animate-fade-in">
+                  <p className="flex items-start gap-1.5"><Sparkles size={12} className="shrink-0 mt-0.5 text-[#8C6239]" /> {details.panduan}</p>
                 </TabsContent>
               </div>
             </Tabs>
-            
-            <div className="h-[1px] bg-border-subtle/50 w-full mb-6"></div>
 
-            {/* REGULASI EVENT HUKUM DISKON */}
-            <div className="space-y-3 mb-6 font-quicksand">
-              <div className="flex items-center gap-3 text-xs text-primary-dark/70">
-                <FaCheckCircle className="text-secondary-light text-sm flex-shrink-0" /> 
-                <span>Kalkulasi Otomatis: Harga promo langsung memotong nilai transaksi akhir pada invoice pembeli.</span>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-primary-dark/70">
-                <FaCheckCircle className="text-secondary-light text-sm flex-shrink-0" /> 
-                <span>Segel Jaminan Mutu: Produk lolos QC dari pusat distribusi utama Veloura Atelier Warehouse.</span>
-              </div>
-            </div>
-
-            {/* ACTION PANEL MANAGEMENT SYSTEM */}
-            <div className="flex flex-col sm:flex-row gap-3 font-quicksand">
+            {/* ACTION PANEL */}
+            <div className="flex gap-2 pt-1">
               <button 
                 onClick={() => setIsModalOpen(true)}
-                className="flex-[3] py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2.5 bg-primary-dark text-white hover:bg-hover-green shadow-md cursor-pointer transition-all duration-300"
+                className="flex-1 h-9 bg-[#4E5631] text-white rounded-lg text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 hover:bg-[#3d4426] transition-all cursor-pointer"
               >
-                <FaEdit className="text-xs" /> Atur Ulang Rasio & Nominal Diskon (Ukuran {selectedSize})
+                <Edit3 size={12} className="stroke-[2.5]" /> Ubah Konfigurasi ({selectedSize})
               </button>
-              
               <button 
                 onClick={() => setIsCampaignActive(!isCampaignActive)}
-                className={`flex-1 py-4 rounded-xl border text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer ${
-                  isCampaignActive 
-                    ? "border-secondary-light/30 bg-secondary-light/5 text-secondary-light" 
-                    : "border-slate-300 bg-slate-50 text-slate-500 hover:border-slate-400"
+                className={`px-3 h-9 rounded-lg border text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  isCampaignActive ? "border-[#8C6239]/20 bg-white text-[#8C6239] hover:bg-[#FAF9F5]" : "border-slate-200 bg-slate-50 text-slate-400"
                 }`}
               >
-                {isCampaignActive ? <FaToggleOn className="text-sm" /> : <FaToggleOff className="text-sm" />}
-                {isCampaignActive ? "Diskon Aktif" : "Diskon Dijeda"}
+                {isCampaignActive ? <ToggleRight size={16} className="text-[#4E5631]" /> : <ToggleLeft size={16} />}
+                {isCampaignActive ? "Aktif" : "Jeda"}
               </button>
             </div>
 
           </div>
         </div>
 
-        {/* MODAL OVERLAY: ADJUSTMENT NOMINAL DISKON */}
+        {/* MODAL CONFIG OVERLAY */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-primary-dark/40 backdrop-blur-sm flex items-center justify-center z-[99999] p-4 font-quicksand animate-fade-in">
-            <div className="bg-white w-full max-w-md rounded-[30px] shadow-2xl border border-primary-light/15 p-6 animate-scale-in">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-4 mb-4">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-[99999] p-4 font-quicksand animate-fade-in">
+            <div className="bg-white w-full max-w-xs rounded-2xl shadow-xl border border-slate-100 p-4 transform transition-all animate-scale-in">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
                 <div>
-                  <h3 className="font-playfair text-lg font-bold text-primary-dark">Matriks Ukuran {selectedSize}</h3>
-                  <p className="text-[11px] text-primary-dark/50">Sesuaikan margin markdown promosi item.</p>
+                  <div className="flex items-center gap-1 text-[9px] tracking-wider uppercase font-bold text-[#8C6239]">
+                    <Sparkles size={10} className="fill-[#8C6239] stroke-none" /> Matriks Ritel
+                  </div>
+                  <h3 className="font-playfair text-sm font-bold text-slate-900">Ubah Ukuran {selectedSize}</h3>
                 </div>
-                <button 
-                  onClick={() => setIsModalOpen(false)} 
-                  className="p-2 text-primary-dark/40 hover:text-primary-dark rounded-full hover:bg-bg-soft transition-colors cursor-pointer"
-                >
-                  <FaTimes size={14} />
-                </button>
+                <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"><X size={14} /></button>
               </div>
 
-              <form onSubmit={handleSaveMetrics} className="space-y-4">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-primary-dark/70 mb-1.5">MSRP Asli (Awal)</label>
-                  <input 
-                    type="text" 
-                    value={editForm.oldPrice}
-                    onChange={(e) => setEditForm({...editForm, oldPrice: e.target.value})}
-                    className="w-full px-4 py-2.5 bg-bg-soft border border-border-subtle rounded-xl text-xs font-semibold text-primary-dark outline-none focus:border-secondary-light transition-all" 
-                    required
-                  />
+              <form onSubmit={handleSaveMetrics} className="space-y-3">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">MSRP Awal</label>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-slate-400">Rp</span>
+                    <input type="text" value={editForm.oldPrice} onChange={(e) => setEditForm({...editForm, oldPrice: e.target.value})} className="w-full pl-7 pr-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:border-[#8C6239] h-8" required />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-primary-dark/70 mb-1.5">Harga Diskon Baru</label>
-                  <input 
-                    type="text" 
-                    value={editForm.price}
-                    onChange={(e) => setEditForm({...editForm, price: e.target.value})}
-                    className="w-full px-4 py-2.5 bg-bg-soft border border-border-subtle rounded-xl text-xs font-semibold text-primary-dark outline-none focus:border-secondary-light transition-all" 
-                    required
-                  />
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">Harga Diskon</label>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-slate-400">Rp</span>
+                    <input type="text" value={editForm.price} onChange={(e) => setEditForm({...editForm, price: e.target.value})} className="w-full pl-7 pr-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:border-[#8C6239] h-8" required />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-primary-dark/70 mb-1.5">Persentase Label (Contoh: 30%)</label>
-                  <input 
-                    type="text" 
-                    value={editForm.discount}
-                    onChange={(e) => setEditForm({...editForm, discount: e.target.value})}
-                    className="w-full px-4 py-2.5 bg-bg-soft border border-border-subtle rounded-xl text-xs font-semibold text-primary-dark outline-none focus:border-secondary-light transition-all" 
-                    required
-                  />
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">Potongan Persen</label>
+                  <input type="text" value={editForm.discount} onChange={(e) => setEditForm({...editForm, discount: e.target.value})} className="w-full px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:border-[#8C6239] h-8" required />
                 </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 py-2.5 border border-border-subtle rounded-xl text-xs font-bold text-primary-dark/70 hover:bg-bg-soft transition-colors cursor-pointer"
-                  >
-                    Batal
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="flex-1 py-2.5 bg-primary-dark text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-hover-green shadow-sm transition-colors cursor-pointer"
-                  >
-                    <FaSave /> Terapkan Nilai
-                  </button>
+                <div className="flex justify-end gap-1.5 pt-2 border-t border-slate-100 mt-4">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-3 h-8 bg-slate-50 text-slate-600 rounded-lg text-[11px] font-semibold cursor-pointer">Batal</button>
+                  <button type="submit" className="px-3 h-8 bg-[#4E5631] text-white rounded-lg text-[11px] font-bold flex items-center gap-1 hover:bg-[#3d4426] cursor-pointer"><Save size={11} /> Simpan</button>
                 </div>
               </form>
             </div>
           </div>
         )}
 
-        {/* FOOTER GLOBAL */}
-        <div className="mt-16">
+        <div className="mt-8">
           <Footer />
         </div>
 
