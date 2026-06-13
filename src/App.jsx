@@ -36,6 +36,9 @@ const StockManagement = lazy(() => import("./pages/StockManagement"));
 const SupplierManagement = lazy(() => import("./pages/SupplierManagement"));
 const CashierHistory = lazy(() => import("./pages/CashierHistory")); 
 
+// 🌟 INTEGRASI LAZY IMPORT SECURITY & SYSTEM CONTROL
+const ManageUsers = lazy(() => import("./pages/ManageUsers"));
+
 // AUTH PAGES (LAZY)
 const Login = lazy(() => import("./pages/auth/Login"));
 const Register = lazy(() => import("./pages/auth/Register"));
@@ -59,6 +62,9 @@ const App = () => {
           <Route path="/inventory" element={<StockManagement />} />
           <Route path="/suppliers" element={<SupplierManagement />} />
           <Route path="/sales-history" element={<CashierHistory />} />
+
+          {/* 🌟 RUTE SISTEM & SECURITY CONTROL */}
+          <Route path="/manage-users" element={<ManageUsers />} />
 
           {/* Rute Toko & Navigasi Publik/Utama */}
           <Route path="/shop" element={<Shop />} />

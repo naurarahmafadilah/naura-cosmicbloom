@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { 
   FaSearch, FaFilter, FaPlus, FaTimes, FaSave, FaDownload, 
   FaEdit, FaTrashAlt, FaIdCard, FaGem, FaCheckCircle, 
   FaCalendarAlt, FaGift, FaExchangeAlt, FaHistory,
-  FaEye, FaShoppingBag, FaCoins, FaCrown // Menggunakan FaCrown yang lebih standar di react-icons/fa
+  FaEye, FaShoppingBag, FaCoins, FaCrown 
 } from "react-icons/fa";
 
 // 1. IMPORT DATA JSON
@@ -28,8 +28,11 @@ const Membership = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [members, setMembers] = useState(initialMembersData);
   const [editingMemberId, setEditingMemberId] = useState(null);
-  
   const [selectedMember, setSelectedMember] = useState(null);
+
+  // 🌟 INISIALISASI useRef
+  const formRef = useRef(null);
+  const nameInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     id: "",
@@ -46,8 +49,33 @@ const Membership = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Fungsi pembantu untuk membuka form, scroll ke form, dan auto-focus ke input nama
+  const openFormAndFocus = () => {
+    setShowForm(true);
+    
+    // Gunakan setTimeout agar DOM form selesai me-render terlebih dahulu sebelum diakses oleh ref
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      if (nameInputRef.current) {
+        nameInputRef.current.focus();
+      }
+    }, 100);
+  };
+
+  const handleAddClick = () => {
+    if (showForm && !editingMemberId) {
+      handleCancel();
+    } else {
+      setFormData({ id: "", name: "", email: "", tier: "Regular", points: "0", joinDate: new Date().toISOString().split('T')[0], status: "Aktif" });
+      setEditingMemberId(null);
+      openFormAndFocus();
+    }
+  };
+
   const handleEditClick = (member, e) => {
-    e.stopPropagation(); // Mencegah bentrokan event trigger
+    e.stopPropagation(); 
     setFormData({
       id: member.id || "",
       name: member.name || "",
@@ -58,12 +86,11 @@ const Membership = () => {
       status: member.status || "Aktif"
     });
     setEditingMemberId(member.id);
-    setShowForm(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    openFormAndFocus();
   };
 
   const handleDeleteClick = (id, e) => {
-    e.stopPropagation(); // Mencegah bentrokan event trigger
+    e.stopPropagation(); 
     if (window.confirm("Apakah Anda yakin ingin menonaktifkan status membership pelanggan ini?")) {
       setMembers(members.filter((item) => item.id !== id));
     }
@@ -151,10 +178,10 @@ const Membership = () => {
               <FaDownload size={11} /> Unduh Laporan (.xlsx)
             </button>
             <button 
-              onClick={() => (showForm ? handleCancel() : setShowForm(true))}
+              onClick={handleAddClick}
               className="px-4 py-2 bg-[#4E5631] text-white rounded-xl text-xs font-semibold tracking-wider hover:bg-[#4E5631]/90 shadow-xs transition-all flex items-center gap-2 cursor-pointer"
             >
-              {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Tutup Form" : "Tambah Kartu Member"}
+              {showForm && !editingMemberId ? <FaTimes /> : <FaPlus />} {showForm && !editingMemberId ? "Tutup Form" : "Tambah Kartu Member"}
             </button>
           </div>
         </div>
@@ -207,7 +234,10 @@ const Membership = () => {
           
           {/* FORM PENDAFTARAN / EDIT MEMBERSHIP */}
           {showForm && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs animate-fade-in">
+            <div 
+              ref={formRef} 
+              className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs animate-fade-in scroll-mt-6"
+            >
               <div className="border-b border-slate-100 pb-3 mb-4 flex justify-between items-start">
                 <div>
                   <h3 className="text-base font-bold font-playfair text-slate-800">
@@ -223,10 +253,20 @@ const Membership = () => {
               <form onSubmit={handleFormSubmit} className="space-y-4 font-quicksand text-xs">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                   <InputField label="Nomor Kartu Member (ID)" name="id" placeholder="Otomatis (contoh: VLR-2024)" value={formData.id} onChange={handleInputChange} disabled={!!editingMemberId} />
-                  <InputField label="Nama Lengkap Pemegang Kartu" name="name" placeholder="Masukkan nama" value={formData.name} onChange={handleInputChange} required />
+                  
+                  {/* 🌟 MENGGUNAKAN REF UNTUK OTOMATIS FOKUS */}
+                  <InputField 
+                    ref={nameInputRef}
+                    label="Nama Lengkap Pemegang Kartu" 
+                    name="name" 
+                    placeholder="Masukkan nama" 
+                    value={formData.name} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                  
                   <InputField label="Email Korespondensi" name="email" type="email" placeholder="contoh@veloura.com" value={formData.email} onChange={handleInputChange} required />
                   <InputField label="Jumlah Alokasi Poin" name="points" type="number" placeholder="0" value={formData.points} onChange={handleInputChange} />
-                  
                   <InputField label="Tanggal Registrasi Keanggotaan" name="joinDate" type="date" value={formData.joinDate} onChange={handleInputChange} />
 
                   {/* Native Select Elegant untuk Tier */}
@@ -365,7 +405,6 @@ const Membership = () => {
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      {/* BUTTON LIHAT DETAIL */}
                       <button 
                         type="button"
                         onClick={() => setSelectedMember(item)}

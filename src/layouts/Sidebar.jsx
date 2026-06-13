@@ -9,6 +9,7 @@ import {
   FaTag,
   FaIdCard 
 } from "react-icons/fa";
+// Ganti baris import yang salah sebelumnya dengan ini:
 import { 
   FiUsers, 
   FiTrendingUp, 
@@ -17,8 +18,9 @@ import {
   FiLogOut,
   FiPackage,    
   FiTruck,      
-  FiShoppingBag 
-} from "react-icons/fi";
+  FiShoppingBag,
+  FiShield // 🌟 Sekarang di-import dari package yang benar
+} from "react-icons/fi"; // <-- Pastikan tetap "react-icons/fi"
 
 const Sidebar = () => {
   // Utility class menu utama
@@ -61,6 +63,13 @@ const Sidebar = () => {
         { name: "Pesanan Masuk", path: "/orders", icon: <FaBoxOpen />, badge: "12", isAlert: true },
         { name: "Riwayat Kasir", path: "/sales-history", icon: <FiShoppingBag /> },
         { name: "Favorit", path: "/wishlist", icon: <FaHeart /> }
+      ]
+    },
+    // 🌟 SEKSI BARU: SISTEM & SECURITY CONTROL
+    {
+      title: "Sistem & Otentikasi",
+      items: [
+        { name: "Manage Users", path: "/manage-users", icon: <FiShield />, badge: "AUTH" }
       ]
     }
   ];

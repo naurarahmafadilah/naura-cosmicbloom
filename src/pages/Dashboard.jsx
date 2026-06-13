@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react"; 
 import { useNavigate } from "react-router-dom"; 
 
 // ==========================================
@@ -32,7 +32,7 @@ import ReviewHighlightCard from "../components/ReviewHighlightCard";
 import StockAlertCard from "../components/StockAlertCard"; 
 import Footer from "../components/Footer";
 
-import { FiShield, FiLock, FiPlus, FiRefreshCw, FiClock, FiCalendar } from "react-icons/fi";
+import { FiShield, FiPlus, FiRefreshCw, FiClock, FiCalendar } from "react-icons/fi";
 
 const crmDataQuarters = {
   Q1: [
@@ -60,14 +60,12 @@ const Dashboard = ({ products: propsProducts }) => {
   const activeProducts = propsProducts && propsProducts.length > 0 ? propsProducts : localProducts;
   
   const [currentUser, setCurrentUser] = useState(() => JSON.parse(localStorage.getItem("user")) || null);
-  const isGuest = currentUser?.role === "guest";
 
-  // State baru untuk penanganan Tanggal dan Jam Real-time
+  // State untuk penanganan Tanggal dan Jam Real-time
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  useEffect(() => {
-    if (isGuest) navigate("/admin/guestdashboard");
-  }, [isGuest, navigate]);
+  // Referensi container daftar produk
+  const productSectionRef = useRef(null);
 
   // Effect untuk memperbarui Jam setiap detik (Interval 1000ms)
   useEffect(() => {
@@ -97,7 +95,6 @@ const Dashboard = ({ products: propsProducts }) => {
   const [formData, setFormData] = useState({ namaProduk: "", hargaProduk: "", kategoriProduk: "", gambarProduk: "" });
 
   const handleSyncCRM = () => {
-    if (isGuest) return;
     setIsSyncing(true);
     setSyncProgress(20);
     const interval = setInterval(() => {
@@ -113,14 +110,12 @@ const Dashboard = ({ products: propsProducts }) => {
   };
 
   const handleOpenCreateMode = () => {
-    if (isGuest) return;
     setIsEditMode(false);
     setFormData({ namaProduk: "", hargaProduk: "", kategoriProduk: "", gambarProduk: "" });
     setIsDialogOpen(true);
   };
 
   const handleOpenEditMode = (product, index) => {
-    if (isGuest) return;
     setIsEditMode(true);
     setSelectedProductIndex(index);
     setFormData({ namaProduk: product.name, hargaProduk: product.price.replace(/\./g, ""), kategoriProduk: "", gambarProduk: product.img });
@@ -129,7 +124,7 @@ const Dashboard = ({ products: propsProducts }) => {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (isGuest || !formData.namaProduk || !formData.hargaProduk) return;
+    if (!formData.namaProduk || !formData.hargaProduk) return;
     const formattedPrice = parseInt(formData.hargaProduk).toLocaleString("id-ID");
     const fallbackImg = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400";
 
@@ -145,6 +140,11 @@ const Dashboard = ({ products: propsProducts }) => {
     } else {
       const newProd = { id: Date.now(), name: formData.namaProduk, price: formattedPrice, img: formData.gambarProduk || fallbackImg };
       setLocalProducts([newProd, ...localProducts]);
+
+      // Otomatis scroll ke elemen produk setelah ditambahkan
+      setTimeout(() => {
+        productSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
     }
     setIsDialogOpen(false);
   };
@@ -172,7 +172,7 @@ const Dashboard = ({ products: propsProducts }) => {
         <Alert className="border-none rounded-2xl py-3 px-5 bg-amber-50/70 text-amber-900 flex items-center gap-3 shadow-3xs">
           <FiShield size={14} className="text-amber-700 shrink-0" />
           <AlertDescription className="text-xs font-medium font-quicksand tracking-wide">
-            Sistem Keamanan: Fitur mutasi repositori produk, pipeline pembaruan CRM, dan otomatisasi penyiaran promo dibatasi berdasarkan level hak akses aktif Anda.
+            Sistem Keamanan: Fitur mutasi repositori produk, pipeline pembaruan CRM, dan otomatisasi penyiaran promo berjalan normal di bawah otoritas sesi penuh.
           </AlertDescription>
         </Alert>
 
@@ -196,11 +196,6 @@ const Dashboard = ({ products: propsProducts }) => {
               <h1 className="text-2xl sm:text-3xl font-playfair tracking-wide text-[#4E5631]">
                 Executive Suite Dashboard
               </h1>
-              {isGuest && (
-                <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[10px] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider">
-                  Guest View Only
-                </span>
-              )}
             </div>
             
             {/* AKSEN GARIS ESTETIK VELOURA */}
@@ -214,49 +209,41 @@ const Dashboard = ({ products: propsProducts }) => {
           {/* ACTION BUTTONS */}
           <div className="flex items-center gap-3 self-start md:self-end">
             <button 
-              onClick={() => isGuest ? null : alert("📥 Report diunduh.")}
-              disabled={isGuest}
-              className={`h-9 px-4 rounded-xl text-xs font-semibold tracking-wide border transition-all flex items-center gap-2 ${
-                isGuest ? "bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 cursor-pointer shadow-3xs"
-              }`}
+              onClick={() => alert("📥 Report diunduh.")}
+              className="h-9 px-4 rounded-xl text-xs font-semibold tracking-wide border transition-all flex items-center gap-2 bg-white text-slate-600 border-slate-200 hover:bg-slate-50 cursor-pointer shadow-3xs"
             >
-              {isGuest && <FiLock size={12} />} Ekspor Laporan
+              Ekspor Laporan
             </button>
             
-            <Dialog open={isDialogOpen} onOpenChange={isGuest ? () => {} : setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <button 
                 onClick={handleOpenCreateMode}
-                disabled={isGuest}
-                className={`h-9 px-4 rounded-xl text-xs font-semibold tracking-wide transition-all flex items-center gap-2 shadow-sm ${
-                  isGuest ? "bg-slate-100 text-slate-300 cursor-not-allowed" : "bg-[#4E5631] text-white hover:bg-[#3d4426] cursor-pointer"
-                }`}
+                className="h-9 px-4 rounded-xl text-xs font-semibold tracking-wide transition-all flex items-center gap-2 shadow-sm bg-[#4E5631] text-white hover:bg-[#3d4426] cursor-pointer"
               >
-                {isGuest ? <FiLock size={12} /> : <FiPlus size={13} />} Registrasi Item
+                <FiPlus size={13} /> Registrasi Item
               </button>
               
-              {!isGuest && (
-                <DialogContent className="sm:max-w-[360px] rounded-2xl bg-white p-6 border border-slate-100 shadow-2xl font-quicksand">
-                  <DialogHeader>
-                    <DialogTitle className="text-base font-bold font-playfair text-[#4E5631]">
-                      {isEditMode ? "Ubah Detail Produk" : "Registrasi Koleksi Baru"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleFormSubmit} className="space-y-4 pt-2">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Item</label>
-                      <Input name="namaProduk" value={formData.namaProduk} onChange={(e) => setFormData({...formData, namaProduk: e.target.value})} required className="rounded-xl h-9 text-xs border-slate-200" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Harga Retail (Rp)</label>
-                      <Input name="hargaProduk" type="number" value={formData.hargaProduk} onChange={(e) => setFormData({...formData, hargaProduk: e.target.value})} required className="rounded-xl h-9 text-xs border-slate-200" />
-                    </div>
-                    <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                      <button type="button" onClick={() => setIsDialogOpen(false)} className="px-4 h-9 bg-slate-50 text-slate-500 text-xs font-semibold rounded-xl">Batal</button>
-                      <button type="submit" className="px-4 h-9 bg-[#4E5631] text-white rounded-xl text-xs font-semibold">Simpan</button>
-                    </div>
-                  </form>
-                </DialogContent>
-              )}
+              <DialogContent className="sm:max-w-[360px] rounded-2xl bg-white p-6 border border-slate-100 shadow-2xl font-quicksand">
+                <DialogHeader>
+                  <DialogTitle className="text-base font-bold font-playfair text-[#4E5631]">
+                    {isEditMode ? "Ubah Detail Produk" : "Registrasi Koleksi Baru"}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleFormSubmit} className="space-y-4 pt-2">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Item</label>
+                    <Input name="namaProduk" value={formData.namaProduk} onChange={(e) => setFormData({...formData, namaProduk: e.target.value})} required className="rounded-xl h-9 text-xs border-slate-200" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Harga Retail (Rp)</label>
+                    <Input name="hargaProduk" type="number" value={formData.hargaProduk} onChange={(e) => setFormData({...formData, hargaProduk: e.target.value})} required className="rounded-xl h-9 text-xs border-slate-200" />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onClick={() => setIsDialogOpen(false)} className="px-4 h-9 bg-slate-50 text-slate-500 text-xs font-semibold rounded-xl">Batal</button>
+                    <button type="submit" className="px-4 h-9 bg-[#4E5631] text-white rounded-xl text-xs font-semibold">Simpan</button>
+                  </div>
+                </form>
+              </DialogContent>
             </Dialog>
           </div>
         </div>
@@ -351,51 +338,44 @@ const Dashboard = ({ products: propsProducts }) => {
             </div>
 
             <div className="space-y-2 pt-4">
-              <Dialog open={isBlastDialogOpen} onOpenChange={isGuest ? () => {} : setIsBlastDialogOpen}>
+              <Dialog open={isBlastDialogOpen} onOpenChange={setIsBlastDialogOpen}>
                 <button 
-                  onClick={() => isGuest ? null : setIsBlastDialogOpen(true)}
-                  className={`w-full h-9 rounded-xl text-xs font-semibold tracking-wide border transition-all ${
-                    isGuest ? "bg-slate-100 text-slate-300 border-transparent cursor-not-allowed" : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 cursor-pointer shadow-3xs"
-                  }`}
+                  onClick={() => setIsBlastDialogOpen(true)}
+                  className="w-full h-9 rounded-xl text-xs font-semibold tracking-wide border transition-all bg-white text-slate-700 border-slate-200 hover:border-slate-300 cursor-pointer shadow-3xs"
                 >
-                  {isGuest ? "Sistem Siaran Terkunci" : "Simulasi Siaran Promo"}
+                  Simulasi Siaran Promo
                 </button>
                 
-                {!isGuest && (
-                  <DialogContent className="sm:max-w-[380px] rounded-2xl bg-white p-6 border border-slate-100 font-quicksand">
-                    <DialogHeader>
-                      <DialogTitle className="text-base font-bold text-[#4E5631] font-playfair">Konfigurasi Target Massa</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={(e) => { e.preventDefault(); setIsBlastDialogOpen(false); }} className="space-y-4 pt-2">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Klaster Konsumen</label>
-                        <Select value={selectedSegment} onValueChange={setSelectedSegment}>
-                          <SelectTrigger className="rounded-xl h-9 text-xs border-slate-200"><SelectValue /></SelectTrigger>
-                          <SelectContent className="bg-white border-slate-200 rounded-xl">
-                            <SelectItem value="loyal" className="text-xs">Klaster Pelanggan Loyal</SelectItem>
-                            <SelectItem value="new" className="text-xs">Klaster Registrasi Baru</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Konten Pesan</label>
-                        <textarea value={blastTemplate} onChange={(e) => setBlastTemplate(e.target.value)} className="w-full text-xs p-3 border border-slate-200 rounded-xl h-20 focus:outline-none" />
-                      </div>
-                      <div className="flex justify-end gap-2 pt-2">
-                        <button type="button" onClick={() => setIsBlastDialogOpen(false)} className="px-4 h-9 bg-slate-100 text-slate-500 text-xs font-semibold rounded-xl">Batal</button>
-                        <button type="submit" className="px-4 h-9 bg-[#4E5631] text-white rounded-xl text-xs font-semibold">Tembakkan Konten</button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                )}
+                <DialogContent className="sm:max-w-[380px] rounded-2xl bg-white p-6 border border-slate-100 font-quicksand">
+                  <DialogHeader>
+                    <DialogTitle className="text-base font-bold text-[#4E5631] font-playfair">Konfigurasi Target Massa</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => { e.preventDefault(); setIsBlastDialogOpen(false); }} className="space-y-4 pt-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Klaster Konsumen</label>
+                      <Select value={selectedSegment} onValueChange={setSelectedSegment}>
+                        <SelectTrigger className="rounded-xl h-9 text-xs border-slate-200"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white border-slate-200 rounded-xl">
+                          <SelectItem value="loyal" className="text-xs">Klaster Pelanggan Loyal</SelectItem>
+                          <SelectItem value="new" className="text-xs">Klaster Registrasi Baru</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Konten Pesan</label>
+                      <textarea value={blastTemplate} onChange={(e) => setBlastTemplate(e.target.value)} className="w-full text-xs p-3 border border-slate-200 rounded-xl h-20 focus:outline-none" />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button type="button" onClick={() => setIsBlastDialogOpen(false)} className="px-4 h-9 bg-slate-100 text-slate-500 text-xs font-semibold rounded-xl">Batal</button>
+                      <button type="submit" className="px-4 h-9 bg-[#4E5631] text-white rounded-xl text-xs font-semibold">Tembakkan Konten</button>
+                    </div>
+                  </form>
+                </DialogContent>
               </Dialog>
 
               <button 
-                onClick={() => isGuest ? null : alert("Mengatur Segmen...")}
-                disabled={isGuest}
-                className={`w-full h-9 rounded-xl text-xs font-semibold text-white tracking-wide transition-all ${
-                  isGuest ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-[#4E5631] hover:bg-[#3d4426] cursor-pointer"
-                }`}
+                onClick={() => alert("Mengatur Segmen...")}
+                className="w-full h-9 rounded-xl text-xs font-semibold text-white tracking-wide transition-all bg-[#4E5631] hover:bg-[#3d4426] cursor-pointer"
               >
                 Kelola Segmentasi
               </button>
@@ -407,7 +387,7 @@ const Dashboard = ({ products: propsProducts }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* PRODUCT COLLECTION FEED (2 COLS WIDTH) */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 space-y-4">
+          <div ref={productSectionRef} className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 space-y-4 scroll-mt-6 transition-all duration-500">
             <div className="flex items-center justify-between border-b border-slate-50 pb-3">
               <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Kurasi Item Terpopuler</h3>
               <button 
@@ -437,16 +417,10 @@ const Dashboard = ({ products: propsProducts }) => {
 
             {/* INTEGRITY PIPELINE */}
             <div className="bg-white p-5 rounded-2xl border border-slate-100 space-y-3 relative overflow-hidden">
-              {isGuest && (
-                <div className="absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center p-4">
-                  <FiLock className="w-4 h-4 text-slate-300 mb-1" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Vault Protected</span>
-                </div>
-              )}
               <div className="flex justify-between items-center text-xs font-bold text-slate-700">
                 <span className="tracking-wide">Integritas Basis Data</span>
                 <button 
-                  disabled={isSyncing || isGuest} 
+                  disabled={isSyncing} 
                   onClick={handleSyncCRM} 
                   className={`text-[#4E5631] flex items-center gap-1.5 text-[11px] font-bold hover:opacity-80 transition-opacity ${isSyncing ? "animate-spin" : ""}`}
                 >

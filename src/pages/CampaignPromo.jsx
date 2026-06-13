@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { 
   FaSearch, FaFilter, FaPlus, FaTimes, FaSave, FaDownload, 
   FaEdit, FaTrashAlt, FaBullhorn, FaPercentage, FaUsers, 
@@ -41,6 +41,22 @@ const CampaignPromo = () => {
     status: "Aktif"
   };
   const [formData, setFormData] = useState(initialFormState);
+
+  // 🌟 REFERENCE MANAGEMENT (useRef)
+  const formRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  // Shortcut keyboard Ctrl+F / Cmd+F untuk auto-focus input pencarian
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // 2. METRICS CALCULATION (useMemo untuk efisiensi performa)
   const metrics = useMemo(() => {
@@ -110,6 +126,20 @@ const CampaignPromo = () => {
     handleCancel();
   };
 
+  const handleCreateClick = () => {
+    if (showForm && !editingCampaignId) {
+      handleCancel();
+    } else {
+      setShowForm(true);
+      setEditingCampaignId(null);
+      setFormData(initialFormState);
+      // Scroll halus ke arah form setelah rendering selesai
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
+  };
+
   const handleEditClick = (item, e) => {
     e.stopPropagation();
     setEditingCampaignId(item.id);
@@ -124,6 +154,11 @@ const CampaignPromo = () => {
       status: item.status || "Aktif"
     });
     setShowForm(true);
+    
+    // Scroll halus ke arah form target edit
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const handleDeleteClick = (id, e) => {
@@ -170,10 +205,10 @@ const CampaignPromo = () => {
               <FaDownload size={11} /> Ekspor Data (.csv)
             </button>
             <button 
-              onClick={() => (showForm ? handleCancel() : setShowForm(true))}
+              onClick={handleCreateClick}
               className="px-4 py-2 bg-[#4E5631] text-white rounded-xl text-xs font-semibold tracking-wider hover:bg-[#4E5631]/90 shadow-xs transition-all flex items-center gap-2 cursor-pointer"
             >
-              {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Tutup Form" : "Buat Campaign Baru"}
+              {showForm && !editingCampaignId ? <FaTimes /> : <FaPlus />} {showForm && !editingCampaignId ? "Tutup Form" : "Buat Campaign Baru"}
             </button>
           </div>
         </div>
@@ -226,7 +261,7 @@ const CampaignPromo = () => {
           
           {/* FORM INPUT CAMPAIGN */}
           {showForm && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+            <div ref={formRef} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs scroll-mt-6">
               <div className="border-b border-slate-100 pb-3 mb-4 flex justify-between items-start">
                 <div>
                   <h3 className="text-base font-bold font-playfair text-slate-800">
@@ -299,8 +334,9 @@ const CampaignPromo = () => {
             <div className="relative w-full sm:w-80 md:w-96 flex items-center">
               <FaSearch className="absolute left-3.5 text-slate-300 text-xs" />
               <input
+                ref={searchInputRef}
                 type="text"
-                placeholder="Cari nama promo atau jenis reward..."
+                placeholder="Cari nama promo (Tekan Ctrl+F)..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full h-9 bg-slate-50/50 border border-slate-200 rounded-xl pl-9 pr-4 text-xs font-medium focus:outline-none focus:border-[#4E5631]/50 focus:bg-white transition-all placeholder-slate-400"
@@ -517,7 +553,6 @@ const CampaignPromo = () => {
   );
 };
 
-// Sub-komponen ikon kecil lokal agar ramah kompilasi
 const CalendarCheckIcon = ({ className }) => (
   <svg className={`w-3 h-3 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
