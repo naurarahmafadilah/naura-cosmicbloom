@@ -6,8 +6,8 @@ import AuthLayout from "./layouts/AuthLayout";
 import Loading from "./components/Loading";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
-
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const MemberDashboard = lazy(() => import("./pages/MemberDashboard")); 
 
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopDetail = lazy(() => import("./pages/ShopDetail"));
@@ -16,7 +16,7 @@ const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const Orders = lazy(() => import("./pages/Orders"));
 const OrdersDetail = lazy(() => import("./pages/OrdersDetail"));
 
-const Membership = lazy(() => import("./pages/Membership"));
+const Membership = lazy(() => import("./pages/Membership")); 
 const MembershipsDetail = lazy(() => import("./pages/MembershipsDetail"));
 
 const Sale = lazy(() => import("./pages/Sale"));
@@ -42,14 +42,32 @@ const App = () => {
   return (
     <Suspense fallback={<Loading />}>
       <Routes>
-        {/* LANDING PAGE SEBELUM LOGIN */}
+        {/* ==========================================================
+            KELOMPOK RUTE UMUM & MEMBER (BEBAS AKSES TANPA LOGIN / PUBLIC)
+           ========================================================== */}
         <Route path="/" element={<LandingPage />} />
+        
+        {/* Diakses langsung kapan saja tanpa proteksi login */}
+        <Route path="/member" element={<MemberDashboard />} />
+        
+        {/* Rute Publik Lainnya */}
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/shop/:slug" element={<ShopDetail />} />
+        <Route path="/sale" element={<Sale />} />
+        <Route path="/sale/:slug" element={<SaleDetail />} />
+        <Route path="/collection" element={<Collection />} />
+        <Route path="/collection/:slug" element={<CollectionDetail />} />
+        <Route path="/contact" element={<Contact />} />
 
-        {/* MAIN LAYOUT SETELAH LOGIN */}
+        {/* ==========================================================
+            KELOMPOK INTERNAL / PRIVATE (MEMERLUKAN MAIN LAYOUT / LOGIN ADMIN)
+           ========================================================== */}
         <Route element={<MainLayout />}>
+          {/* Kunci: /dashboard dikembalikan ke sini agar berfungsi normal setelah login */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
 
+          {/* Kelompok Manajemen Data / Admin CRM */}
           <Route path="/customer-crm" element={<CustomerCRM />} />
           <Route path="/campaign" element={<CampaignPromo />} />
           <Route path="/feedback" element={<FeedbackManagement />} />
@@ -58,30 +76,27 @@ const App = () => {
           <Route path="/sales-history" element={<CashierHistory />} />
           <Route path="/manage-users" element={<ManageUsers />} />
 
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/sale" element={<Sale />} />
+          {/* Transaksi Riwayat Akun */}
           <Route path="/orders" element={<Orders />} />
-          <Route path="/collection" element={<Collection />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/orders/:id" element={<OrdersDetail />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/wishlist/:id" element={<WishlistDetail />} />
 
+          {/* Pengaturan Master Data Membership */}
           <Route path="/membership" element={<Membership />} />
           <Route path="/membership/:id" element={<MembershipsDetail />} />
-
-          <Route path="/shop/:slug" element={<ShopDetail />} />
-          <Route path="/sale/:slug" element={<SaleDetail />} />
-          <Route path="/orders/:id" element={<OrdersDetail />} />
-          <Route path="/collection/:slug" element={<CollectionDetail />} />
-          <Route path="/wishlist/:id" element={<WishlistDetail />} />
         </Route>
 
-        {/* AUTH LAYOUT */}
+        {/* ==========================================================
+            AUTH LAYOUT
+           ========================================================== */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot" element={<Forgot />} />
         </Route>
 
+        {/* PAGE NOT FOUND */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
