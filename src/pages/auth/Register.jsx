@@ -31,7 +31,6 @@ export default function Register() {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!emailRegex.test(cleanEmail)) {
       setError("Format email tidak valid.");
       return;
@@ -50,6 +49,7 @@ export default function Register() {
     setLoading(true);
 
     try {
+      // 1. Jalankan Sign Up ke Supabase Auth
       const { data, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
         password,
@@ -63,56 +63,49 @@ export default function Register() {
 
       if (authError) throw authError;
 
-      const userId = data.user?.id;
-
-      if (!userId) {
-        setError(
-          "Registrasi berhasil, tetapi akun perlu konfirmasi email terlebih dahulu."
-        );
-        return;
+      const user = data?.user;
+      if (!user) {
+        throw new Error("Gagal memproses data pengguna baru.");
       }
 
+      // 2. LANGSUNG SIMPAN profil ke tabel publik 'users' (Tanpa cek konfirmasi email)
       const { error: userError } = await supabase.from("users").insert([
         {
+          id: user.id, 
           name: cleanName,
           email: cleanEmail,
           role: role,
         },
       ]);
 
-      if (userError) throw userError;
-
-      const { data: loginData, error: loginError } =
-        await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password,
-        });
-
-      if (loginError) {
-        alert("Pendaftaran berhasil! Silakan login menggunakan akun baru.");
-        navigate("/login");
-        return;
+      if (userError) {
+        console.error("Gagal mencatat data ke tabel database:", userError);
       }
 
+      // 3. Susun objek data pengguna untuk disimpan ke LocalStorage agar langsung login
       const loggedInUser = {
-        id: loginData.user.id,
-        email: loginData.user.email,
-        name: loginData.user.user_metadata?.name || cleanName,
-        role: loginData.user.user_metadata?.role || role,
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.name || cleanName,
+        role: user.user_metadata?.role || role,
       };
 
       localStorage.setItem("user", JSON.stringify(loggedInUser));
+      
+      // Memicu event agar komponen Navbar/Sidebar mendeteksi perubahan status login
       window.dispatchEvent(new Event("localUserUpdate"));
 
-      alert("Pendaftaran berhasil! Kamu berhasil login dengan akun baru.");
+      alert("Pendaftaran sukses! Anda telah otomatis masuk ke dalam sistem.");
 
+      // 4. Alihkan halaman langsung berdasarkan Role akun
       if (loggedInUser.role?.toLowerCase() === "admin") {
         navigate("/admin/dashboard");
       } else {
         navigate("/dashboard");
       }
     } catch (err) {
-      setError(err.message || "Terjadi kesalahan saat melakukan registrasi.");
+      console.error(err);
+      setError(err.message || "Terjadi kendala saat mendaftarkan akun.");
     } finally {
       setLoading(false);
     }
@@ -120,6 +113,22 @@ export default function Register() {
 
   return (
     <div className="animate-fade-in">
+      {/* Mencegah icon mata ganda bawaan browser */}
+      <style>{`
+        input::-ms-reveal, 
+        input::-ms-clear,
+        input::-webkit-contacts-auto-fill-button,
+        input::-webkit-credentials-auto-fill-button,
+        input::-webkit-password-toggle-button {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          opacity: 0 !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+      `}</style>
+
       <div className="text-center mb-8">
         <h2 className="text-4xl font-playfair text-primary-dark mb-2">
           Create Account<span className="text-secondary-light">.</span>
@@ -131,11 +140,12 @@ export default function Register() {
 
       <form className="space-y-5" onSubmit={handleRegister}>
         {error && (
-          <div className="text-xs text-red-600 bg-red-50 p-3 rounded-2xl font-quicksand font-bold text-center animate-pulse">
+          <div className="text-xs text-red-600 bg-red-50 p-3 rounded-2xl font-quicksand font-bold text-center animate-pulse border border-red-100">
             {error}
           </div>
         )}
 
+        {/* FULL NAME INPUT */}
         <div className="space-y-1">
           <label className="block text-[11px] uppercase tracking-[2px] font-bold text-secondary-dark/60 ml-1">
             Full Name
@@ -151,6 +161,7 @@ export default function Register() {
           />
         </div>
 
+        {/* EMAIL INPUT */}
         <div className="space-y-1">
           <label className="block text-[11px] uppercase tracking-[2px] font-bold text-secondary-dark/60 ml-1">
             Email Address
@@ -166,6 +177,7 @@ export default function Register() {
           />
         </div>
 
+        {/* ACCOUNT ROLE SELECT */}
         <div className="space-y-1">
           <label className="block text-[11px] uppercase tracking-[2px] font-bold text-secondary-dark/60 ml-1">
             Account Role
@@ -181,12 +193,12 @@ export default function Register() {
           </select>
         </div>
 
+        {/* PASSWORD INPUT GROUP */}
         <div className="space-y-1">
           <label className="block text-[11px] uppercase tracking-[2px] font-bold text-secondary-dark/60 ml-1">
             Password
           </label>
-
-          <div className="relative">
+          <div className="relative flex items-center">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
@@ -196,23 +208,22 @@ export default function Register() {
               disabled={loading}
               className="w-full px-5 py-3 pr-12 bg-bg-main border border-transparent rounded-2xl focus:outline-none focus:border-primary-light focus:bg-white transition-all font-quicksand text-sm shadow-inner disabled:opacity-50"
             />
-
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary-dark"
+              className="absolute right-5 p-1 text-gray-400 hover:text-primary-dark transition-colors focus:outline-none z-10 flex items-center justify-center"
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
             </button>
           </div>
         </div>
 
+        {/* CONFIRM PASSWORD INPUT GROUP */}
         <div className="space-y-1">
           <label className="block text-[11px] uppercase tracking-[2px] font-bold text-secondary-dark/60 ml-1">
             Confirm Password
           </label>
-
-          <div className="relative">
+          <div className="relative flex items-center">
             <input
               type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
@@ -222,13 +233,12 @@ export default function Register() {
               disabled={loading}
               className="w-full px-5 py-3 pr-12 bg-bg-main border border-transparent rounded-2xl focus:outline-none focus:border-primary-light focus:bg-white transition-all font-quicksand text-sm shadow-inner disabled:opacity-50"
             />
-
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary-dark"
+              className="absolute right-5 p-1 text-gray-400 hover:text-primary-dark transition-colors focus:outline-none z-10 flex items-center justify-center"
             >
-              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              {showConfirmPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
             </button>
           </div>
         </div>

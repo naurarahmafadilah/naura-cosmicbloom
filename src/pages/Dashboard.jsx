@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"; 
 import { useNavigate } from "react-router-dom"; 
+import { supabase } from "../lib/supabase"; // Pastikan path ke file supabase.js Anda sudah benar
 
 // ==========================================
 // SHADCN UI & RECHARTS INTEGRATION
@@ -32,7 +33,7 @@ import ReviewHighlightCard from "../components/ReviewHighlightCard";
 import StockAlertCard from "../components/StockAlertCard"; 
 import Footer from "../components/Footer";
 
-import { FiShield, FiPlus, FiRefreshCw, FiClock, FiCalendar } from "react-icons/fi";
+import { FiShield, FiPlus, FiRefreshCw, FiClock, FiCalendar, FiLogOut } from "react-icons/fi";
 
 const crmDataQuarters = {
   Q1: [
@@ -59,15 +60,19 @@ const Dashboard = ({ products: propsProducts }) => {
   const [localProducts, setLocalProducts] = useState(defaultProductsMock);
   const activeProducts = propsProducts && propsProducts.length > 0 ? propsProducts : localProducts;
   
-  const [currentUser, setCurrentUser] = useState(() => JSON.parse(localStorage.getItem("user")) || null);
+  // Amankan state user agar tidak memicu crash layar putih jika data null
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || null;
+    } catch {
+      return null;
+    }
+  });
 
-  // State untuk penanganan Tanggal dan Jam Real-time
   const [currentTime, setCurrentTime] = useState(new Date());
-
-  // Referensi container daftar produk
   const productSectionRef = useRef(null);
 
-  // Effect untuk memperbarui Jam setiap detik (Interval 1000ms)
+  // Effect untuk memperbarui Jam Real-time
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -75,8 +80,16 @@ const Dashboard = ({ products: propsProducts }) => {
     return () => clearInterval(timer);
   }, []);
 
+  // Sinkronisasi data user dari localStorage
   useEffect(() => {
-    const handleStorageChange = () => setCurrentUser(JSON.parse(localStorage.getItem("user")));
+    const handleStorageChange = () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem("user"));
+        setCurrentUser(userData);
+      } catch (err) {
+        console.error("Error parsing user data:", err);
+      }
+    };
     const interval = setInterval(handleStorageChange, 1000); 
     return () => clearInterval(interval);
   }, []);
@@ -118,7 +131,14 @@ const Dashboard = ({ products: propsProducts }) => {
   const handleOpenEditMode = (product, index) => {
     setIsEditMode(true);
     setSelectedProductIndex(index);
-    setFormData({ namaProduk: product.name, hargaProduk: product.price.replace(/\./g, ""), kategoriProduk: "", gambarProduk: product.img });
+    // BAGIAN DIPERBAIKI: Mengubah .replace(/\./g, "") menjadi .replace(/./g, "") 
+    // atau menggunakan metode pembersihan angka yang lebih aman untuk string nominal.
+    setFormData({ 
+      namaProduk: product.name, 
+      hargaProduk: product.price.replace(/[^0-9]/g, ""), 
+      kategoriProduk: "", 
+      gambarProduk: product.img 
+    });
     setIsDialogOpen(true);
   };
 
@@ -141,7 +161,6 @@ const Dashboard = ({ products: propsProducts }) => {
       const newProd = { id: Date.now(), name: formData.namaProduk, price: formattedPrice, img: formData.gambarProduk || fallbackImg };
       setLocalProducts([newProd, ...localProducts]);
 
-      // Otomatis scroll ke elemen produk setelah ditambahkan
       setTimeout(() => {
         productSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 100);
@@ -149,7 +168,14 @@ const Dashboard = ({ products: propsProducts }) => {
     setIsDialogOpen(false);
   };
 
-  // Formatter String untuk Hari, Tanggal, Bulan, Tahun (Lokal Indonesia)
+  const handleLogout = async () => {
+    localStorage.removeItem("user");
+    await supabase.auth.signOut();
+    window.dispatchEvent(new Event("localUserUpdate"));
+    navigate("/login");
+  };
+
+  // Formatter String untuk Hari & Tanggal
   const formattedDate = currentTime.toLocaleDateString("id-ID", {
     weekday: "long",
     year: "numeric",
@@ -157,12 +183,31 @@ const Dashboard = ({ products: propsProducts }) => {
     day: "numeric"
   });
 
-  // Formatter String untuk Jam Menit Detik
+  // Formatter String untuk Jam
   const formattedTime = currentTime.toLocaleTimeString("id-ID", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit"
   });
+
+  // ==========================================
+  // SAFETY GUARD (MENCEGAH BLANK PAGE JIKA BELUM LOGIN)
+  // ==========================================
+  if (!currentUser) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-50 font-quicksand p-4">
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 text-center max-w-sm space-y-4">
+          <p className="text-sm font-semibold text-slate-600">Sesi Anda telah berakhir atau belum terautentikasi.</p>
+          <button 
+            onClick={() => navigate("/login")}
+            className="w-full bg-[#4E5631] text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            Masuk Ke Akun
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DashboardContainer>
@@ -172,7 +217,7 @@ const Dashboard = ({ products: propsProducts }) => {
         <Alert className="border-none rounded-2xl py-3 px-5 bg-amber-50/70 text-amber-900 flex items-center gap-3 shadow-3xs">
           <FiShield size={14} className="text-amber-700 shrink-0" />
           <AlertDescription className="text-xs font-medium font-quicksand tracking-wide">
-            Sistem Keamanan: Fitur mutasi repositori produk, pipeline pembaruan CRM, dan otomatisasi penyiaran promo berjalan normal di bawah otoritas sesi penuh.
+            Sistem Keamanan: Fitur mutasi repositori produk, pipeline pembaruan CRM, dan otomatisasi penyiaran promo berjalan normal di bawah otoritas sesi penuh ({currentUser.role || "Administrator"}).
           </AlertDescription>
         </Alert>
 
@@ -194,11 +239,10 @@ const Dashboard = ({ products: propsProducts }) => {
 
             <div className="flex items-center gap-3">
               <h1 className="text-2xl sm:text-3xl font-playfair tracking-wide text-[#4E5631]">
-                Executive Suite Dashboard
+                Selamat Datang, {currentUser.name || "User"}
               </h1>
             </div>
             
-            {/* AKSEN GARIS ESTETIK VELOURA */}
             <div className="h-[2px] w-14 bg-[#A47174] mt-2"></div>
             
             <p className="text-xs text-slate-500 font-quicksand font-medium tracking-wide pt-1.5 max-w-2xl">
@@ -206,14 +250,8 @@ const Dashboard = ({ products: propsProducts }) => {
             </p>
           </div>
 
-          {/* ACTION BUTTONS */}
+          {/* ACTION BUTTONS & LOGOUT */}
           <div className="flex items-center gap-3 self-start md:self-end">
-            <button 
-              onClick={() => alert("📥 Report diunduh.")}
-              className="h-9 px-4 rounded-xl text-xs font-semibold tracking-wide border transition-all flex items-center gap-2 bg-white text-slate-600 border-slate-200 hover:bg-slate-50 cursor-pointer shadow-3xs"
-            >
-              Ekspor Laporan
-            </button>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <button 

@@ -1,5 +1,6 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom"; // 🌟 Tambahkan useNavigate
+import { supabase } from "../lib/supabase"; // 🌟 Sesuaikan path ke lib supabase Anda jika diperlukan
 import { 
   FaHome, 
   FaCrown, 
@@ -9,7 +10,6 @@ import {
   FaTag,
   FaIdCard 
 } from "react-icons/fa";
-// Ganti baris import yang salah sebelumnya dengan ini:
 import { 
   FiUsers, 
   FiTrendingUp, 
@@ -19,10 +19,12 @@ import {
   FiPackage,    
   FiTruck,      
   FiShoppingBag,
-  FiShield // 🌟 Sekarang di-import dari package yang benar
-} from "react-icons/fi"; // <-- Pastikan tetap "react-icons/fi"
+  FiShield 
+} from "react-icons/fi";
 
 const Sidebar = () => {
+  const navigate = useNavigate(); // 🌟 Definisikan hook navigasi
+
   // Utility class menu utama
   const menuClass = ({ isActive }) =>
     `group flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 font-quicksand text-xs tracking-wide select-none ${
@@ -31,11 +33,26 @@ const Sidebar = () => {
         : "text-primary-dark/70 hover:bg-bg-soft hover:text-primary-dark"
     }`;
 
+  // 🌟 Handle logout sistem secara bersih
+  const handleSidebarLogout = async () => {
+    // 1. Bersihkan data bypass dari penyimpanan lokal browser
+    localStorage.removeItem("user");
+    
+    // 2. Putus sesi resmi di server Supabase (jika ada)
+    await supabase.auth.signOut();
+    
+    // 3. Picu ulang event listener agar layout tahu user sudah keluar
+    window.dispatchEvent(new Event("localUserUpdate"));
+    
+    // 4. Tendang kembali ke portal login
+    navigate("/login", { replace: true });
+  };
+
   const adminSections = [
     {
       title: "Utama",
       items: [
-        { name: "Beranda", path: "/", icon: <FaHome />, end: true }
+        { name: "Beranda", path: "/dashboard", icon: <FaHome />, end: true } // 🌟 Ubah "/" ke "/dashboard" jika beranda admin Anda di sana
       ]
     },
     {
@@ -65,7 +82,6 @@ const Sidebar = () => {
         { name: "Favorit", path: "/wishlist", icon: <FaHeart /> }
       ]
     },
-    // 🌟 SEKSI BARU: SISTEM & SECURITY CONTROL
     {
       title: "Sistem & Otentikasi",
       items: [
@@ -150,8 +166,9 @@ const Sidebar = () => {
           )}
         </NavLink>
         
+        {/* 🌟 Tombol Keluar Aktif dengan Handler Fungsi Bersih */}
         <button 
-          onClick={() => alert("Keluar sistem...")} 
+          onClick={handleSidebarLogout} 
           className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide text-secondary-light hover:bg-bg-soft hover:text-secondary-dark transition-all duration-300 text-left font-quicksand cursor-pointer"
         >
           <FiLogOut className="text-sm shrink-0" />

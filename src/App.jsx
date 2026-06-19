@@ -3,23 +3,21 @@ import { lazy, Suspense } from "react";
 
 import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
-import Loading from "./components/Loading"; 
+import Loading from "./components/Loading";
 
-// MAIN PAGES (LAZY)
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const DashboardGuest = lazy(() => import("./pages/GuestDashboard")); 
 
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopDetail = lazy(() => import("./pages/ShopDetail"));
 const Collection = lazy(() => import("./pages/Collection"));
 const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const Orders = lazy(() => import("./pages/Orders"));
-// Pastikan nama file di folder Anda adalah OrdersDetail.jsx jika baris bawah ini merujuk ke sana
-const OrdersDetail = lazy(() => import("./pages/OrdersDetail")); 
+const OrdersDetail = lazy(() => import("./pages/OrdersDetail"));
 
-// INTEGRASI LAZY IMPORT MEMBERSHIP
-const Membership = lazy(() => import("./pages/Membership")); 
-const MembershipsDetail = lazy(() => import("./pages/MembershipsDetail")); 
+const Membership = lazy(() => import("./pages/Membership"));
+const MembershipsDetail = lazy(() => import("./pages/MembershipsDetail"));
 
 const Sale = lazy(() => import("./pages/Sale"));
 const SaleDetail = lazy(() => import("./pages/SaleDetail"));
@@ -28,18 +26,14 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const WishlistDetail = lazy(() => import("./pages/WishlistDetail"));
 
-// MANAGEMENT & CRM PAGES (LAZY IMPORT)
 const CustomerCRM = lazy(() => import("./pages/CustomerCRM"));
 const CampaignPromo = lazy(() => import("./pages/CampaignPromo"));
-const FeedbackManagement = lazy(() => import("./pages/FeedbackManagement")); 
-const StockManagement = lazy(() => import("./pages/StockManagement")); 
+const FeedbackManagement = lazy(() => import("./pages/FeedbackManagement"));
+const StockManagement = lazy(() => import("./pages/StockManagement"));
 const SupplierManagement = lazy(() => import("./pages/SupplierManagement"));
-const CashierHistory = lazy(() => import("./pages/CashierHistory")); 
-
-// 🌟 INTEGRASI LAZY IMPORT SECURITY & SYSTEM CONTROL
+const CashierHistory = lazy(() => import("./pages/CashierHistory"));
 const ManageUsers = lazy(() => import("./pages/ManageUsers"));
 
-// AUTH PAGES (LAZY)
 const Login = lazy(() => import("./pages/auth/Login"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Forgot = lazy(() => import("./pages/auth/Forgot"));
@@ -48,37 +42,32 @@ const App = () => {
   return (
     <Suspense fallback={<Loading />}>
       <Routes>
-        {/* MAIN LAYOUT GROUP */}
-        <Route element={<MainLayout />}>
-          {/* Dashboard Admin Utama & Guest */}
-          <Route path="/" element={<Dashboard />} /> 
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/dashboard-guest" element={<DashboardGuest />} />
+        {/* LANDING PAGE SEBELUM LOGIN */}
+        <Route path="/" element={<LandingPage />} />
 
-          {/* 🌟 RUTE MANAJEMEN & CRM (VELOURA HUB) */}
+        {/* MAIN LAYOUT SETELAH LOGIN */}
+        <Route element={<MainLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+
           <Route path="/customer-crm" element={<CustomerCRM />} />
           <Route path="/campaign" element={<CampaignPromo />} />
-          <Route path="/feedback" element={<FeedbackManagement />} /> 
+          <Route path="/feedback" element={<FeedbackManagement />} />
           <Route path="/inventory" element={<StockManagement />} />
           <Route path="/suppliers" element={<SupplierManagement />} />
           <Route path="/sales-history" element={<CashierHistory />} />
-
-          {/* 🌟 RUTE SISTEM & SECURITY CONTROL */}
           <Route path="/manage-users" element={<ManageUsers />} />
 
-          {/* Rute Toko & Navigasi Publik/Utama */}
           <Route path="/shop" element={<Shop />} />
           <Route path="/sale" element={<Sale />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/wishlist" element={<Wishlist />} />
-          
-          {/* RUTE MASTER & DETAIL MEMBERSHIP */}
+
           <Route path="/membership" element={<Membership />} />
           <Route path="/membership/:id" element={<MembershipsDetail />} />
 
-          {/* DYNAMIC ROUTES (DETAIL) */}
           <Route path="/shop/:slug" element={<ShopDetail />} />
           <Route path="/sale/:slug" element={<SaleDetail />} />
           <Route path="/orders/:id" element={<OrdersDetail />} />
@@ -86,14 +75,13 @@ const App = () => {
           <Route path="/wishlist/:id" element={<WishlistDetail />} />
         </Route>
 
-        {/* AUTH LAYOUT GROUP */}
+        {/* AUTH LAYOUT */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot" element={<Forgot />} />
         </Route>
 
-        {/* 404 NOT FOUND */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

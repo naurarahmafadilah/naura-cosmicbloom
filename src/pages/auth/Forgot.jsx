@@ -54,6 +54,23 @@ export default function UpdatePassword() {
 
   return (
     <div className="animate-fade-in max-w-sm mx-auto">
+      {/* SOLUSI TOTAL: Blok CSS ini memaksa semua jenis indikator mata, tombol bersihkan text, dan 
+          ekstensi autofill dari Google Chrome, Edge, Safari, dan iCloud Keychain untuk menghilang secara absolut */}
+      <style>{`
+        input::-ms-reveal, 
+        input::-ms-clear,
+        input::-webkit-contacts-auto-fill-button,
+        input::-webkit-credentials-auto-fill-button,
+        input::-webkit-password-toggle-button {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          opacity: 0 !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+      `}</style>
+
       <div className="text-center mb-8">
         <h2 className="text-4xl font-playfair text-primary-dark mb-2">
           New Password<span className="text-secondary-light">.</span>
@@ -75,7 +92,7 @@ export default function UpdatePassword() {
             Password Baru
           </label>
 
-          <div className="relative">
+          <div className="relative flex items-center">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
@@ -89,9 +106,9 @@ export default function UpdatePassword() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary-dark"
+              className="absolute right-5 p-1 text-gray-400 hover:text-primary-dark transition-colors focus:outline-none z-10 flex items-center justify-center"
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
             </button>
           </div>
         </div>
@@ -101,7 +118,7 @@ export default function UpdatePassword() {
             Konfirmasi Password Baru
           </label>
 
-          <div className="relative">
+          <div className="relative flex items-center">
             <input
               type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
@@ -115,9 +132,9 @@ export default function UpdatePassword() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary-dark"
+              className="absolute right-5 p-1 text-gray-400 hover:text-primary-dark transition-colors focus:outline-none z-10 flex items-center justify-center"
             >
-              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              {showConfirmPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
             </button>
           </div>
         </div>
