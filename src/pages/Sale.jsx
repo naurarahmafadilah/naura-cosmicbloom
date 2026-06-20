@@ -78,16 +78,16 @@ const Sale = () => {
         return () => clearInterval(timer);
     }, [isEventActive]);
 
-    // Fitur: Auto-Calculate Diskon saat admin mengisi Harga Coret dan Harga Baru
+    // Fitur: Auto-Calculate Diskon saat admin mengisi Harga Coret dan Harga Baru (Berlaku untuk Tambah & Edit)
     useEffect(() => {
         const oldNum = parseInt(formData.oldPrice) || 0;
         const newNum = parseInt(formData.price) || 0;
 
-        if (oldNum > 0 && newNum > 0 && oldNum > newNum && !editingId) {
+        if (oldNum > 0 && newNum > 0 && oldNum > newNum) {
             const calculated = Math.round(((oldNum - newNum) / oldNum) * 100);
             setFormData(prev => ({ ...prev, discount: `${calculated}%` }));
         }
-    }, [formData.oldPrice, formData.price, editingId]);
+    }, [formData.oldPrice, formData.price]);
 
     const formatTime = (num) => String(num).padStart(2, "0");
 
@@ -189,11 +189,11 @@ const Sale = () => {
                 {/* HEADER CONTROL */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/60 pb-6 mb-8">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-playfair tracking-wide text-[#4E5631]">
+                        <h1 className="text-2xl sm:text-3xl font-playfair font-normal tracking-wide text-[#4E5631]">
                             Pusat Kendali Promosi & Penjualan Terkurasi
                         </h1>
                         <div className="h-[2px] w-14 bg-[#A47174] mt-2"></div>
-                        <p className="text-xs text-slate-500 font-medium tracking-wide mt-3 max-w-2xl">
+                        <p className="text-xs text-slate-500 font-light tracking-wide mt-3 max-w-2xl">
                             Panel sinkronisasi strategi markdowns musiman Veloura. Kelola aktivasi potongan harga, otorisasi kode promosi eksklusif, serta kurasi label harga khusus untuk periode penjualan tertentu.
                         </p>
                     </div>
@@ -202,7 +202,7 @@ const Sale = () => {
                         {/* SAKLAR INTERAKTIF EVENT */}
                         <button
                             onClick={() => setIsEventActive(!isEventActive)}
-                            className={`px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 cursor-pointer ${isEventActive
+                            className={`px-4 py-2.5 rounded-xl text-xs font-medium tracking-wider transition-all duration-300 flex items-center gap-2 cursor-pointer ${isEventActive
                                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                                     : "bg-rose-50 text-rose-700 border border-rose-200"
                                 }`}
@@ -213,7 +213,7 @@ const Sale = () => {
 
                         <button
                             onClick={() => (showForm ? handleCancel() : setShowForm(true))}
-                            className="px-5 py-2.5 bg-[#4E5631] text-white rounded-xl text-xs font-bold tracking-wider hover:bg-[#4E5631]/90 shadow-sm transition-all duration-300 flex items-center gap-2 cursor-pointer uppercase"
+                            className="px-5 py-2.5 bg-[#4E5631] text-white rounded-xl text-xs font-medium tracking-wider hover:bg-[#4E5631]/90 shadow-sm transition-all duration-300 flex items-center gap-2 cursor-pointer uppercase"
                         >
                             {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Tutup Form" : "Tambah Promo"}
                         </button>
@@ -225,22 +225,22 @@ const Sale = () => {
                     <div className="bg-white p-4 rounded-xl border border-border-subtle shadow-xs flex items-center gap-4">
                         <div className="p-3 bg-slate-50 text-[#4E5631] rounded-lg border border-border-subtle"><FaTag /></div>
                         <div>
-                            <p className="text-[10px] uppercase font-bold text-primary-dark/40 tracking-wider">Total Item Aktif</p>
-                            <p className="text-lg font-bold text-slate-800">{promotions.length} Produk</p>
+                            <p className="text-[10px] uppercase font-medium text-primary-dark/40 tracking-wider">Total Item Aktif</p>
+                            <p className="text-lg font-light text-slate-800">{promotions.length} Produk</p>
                         </div>
                     </div>
                     <div className="bg-white p-4 rounded-xl border border-border-subtle shadow-xs flex items-center gap-4">
                         <div className="p-3 bg-slate-50 text-[#A47174] rounded-lg border border-border-subtle"><FaPercentage /></div>
                         <div>
-                            <p className="text-[10px] uppercase font-bold text-primary-dark/40 tracking-wider">Rata-Rata Diskon</p>
-                            <p className="text-lg font-bold text-slate-800">{avgDiscount}% Potongan</p>
+                            <p className="text-[10px] uppercase font-medium text-primary-dark/40 tracking-wider">Rata-Rata Diskon</p>
+                            <p className="text-lg font-light text-slate-800">{avgDiscount}% Potongan</p>
                         </div>
                     </div>
                     <div className="bg-white p-4 rounded-xl border border-border-subtle shadow-xs flex items-center gap-4">
                         <div className="p-3 bg-slate-50 text-emerald-700 rounded-lg border border-border-subtle"><FaChartPie /></div>
                         <div>
-                            <p className="text-[10px] uppercase font-bold text-primary-dark/40 tracking-wider">Katalog Diskon Besar</p>
-                            <p className="text-lg font-bold text-slate-800">{promotions.filter(i => parseInt(i.discount) >= 30).length} Item (&gt;=30%)</p>
+                            <p className="text-[10px] uppercase font-medium text-primary-dark/40 tracking-wider">Katalog Diskon Besar</p>
+                            <p className="text-lg font-light text-slate-800">{promotions.filter(i => parseInt(i.discount) >= 30).length} Item (&gt;=30%)</p>
                         </div>
                     </div>
                 </div>
@@ -253,10 +253,10 @@ const Sale = () => {
                         <div className="bg-white p-6 rounded-xl border border-border-subtle shadow-sm animate-fade-in">
                             <div className="border-b border-bg-soft pb-3 mb-4 flex justify-between items-start">
                                 <div>
-                                    <h3 className="text-base font-bold font-playfair text-primary-dark">
+                                    <h3 className="text-base font-normal font-playfair text-primary-dark">
                                         {editingId ? "Ubah Konfigurasi Kampanye Diskon" : "Registrasi Kampanye Baru"}
                                     </h3>
-                                    <p className="text-[11px] text-primary-dark/50 font-quicksand">
+                                    <p className="text-[11px] text-primary-dark/50 font-quicksand font-light">
                                         💡 *Tips: Masukkan MSRP Awal dan Harga Diskon, maka Sistem akan menghitung persentase label diskon secara otomatis!*
                                     </p>
                                 </div>
@@ -275,8 +275,8 @@ const Sale = () => {
                                 </div>
 
                                 <div className="flex justify-end gap-2 pt-3 border-t border-bg-soft">
-                                    <button type="button" onClick={handleCancel} className="px-4 py-2 bg-bg-soft text-primary-dark/80 rounded-xl text-xs font-bold hover:bg-border-subtle">Batal</button>
-                                    <button type="submit" className="px-4 py-2 bg-[#4E5631] text-white rounded-xl text-xs font-bold hover:opacity-90 shadow-xs flex items-center gap-1.5 uppercase tracking-wider"><FaSave size={11} /> Simpan Katalog</button>
+                                    <button type="button" onClick={handleCancel} className="px-4 py-2 bg-bg-soft text-primary-dark/80 rounded-xl text-xs font-medium hover:bg-border-subtle">Batal</button>
+                                    <button type="submit" className="px-4 py-2 bg-[#4E5631] text-white rounded-xl text-xs font-medium hover:opacity-90 shadow-xs flex items-center gap-1.5 uppercase tracking-wider"><FaSave size={11} /> Simpan Katalog</button>
                                 </div>
                             </form>
                         </div>
@@ -285,13 +285,13 @@ const Sale = () => {
                     {/* PROMO BANNER DENGAN KONTROL TIMEOUT */}
                     <div className={`${isEventActive ? "bg-primary-dark" : "bg-slate-400"} rounded-xl p-8 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between transition-colors duration-500 border border-white/10`}>
                         <div className="relative z-10 space-y-1.5 text-center md:text-left">
-                            <div className="inline-flex items-center gap-2 text-secondary-light text-[10px] font-bold uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded-md border border-white/10">
+                            <div className="inline-flex items-center gap-2 text-secondary-light text-[10px] font-medium uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded-md border border-white/10">
                                 <FaTag /> LIVE MARKETING SYSTEM
                             </div>
-                            <h2 className="text-3xl font-playfair tracking-wide">
+                            <h2 className="text-3xl font-playfair font-normal tracking-wide">
                                 Etalase Kampanye <span className="italic text-secondary-light">Flash Sale</span>
                             </h2>
-                            <p className="font-quicksand text-xs text-white/70">
+                            <p className="font-quicksand text-xs font-light text-white/70">
                                 Status modul hitung mundur saat ini sedang {isEventActive ? "memancarkan data ke etasale pembeli." : "dihentikan sementara oleh admin."}
                             </p>
                         </div>
@@ -299,8 +299,8 @@ const Sale = () => {
                         {/* Timer Box Glassmorphism */}
                         <div className="mt-6 md:mt-0 relative z-10 font-quicksand shrink-0">
                             <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-xl border border-white/10 min-w-[200px]">
-                                <p className="text-[9px] uppercase tracking-[3px] text-center text-white/60 mb-1.5 font-bold">Sisa Waktu Event</p>
-                                <p className="text-xl font-mono font-bold tracking-widest text-center text-white flex justify-center gap-1">
+                                <p className="text-[9px] uppercase tracking-[3px] text-center text-white/60 mb-1.5 font-medium">Sisa Waktu Event</p>
+                                <p className="text-xl font-mono font-light tracking-widest text-center text-white flex justify-center gap-1">
                                     {isEventActive ? (
                                         <>
                                             <span>{formatTime(timeLeft.hours)}</span>:
@@ -308,7 +308,7 @@ const Sale = () => {
                                             <span className="text-secondary-light">{formatTime(timeLeft.seconds)}</span>
                                         </>
                                     ) : (
-                                        <span className="text-xs tracking-normal uppercase text-white/40">PAUSED</span>
+                                        <span className="text-xs tracking-normal uppercase text-white/40 font-medium">PAUSED</span>
                                     )}
                                 </p>
                             </div>
@@ -325,23 +325,23 @@ const Sale = () => {
                                 placeholder="Cari nama koleksi promo secara instan..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full h-9 bg-bg-soft border border-border-subtle rounded-xl pl-9 pr-4 text-xs font-medium focus:outline-none focus:border-[#4E5631]/60 transition-colors placeholder-primary-dark/30"
+                                className="w-full h-9 bg-bg-soft border border-border-subtle rounded-xl pl-9 pr-4 text-xs font-light focus:outline-none focus:border-[#4E5631]/60 transition-colors placeholder-primary-dark/30"
                             />
                             {searchQuery && (
-                                <button onClick={() => setSearchQuery("")} className="absolute right-3 text-primary-dark/40 hover:text-primary-dark text-[10px]">CLEAR</button>
+                                <button onClick={() => setSearchQuery("")} className="absolute right-3 text-primary-dark/40 hover:text-primary-dark text-[10px] font-medium">CLEAR</button>
                             )}
                         </div>
 
                         {/* SELECT DROPDOWN SHADCN */}
                         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                            <span className="text-[10px] font-bold text-primary-dark/40 uppercase tracking-wider">Filter Besaran:</span>
+                            <span className="text-[10px] font-medium text-primary-dark/40 uppercase tracking-wider">Filter Besaran:</span>
                             <Select value={selectedDiscount} onValueChange={setSelectedDiscount}>
-                                <SelectTrigger className="w-full sm:w-[180px] h-9 bg-white border border-border-subtle rounded-xl text-xs font-bold text-slate-900 shadow-xs focus:ring-0">
+                                <SelectTrigger className="w-full sm:w-[180px] h-9 bg-white border border-border-subtle rounded-xl text-xs font-medium text-slate-900 shadow-xs focus:ring-0">
                                     <SelectValue placeholder="Pilih Potongan" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-white border border-border-subtle font-quicksand z-[9999]">
-                                    <SelectItem value="all" className="text-xs font-semibold py-2">Semua Potongan Harga</SelectItem>
-                                    <SelectItem value="high" className="text-xs font-semibold text-emerald-700 py-2">Diskon Besar (≥ 30%)</SelectItem>
+                                    <SelectItem value="all" className="text-xs font-normal py-2">Semua Potongan Harga</SelectItem>
+                                    <SelectItem value="high" className="text-xs font-normal text-emerald-700 py-2">Diskon Besar (≥ 30%)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -367,7 +367,7 @@ const Sale = () => {
                                         />
 
                                         {/* Label Diskon Atas */}
-                                        <div className="absolute top-3 right-3 bg-[#A47174] text-white text-[9px] font-bold px-2 py-1 rounded-md z-20 shadow-xs tracking-wider uppercase">
+                                        <div className="absolute top-3 right-3 bg-[#A47174] text-white text-[9px] font-medium px-2 py-1 rounded-md z-20 shadow-xs tracking-wider uppercase">
                                             {item.discount.includes("%") ? item.discount : `${item.discount} OFF`}
                                         </div>
 
@@ -393,7 +393,7 @@ const Sale = () => {
                                             to={`/sale/${item.slug || item.id}`}
                                             className="absolute inset-0 bg-primary-dark/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 backdrop-blur-[1px]"
                                         >
-                                            <div className="bg-white text-primary-dark w-full py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest text-center shadow-sm">
+                                            <div className="bg-white text-primary-dark w-full py-2 rounded-lg text-[10px] font-medium uppercase tracking-widest text-center shadow-sm">
                                                 Pratinjau Live
                                             </div>
                                         </Link>
@@ -402,18 +402,18 @@ const Sale = () => {
                                     {/* Metadata Deskripsi Produk */}
                                     <div className="mt-3.5 pb-1 text-center space-y-1">
                                         <Link to={`/sale/${item.slug || item.id}`}>
-                                            <h3 className="text-sm font-bold font-playfair text-primary-dark group-hover:text-[#4E5631] transition-colors duration-300 line-clamp-1 px-1 tracking-wide">
+                                            <h3 className="text-sm font-normal font-playfair text-primary-dark group-hover:text-[#4E5631] transition-colors duration-300 line-clamp-1 px-1 tracking-wide">
                                                 {item.name}
                                             </h3>
                                         </Link>
                                         <div className="flex items-center justify-center gap-2 font-quicksand">
                                             {item.oldPrice && (
-                                                <p className="text-primary-dark/30 text-[11px] line-through font-medium">
+                                                <p className="text-primary-dark/30 text-[11px] line-through font-light">
                                                     Rp {formatRupiah(item.oldPrice)}
                                                 </p>
                                             )}
-                                            <p className="text-[#4E5631] font-extrabold text-xs">
-                                                <span className="text-[10px] font-semibold align-baseline mr-0.5 text-primary-dark/60">Rp</span>
+                                            <p className="text-[#4E5631] font-normal text-xs">
+                                                <span className="text-[10px] font-light align-baseline mr-0.5 text-primary-dark/60">Rp</span>
                                                 {formatRupiah(item.price)}
                                             </p>
                                         </div>
@@ -421,7 +421,7 @@ const Sale = () => {
                                 </div>
                             ))
                         ) : (
-                            <div className="col-span-full text-center py-16 bg-white border border-dashed border-border-subtle rounded-xl text-primary-dark/40 font-quicksand text-xs italic">
+                            <div className="col-span-full text-center py-16 bg-white border border-dashed border-border-subtle rounded-xl text-primary-dark/40 font-quicksand text-xs italic font-light">
                                 Tidak ada produk promo terdaftar yang cocok dengan pencarian atau filter diskon Anda.
                             </div>
                         )}

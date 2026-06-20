@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   FaSearch, FaFilter, FaPlus, FaTimes, FaSave,
   FaEdit, FaTrashAlt, FaUserShield, FaUserTag,
-  FaCheckCircle, FaSpinner, FaEye, FaEnvelope, FaIdCard
+  FaCheckCircle, FaSpinner, FaEye, FaEnvelope, FaIdCard, FaLock
 } from "react-icons/fa";
 
 import { supabase } from "../lib/supabase";
@@ -21,7 +21,7 @@ const ManageUsers = () => {
   const [editingUserId, setEditingUserId] = useState(null);
   const [loading, setLoading] = useState(false);
   
-  // State baru untuk menghandle detail user (Modal)
+  // State untuk menghandle detail user (Modal)
   const [selectedUser, setSelectedUser] = useState(null);
 
   const formRef = useRef(null);
@@ -30,6 +30,7 @@ const ManageUsers = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "", // State password baru untuk pembuatan akun login
     role: "user",
   });
 
@@ -48,7 +49,7 @@ const ManageUsers = () => {
           name: item.name || "User",
           email: item.email,
           role: item.role || "user",
-          created_at: item.created_at || new Date().toISOString(), // Opsional: untuk memperkaya detail
+          created_at: item.created_at || new Date().toISOString(),
         }))
         : [];
 
@@ -79,7 +80,7 @@ const ManageUsers = () => {
   };
 
   const handleAddClick = () => {
-    setFormData({ name: "", email: "", role: "user" });
+    setFormData({ name: "", email: "", password: "", role: "user" });
     setEditingUserId(null);
     openFormAndFocus();
   };
@@ -89,6 +90,7 @@ const ManageUsers = () => {
     setFormData({
       name: user.name || "",
       email: user.email || "",
+      password: "", // Kosongkan saat edit (password tidak diubah di sini demi keamanan)
       role: user.role || "user",
     });
     setEditingUserId(user.id);
@@ -104,18 +106,18 @@ const ManageUsers = () => {
     try {
       const { error } = await supabase.from(TABEL_SUPABASE).delete().eq("id", id);
       if (error) throw error;
-      alert("User berhasil dihapus.");
+      alert("User berhasil dihapus dari database lokal.");
       fetchUsers();
     } catch (error) {
       console.error("Gagal menghapus data:", error.message);
-      alert("Gagal menghapus user dari Supabase.");
+      alert("Gagal menghapus user.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setFormData({ name: "", email: "", role: "user" });
+    setFormData({ name: "", email: "", password: "", role: "user" });
     setEditingUserId(null);
     setShowForm(false);
   };
@@ -127,28 +129,61 @@ const ManageUsers = () => {
       return;
     }
 
+    if (!editingUserId && !formData.password) {
+      alert("Password wajib diisi untuk user baru agar bisa login.");
+      return;
+    }
+
     setLoading(true);
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      role: formData.role,
-    };
 
     try {
       if (editingUserId) {
+        // PROSES UPDATE USER EXIST
+        const payload = {
+          name: formData.name,
+          email: formData.email,
+          role: formData.role,
+        };
         const { error } = await supabase.from(TABEL_SUPABASE).update(payload).eq("id", editingUserId);
         if (error) throw error;
         alert("Data user berhasil diperbarui.");
       } else {
-        const { error } = await supabase.from(TABEL_SUPABASE).insert([payload]);
-        if (error) throw error;
-        alert("User baru berhasil ditambahkan.");
+        // PROSES TAMBAH USER BARU + DAFTAR AUTH SUPABASE AGAR BISA LOGIN
+        // Menggunakan auth.signUp agar user masuk ke sistem otentikasi resmi Supabase
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              name: formData.name,
+              role: formData.role
+            }
+          }
+        });
+
+        if (authError) throw authError;
+
+        // Jika tidak ada trigger otomatis di database Supabase Anda, kita pastikan data masuk ke tabel publik 'users'
+        if (authData?.user) {
+          const { error: dbError } = await supabase.from(TABEL_SUPABASE).insert([
+            {
+              id: authData.user.id, // Samakan ID auth dengan ID tabel kustom
+              name: formData.name,
+              email: formData.email,
+              role: formData.role,
+            }
+          ]);
+          // Jika error karena sudah ada trigger di Supabase Anda (duplicate key), abaikan saja dbError ini
+          if (dbError && !dbError.message.includes("duplicate")) throw dbError;
+        }
+
+        alert(`User baru berhasil dibuat!\nEmail: ${formData.email}\nStatus: Siap digunakan untuk Login.`);
       }
       fetchUsers();
       handleCancel();
     } catch (error) {
       console.error("Gagal menyimpan data:", error.message);
-      alert("Gagal menyimpan data ke Supabase.");
+      alert(`Gagal memproses: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -189,7 +224,7 @@ const ManageUsers = () => {
             </div>
             <div className="h-[2px] w-14 bg-[#A47174] mt-2"></div>
             <p className="text-xs text-slate-500 font-quicksand font-medium tracking-wide mt-3 max-w-2xl">
-              Halaman ini digunakan untuk melakukan CRUD data user yang terhubung langsung dengan database Supabase.
+              Halaman manajemen kredensial internal. Menambah user di sini otomatis mendaftarkannya ke sistem keamanan Supabase Auth agar akun bisa langsung digunakan untuk login.
             </p>
           </div>
 
@@ -197,7 +232,7 @@ const ManageUsers = () => {
             <button
               onClick={fetchUsers}
               disabled={loading}
-              className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#4E5631] hover:border-[#4E5631] transition-all duration-300 shadow-xs"
+              className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#4E5631] hover:border-[#4E5631] transition-all duration-300 shadow-sm"
             >
               🔄 Sinkron Data
             </button>
@@ -206,7 +241,7 @@ const ManageUsers = () => {
               disabled={loading}
               className="px-4 py-2 bg-[#4E5631] text-white rounded-xl text-xs font-semibold tracking-wider hover:bg-[#4E5631]/90 flex items-center gap-2 transition-all duration-300 shadow-sm"
             >
-              <FaPlus /> Tambah User
+              <FaPlus /> Tambah User & Auth
             </button>
           </div>
         </div>
@@ -217,9 +252,9 @@ const ManageUsers = () => {
             { title: "Total User", value: metrics.total, icon: <FaUserShield className="text-[#4E5631]" size={18} /> },
             { title: "Admin", value: metrics.admin, icon: <FaUserTag className="text-[#A47174]" size={18} /> },
             { title: "User", value: metrics.user, icon: <FaUserTag className="text-[#4E5631]" size={18} /> },
-            { title: "Aktif", value: metrics.active, icon: <FaCheckCircle className="text-emerald-600" size={18} /> }
+            { title: "Aktif Login", value: metrics.active, icon: <FaCheckCircle className="text-emerald-600" size={18} /> }
           ].map((item, index) => (
-            <div key={index} className="bg-white/80 backdrop-blur-md p-4 rounded-xl border border-slate-100 shadow-xs hover:shadow-md transition-all duration-300">
+            <div key={index} className="bg-white/80 backdrop-blur-md p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
               <div className="flex justify-between items-start mb-2">
                 <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{item.title}</p>
                 {item.icon}
@@ -235,10 +270,10 @@ const ManageUsers = () => {
             <div className="border-b border-slate-100 pb-3 mb-4 flex justify-between">
               <div>
                 <h3 className="text-base font-bold font-playfair text-slate-800">
-                  {editingUserId ? "Edit User" : "Tambah User Baru"}
+                  {editingUserId ? "Edit User Profile" : "Registrasi User & Kredensial Baru"}
                 </h3>
                 <p className="text-[11px] text-slate-400 font-quicksand mt-0.5">
-                  Data akan disimpan langsung ke tabel users Supabase.
+                  {editingUserId ? "Mengubah profil data pengguna pada database." : "Membuat otentikasi login resmi di server Supabase Auth."}
                 </p>
               </div>
               <button onClick={handleCancel} className="text-slate-400 hover:text-rose-500 transition-colors">
@@ -247,10 +282,10 @@ const ManageUsers = () => {
             </div>
 
             <form onSubmit={handleFormSubmit} className="space-y-4 font-quicksand text-xs">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <InputField
                   ref={nameInputRef}
-                  label="Nama User"
+                  label="Nama Lengkap"
                   name="name"
                   placeholder="Masukkan nama user"
                   value={formData.name}
@@ -258,7 +293,7 @@ const ManageUsers = () => {
                   required
                 />
                 <InputField
-                  label="Email"
+                  label="Alamat Email"
                   name="email"
                   type="email"
                   placeholder="nama@email.com"
@@ -266,8 +301,26 @@ const ManageUsers = () => {
                   onChange={handleInputChange}
                   required
                 />
+                
+                {/* INPUT PASSWORD - Hanya muncul jika tambah user baru */}
                 <div className="flex flex-col space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500">Role</label>
+                  <label className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+                    <FaLock size={10}/> Password Login {editingUserId && <span className="text-slate-400 font-normal">(Proteksi)</span>}
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder={editingUserId ? "••••••••" : "Buat password minimal 6 karakter"}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    disabled={!!editingUserId}
+                    required={!editingUserId}
+                    className="w-full h-9 bg-white border border-slate-200 disabled:bg-slate-50 rounded-xl text-xs font-semibold text-slate-800 px-3 focus:outline-none focus:border-[#4E5631] transition-colors"
+                  />
+                </div>
+
+                <div className="flex flex-col space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500">Role Sistem</label>
                   <select
                     name="role"
                     value={formData.role}
@@ -292,18 +345,18 @@ const ManageUsers = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-[#4E5631] text-white rounded-xl text-xs font-semibold flex items-center gap-2 hover:bg-[#4E5631]/90 transition-colors shadow-xs"
+                  className="px-4 py-2 bg-[#4E5631] text-white rounded-xl text-xs font-semibold flex items-center gap-2 hover:bg-[#4E5631]/90 transition-colors shadow-sm"
                 >
                   {loading ? <FaSpinner className="animate-spin" /> : <FaSave />}
-                  {editingUserId ? "Update User" : "Simpan User"}
+                  {editingUserId ? "Update Profil" : "Aktifkan Akun & Simpan"}
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        {/* SEARCH & FILTER */}
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 font-quicksand mb-6">
+        {/* SEARCH & FILTER BAR */}
+        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 font-quicksand mb-6">
           <div className="relative w-full sm:w-96 flex items-center">
             <FaSearch className="absolute left-3.5 text-slate-300 text-xs" />
             <input
@@ -325,7 +378,7 @@ const ManageUsers = () => {
                 onClick={() => setActiveRoleFilter(role)}
                 className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase border transition-all duration-300 ${
                   activeRoleFilter === role
-                    ? "bg-[#4E5631] border-[#4E5631] text-white shadow-xs"
+                    ? "bg-[#4E5631] border-[#4E5631] text-white shadow-sm"
                     : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
                 }`}
               >
@@ -335,7 +388,7 @@ const ManageUsers = () => {
           </div>
         </div>
 
-        {/* PREMIUM CARDS LIST */}
+        {/* CARDS LIST */}
         {filteredUsers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 font-quicksand">
             {filteredUsers.map((item) => {
@@ -343,9 +396,8 @@ const ManageUsers = () => {
               return (
                 <div
                   key={item.id}
-                  className="group relative bg-white rounded-2xl border border-slate-100 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden"
+                  className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden"
                 >
-                  {/* Subtle Premium Indicator Line */}
                   <div className={`h-[3px] w-full ${isAdmin ? "bg-[#A47174]" : "bg-[#4E5631]"}`} />
                   
                   <div className="p-6 flex-1">
@@ -367,13 +419,12 @@ const ManageUsers = () => {
                     </div>
                   </div>
 
-                  {/* Premium Actions Bar */}
                   <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between gap-2">
                     <button
                       onClick={() => setSelectedUser(item)}
                       className="text-[11px] font-bold text-slate-500 hover:text-[#4E5631] flex items-center gap-1.5 transition-colors"
                     >
-                      <FaEye size={13} /> Detail
+                      <FaEye size={13} /> Kredensial
                     </button>
 
                     <div className="flex items-center gap-2">
@@ -399,32 +450,28 @@ const ManageUsers = () => {
           </div>
         ) : (
           <div className="text-center py-16 bg-white border border-slate-100 rounded-2xl text-slate-400 font-quicksand text-xs italic">
-            {loading ? "Memuat data dari Supabase..." : "Data user belum tersedia."}
+            {loading ? "Menuat & memverifikasi data otentikasi..." : "Data user belum tersedia."}
           </div>
         )}
 
         <Footer />
       </div>
 
-      {/* PREMIUM DETAIL MODAL */}
+      {/* MODAL OVERVIEW */}
       {selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-quicksand animate-fade-in">
-          {/* Backdrop */}
           <div 
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
             onClick={() => setSelectedUser(null)}
           />
           
-          {/* Modal Box */}
           <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform scale-100 transition-transform">
-            {/* Modal Decorative Header */}
             <div className={`h-2 w-full ${selectedUser.role === "admin" ? "bg-[#A47174]" : "bg-[#4E5631]"}`} />
             
             <div className="p-6">
-              {/* Header Close Button */}
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase">Profile Overview</span>
+                  <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase">Sistem Keamanan Akun</span>
                   <h3 className="text-xl font-bold font-playfair text-slate-800 mt-0.5">{selectedUser.name}</h3>
                 </div>
                 <button 
@@ -435,34 +482,33 @@ const ManageUsers = () => {
                 </button>
               </div>
 
-              {/* Detail Items */}
               <div className="space-y-4 text-xs">
                 <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                  <div className="p-2 bg-white border border-slate-200 text-slate-500 rounded-lg shadow-2xs">
+                  <div className="p-2 bg-white border border-slate-200 text-slate-500 rounded-lg shadow-xs">
                     <FaIdCard size={14} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">User ID</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">UID Otentikasi (Supabase Auth)</p>
                     <p className="font-mono text-slate-700 mt-0.5 break-all select-all">{selectedUser.id}</p>
                   </div>
                 </div>
 
                 <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                  <div className="p-2 bg-white border border-slate-200 text-slate-500 rounded-lg shadow-2xs">
+                  <div className="p-2 bg-white border border-slate-200 text-slate-500 rounded-lg shadow-xs">
                     <FaEnvelope size={14} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Alamat Email</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">ID Login / Email</p>
                     <p className="font-semibold text-slate-700 mt-0.5 break-all">{selectedUser.email}</p>
                   </div>
                 </div>
 
                 <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-center gap-3">
-                  <div className="p-2 bg-white border border-slate-200 text-slate-500 rounded-lg shadow-2xs">
+                  <div className="p-2 bg-white border border-slate-200 text-slate-500 rounded-lg shadow-xs">
                     <FaUserShield size={14} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Hak Akses / Role</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Hak Akses</p>
                     <span className={`inline-block text-[10px] font-bold tracking-wider px-2 py-0.5 mt-1 rounded-md uppercase border ${
                       selectedUser.role === "admin" 
                         ? "text-[#A47174] bg-[#A47174]/5 border-[#A47174]/20" 
@@ -474,7 +520,6 @@ const ManageUsers = () => {
                 </div>
               </div>
 
-              {/* Modal Footer Actions */}
               <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end gap-2">
                 <button
                   onClick={(e) => {
@@ -483,11 +528,11 @@ const ManageUsers = () => {
                   }}
                   className="px-3.5 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:text-[#4E5631] hover:border-[#4E5631] transition-colors"
                 >
-                  Edit User
+                  Edit Profil
                 </button>
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition-colors shadow-xs"
+                  className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition-colors shadow-sm"
                 >
                   Tutup
                 </button>

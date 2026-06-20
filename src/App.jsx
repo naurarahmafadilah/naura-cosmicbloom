@@ -5,14 +5,24 @@ import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import Loading from "./components/Loading";
 
+// Rute Utama & Landing
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const GuestLandingPage = lazy(() => import("./pages/GuestLandingPage")); // 🌟 TAMBAHAN
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const MemberDashboard = lazy(() => import("./pages/MemberDashboard")); 
 
+// ==========================================================
+// KELOMPOK HALAMAN PREMIUM MEMBER (VELOURA BOUTIQUE ATELIER)
+// ==========================================================
+const MemberDashboard = lazy(() => import("./pages/MemberDashboard")); 
+const LacakPesanan = lazy(() => import("./pages/LacakPesanan"));
+const ProfilMember = lazy(() => import("./pages/ProfilMember"));
+const KeranjangMember = lazy(() => import("./pages/KeranjangMember")); 
+const CheckoutMember = lazy(() => import("./pages/CheckoutMember"));   
+const ContactUs = lazy(() => import("./pages/ContactUs"));             
+
+// E-Commerce & Katalog Publik / Admin
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopDetail = lazy(() => import("./pages/ShopDetail"));
-const Collection = lazy(() => import("./pages/Collection"));
-const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const Orders = lazy(() => import("./pages/Orders"));
 const OrdersDetail = lazy(() => import("./pages/OrdersDetail"));
 
@@ -23,9 +33,8 @@ const Sale = lazy(() => import("./pages/Sale"));
 const SaleDetail = lazy(() => import("./pages/SaleDetail"));
 const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Wishlist = lazy(() => import("./pages/Wishlist"));
-const WishlistDetail = lazy(() => import("./pages/WishlistDetail"));
 
+// Admin & Manajemen internal CRM
 const CustomerCRM = lazy(() => import("./pages/CustomerCRM"));
 const CampaignPromo = lazy(() => import("./pages/CampaignPromo"));
 const FeedbackManagement = lazy(() => import("./pages/FeedbackManagement"));
@@ -34,6 +43,7 @@ const SupplierManagement = lazy(() => import("./pages/SupplierManagement"));
 const CashierHistory = lazy(() => import("./pages/CashierHistory"));
 const ManageUsers = lazy(() => import("./pages/ManageUsers"));
 
+// Autentikasi Kredensial
 const Login = lazy(() => import("./pages/auth/Login"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Forgot = lazy(() => import("./pages/auth/Forgot"));
@@ -46,26 +56,34 @@ const App = () => {
             KELOMPOK RUTE UMUM & MEMBER (BEBAS AKSES TANPA LOGIN / PUBLIC)
            ========================================================== */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/guest" element={<GuestLandingPage />} /> {/* 🌟 TAMBAHAN RUTE GUEST */}
         
-        {/* Diakses langsung kapan saja tanpa proteksi login */}
+        {/* Hub Utama & Modul Integrasi Member Veloura */}
         <Route path="/member" element={<MemberDashboard />} />
+        <Route path="/lacak-pesanan" element={<LacakPesanan />} />
+        <Route path="/profil-member" element={<ProfilMember />} />
+        <Route path="/keranjang" element={<KeranjangMember />} /> 
+        <Route path="/checkout" element={<CheckoutMember />} />   
+        <Route path="/contact-us" element={<ContactUs />} />     
         
-        {/* Rute Publik Lainnya */}
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/shop/:slug" element={<ShopDetail />} />
-        <Route path="/sale" element={<Sale />} />
-        <Route path="/sale/:slug" element={<SaleDetail />} />
-        <Route path="/collection" element={<Collection />} />
-        <Route path="/collection/:slug" element={<CollectionDetail />} />
+        {/* Kontak Publik */}
         <Route path="/contact" element={<Contact />} />
 
         {/* ==========================================================
-            KELOMPOK INTERNAL / PRIVATE (MEMERLUKAN MAIN LAYOUT / LOGIN ADMIN)
+            KELOMPOK INTERNAL / PRIVATE (OTOMATIS STRUKTUR SIDEBAR & HEADER)
            ========================================================== */}
         <Route element={<MainLayout />}>
-          {/* Kunci: /dashboard dikembalikan ke sini agar berfungsi normal setelah login */}
+          {/* Dashboard Internal Atrium */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
+
+          {/* 🌟 MASUK SEBAGAI MANAGEMENT ADMIN (Katalog Baju) */}
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/shop/:slug" element={<ShopDetail />} />
+
+          {/* Program Sale */}
+          <Route path="/sale" element={<Sale />} />
+          <Route path="/sale/:slug" element={<SaleDetail />} />
 
           {/* Kelompok Manajemen Data / Admin CRM */}
           <Route path="/customer-crm" element={<CustomerCRM />} />
@@ -79,8 +97,6 @@ const App = () => {
           {/* Transaksi Riwayat Akun */}
           <Route path="/orders" element={<Orders />} />
           <Route path="/orders/:id" element={<OrdersDetail />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/wishlist/:id" element={<WishlistDetail />} />
 
           {/* Pengaturan Master Data Membership */}
           <Route path="/membership" element={<Membership />} />

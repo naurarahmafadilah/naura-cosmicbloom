@@ -1,11 +1,9 @@
-import React from "react";
-import { NavLink, useNavigate } from "react-router-dom"; // 🌟 Tambahkan useNavigate
-import { supabase } from "../lib/supabase"; // 🌟 Sesuaikan path ke lib supabase Anda jika diperlukan
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase"; 
 import { 
   FaHome, 
-  FaCrown, 
   FaTshirt, 
-  FaHeart, 
   FaBoxOpen, 
   FaTag,
   FaIdCard 
@@ -23,7 +21,16 @@ import {
 } from "react-icons/fi";
 
 const Sidebar = () => {
-  const navigate = useNavigate(); // 🌟 Definisikan hook navigasi
+  const navigate = useNavigate();
+  
+  // State dinamis untuk menampung jumlah antrean pesanan baru (Default: 12 sesuai image_936887.png)
+  const [incomingOrdersCount, setIncomingOrdersCount] = useState(12);
+
+  // Efek simulasi / real-time fetch untuk sinkronisasi pesanan dari database jika diperlukan
+  useEffect(() => {
+    // Anda bisa menyambungkan fungsi realtime Supabase subscribe di sini nantinya
+    // Contoh: setIncomingOrdersCount(data.length);
+  }, []);
 
   // Utility class menu utama
   const menuClass = ({ isActive }) =>
@@ -33,18 +40,11 @@ const Sidebar = () => {
         : "text-primary-dark/70 hover:bg-bg-soft hover:text-primary-dark"
     }`;
 
-  // 🌟 Handle logout sistem secara bersih
+  // Handle logout sistem secara bersih
   const handleSidebarLogout = async () => {
-    // 1. Bersihkan data bypass dari penyimpanan lokal browser
     localStorage.removeItem("user");
-    
-    // 2. Putus sesi resmi di server Supabase (jika ada)
     await supabase.auth.signOut();
-    
-    // 3. Picu ulang event listener agar layout tahu user sudah keluar
     window.dispatchEvent(new Event("localUserUpdate"));
-    
-    // 4. Tendang kembali ke portal login
     navigate("/login", { replace: true });
   };
 
@@ -52,7 +52,7 @@ const Sidebar = () => {
     {
       title: "Utama",
       items: [
-        { name: "Beranda", path: "/dashboard", icon: <FaHome />, end: true } // 🌟 Ubah "/" ke "/dashboard" jika beranda admin Anda di sana
+        { name: "Beranda", path: "/dashboard", icon: <FaHome />, end: true }
       ]
     },
     {
@@ -68,7 +68,7 @@ const Sidebar = () => {
     {
       title: "Stok & Produk",
       items: [
-        { name: "Koleksi VIP", path: "/collection", icon: <FaCrown />, badge: "VIP" },
+        // 🌟 Koleksi VIP dihapus
         { name: "Katalog Baju", path: "/shop", icon: <FaTshirt /> },
         { name: "Stok Gudang", path: "/inventory", icon: <FiPackage /> },
         { name: "Data Supplier", path: "/suppliers", icon: <FiTruck /> }
@@ -77,9 +77,15 @@ const Sidebar = () => {
     {
       title: "Transaksi Toko",
       items: [
-        { name: "Pesanan Masuk", path: "/orders", icon: <FaBoxOpen />, badge: "12", isAlert: true },
-        { name: "Riwayat Kasir", path: "/sales-history", icon: <FiShoppingBag /> },
-        { name: "Favorit", path: "/wishlist", icon: <FaHeart /> }
+        { 
+          name: "Pesanan Masuk", 
+          path: "/orders", 
+          icon: <FaBoxOpen />, 
+          badge: incomingOrdersCount > 0 ? String(incomingOrdersCount) : null, 
+          isAlert: true 
+        },
+        { name: "Riwayat Kasir", path: "/sales-history", icon: <FiShoppingBag /> }
+        // 🌟 Favorit resmi dihapus dari sini
       ]
     },
     {
@@ -133,12 +139,18 @@ const Sidebar = () => {
                         </div>
 
                         {item.badge && (
-                          <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-bold tracking-tight font-quicksand ${
+                          <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-bold tracking-tight font-quicksand transition-all duration-300 ${
                             item.isAlert 
-                              ? isActive ? 'bg-white text-secondary-light font-black' : 'bg-secondary-light text-white' 
+                              ? isActive 
+                                ? 'bg-white text-secondary-light font-black' 
+                                : 'bg-secondary-light text-white animate-pulse' 
                               : item.isSale
-                                ? isActive ? 'bg-white text-secondary-light font-black' : 'bg-secondary-light/10 text-secondary-light group-hover:bg-primary-dark/5'
-                                : isActive ? 'bg-white/20 text-white' : 'bg-primary-dark/5 text-primary-dark group-hover:bg-primary-dark/10'
+                                ? isActive 
+                                  ? 'bg-white text-secondary-light font-black' 
+                                  : 'bg-secondary-light/10 text-secondary-light group-hover:bg-primary-dark/5'
+                                : isActive 
+                                  ? 'bg-white/20 text-white' 
+                                  : 'bg-primary-dark/5 text-primary-dark group-hover:bg-primary-dark/10'
                           }`}>
                             {item.badge}
                           </span>
@@ -157,16 +169,13 @@ const Sidebar = () => {
       <div className="mt-auto pt-4 border-t border-border-subtle space-y-0.5">
         <NavLink to="/settings" className={menuClass}>
           {({ isActive }) => (
-            <>
-              <div className="flex items-center gap-3">
-                <FiSettings className={`text-sm ${isActive ? 'text-white' : 'text-primary-dark/50 group-hover:text-primary-dark'}`} />
-                <span>Pengaturan</span>
-              </div>
-            </>
+            <div className="flex items-center gap-3">
+              <FiSettings className={`text-sm ${isActive ? 'text-white' : 'text-primary-dark/50 group-hover:text-primary-dark'}`} />
+              <span>Pengaturan</span>
+            </div>
           )}
         </NavLink>
         
-        {/* 🌟 Tombol Keluar Aktif dengan Handler Fungsi Bersih */}
         <button 
           onClick={handleSidebarLogout} 
           className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide text-secondary-light hover:bg-bg-soft hover:text-secondary-dark transition-all duration-300 text-left font-quicksand cursor-pointer"

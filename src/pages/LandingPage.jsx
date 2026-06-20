@@ -8,13 +8,18 @@ import {
   Eye,
   Scissors,
   Zap,
-  CheckCircle2
+  CheckCircle2,
+  Menu,
+  X,
+  Heart,
+  Award
 } from "lucide-react";
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [likedProducts, setLikedProducts] = useState({});
 
-  // Data produk asli dari user
   const products = [
     {
       "id": "s1",
@@ -62,143 +67,213 @@ export default function LandingPage() {
     window.location.href = path;
   };
 
+  const toggleLike = (id, e) => {
+    e.stopPropagation();
+    setLikedProducts(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
-    <div className="min-h-screen bg-[#eff0ee] text-[#4e5631] selection:bg-[#ab656b] selection:text-white font-sans antialiased">
-      
+    <div className="min-h-screen bg-[#f7f8f6] text-[#4e5631] selection:bg-[#ab656b] selection:text-white font-sans antialiased scroll-smooth">
+
+      {/* GLOBAL BACKGROUND ORNAMENT */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] bg-[radial-gradient(#4e5631_1px,transparent_1px)] [background-size:24px_24px] z-0" />
+
       {/* NAVIGATION BAR */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-[#eff0ee]/90 backdrop-blur-md border-b border-[#4e5631]/10">
-        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-          
-          <div className="cursor-pointer" onClick={() => handleNavigation("/")}>
-            <h1 className="text-base md:text-lg font-serif tracking-[0.25em] font-bold text-[#4e5631]">
-              VELOURA BOUTIQUE
+      <nav className="fixed top-0 left-0 w-full z-50 bg-[#f7f8f6]/80 backdrop-blur-xl border-b border-[#4e5631]/5 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+
+          <div className="cursor-pointer group" onClick={() => handleNavigation("/")}>
+            <h1 className="text-lg md:text-xl font-serif tracking-[0.3em] font-bold text-[#4e5631] group-hover:text-[#ab656b] transition-colors duration-300">
+              VELOURA<span className="text-[#ab656b] font-light">.</span>
             </h1>
+            <p className="text-[8px] tracking-[0.4em] uppercase opacity-60 mt-0.5 -mr-4 font-semibold">Luxury House</p>
           </div>
 
-          <div className="hidden md:flex items-center gap-6 text-xs uppercase tracking-widest font-semibold opacity-80">
-            <a href="#masalah" className="hover:text-[#ab656b] transition-colors">Dilema</a>
-            <a href="#koleksi" className="hover:text-[#ab656b] transition-colors">Koleksi</a>
-            <a href="#proses" className="hover:text-[#ab656b] transition-colors">Kualitas</a>
-            <a href="#solusi" className="hover:text-[#ab656b] transition-colors">Keunggulan</a>
-            <a href="#faq" className="hover:text-[#ab656b] transition-colors">FAQ</a>
+          <div className="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-[0.2em] font-bold opacity-90">
+            <a href="#masalah" className="hover:text-[#ab656b] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#ab656b] hover:after:w-full after:transition-all transition-colors">Dilema</a>
+            <a href="#koleksi" className="hover:text-[#ab656b] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#ab656b] hover:after:w-full after:transition-all transition-colors">Koleksi</a>
+            <a href="#proses" className="hover:text-[#ab656b] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#ab656b] hover:after:w-full after:transition-all transition-colors">Kualitas</a>
+            <a href="#solusi" className="hover:text-[#ab656b] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#ab656b] hover:after:w-full after:transition-all transition-colors">Keunggulan</a>
+            <a href="#faq" className="hover:text-[#ab656b] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#ab656b] hover:after:w-full after:transition-all transition-colors">FAQ</a>
           </div>
 
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => handleNavigation("/login")} 
-              className="text-xs uppercase tracking-wider font-bold hover:text-[#ab656b] transition-colors cursor-pointer"
+          <div className="hidden sm:flex items-center gap-6">
+            <button
+              onClick={() => handleNavigation("/login")}
+              className="text-[11px] uppercase tracking-[0.15em] font-bold hover:text-[#ab656b] transition-colors cursor-pointer"
             >
               Masuk
             </button>
-            <button 
+            <button
               onClick={() => handleNavigation("/register")}
-              className="bg-[#4e5631] text-white text-xs uppercase tracking-widest px-5 py-2.5 rounded-sm font-bold hover:bg-[#ab656b] transition-all cursor-pointer shadow-sm"
+              className="bg-[#4e5631] text-white text-[10px] uppercase tracking-[0.2em] px-6 py-3.5 rounded-none font-bold hover:bg-[#ab656b] hover:shadow-lg transition-all duration-300 cursor-pointer border border-[#4e5631] hover:border-[#ab656b]"
             >
               Daftar Member
             </button>
           </div>
-        </div>
-      </nav>
 
-      {/* HERO SECTION */}
-      <section className="pt-40 pb-20 px-6 text-center max-w-4xl mx-auto space-y-8">
-        
-        <div className="inline-flex items-center gap-2 bg-[#ab656b]/10 border border-[#ab656b]/30 px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold text-[#ab656b]">
-          <Sparkles size={12} />
-          Koleksi Pakaian Kualitas Premium No. 1
-        </div>
-
-        <h2 className="text-4xl md:text-6xl font-serif font-normal text-[#4e5631] leading-tight">
-          Solusi Terbaik Untuk Penampilan Anda <br />
-          Yang Ingin <span className="italic text-[#ab656b] font-light">Tampil Anggun, Elegan & Berkelas.</span>
-        </h2>
-
-        <p className="text-sm md:text-base text-[#4e5631]/80 max-w-2xl mx-auto leading-relaxed font-medium">
-          Berhenti memakai pakaian pasaran yang membuat Anda terlihat biasa saja di acara penting. Setiap helai koleksi kami dirancang eksklusif dengan potongan *cutting* premium yang menyamarkan kekurangan tubuh, serta menggunakan bahan ternyaman yang langsung terasa mewah begitu menyentuh kulit Anda.
-        </p>
-
-        <div className="pt-4">
-          <button 
-            onClick={() => handleNavigation("/register")}
-            className="bg-[#ab656b] text-white text-xs uppercase tracking-widest px-8 py-4 font-bold rounded-sm hover:bg-[#4e5631] transition-all inline-flex items-center gap-3 shadow-md hover:scale-[1.02] duration-300 cursor-pointer"
-          >
-            Lihat Koleksi Eksklusif Sekarang
-            <ArrowRight size={14} />
+          <button className="lg:hidden p-2 text-[#4e5631]" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* HERO FEATURED IMAGE (Menggunakan Gambar Pertama dari Data Anda) */}
-        <div className="pt-10 max-w-3xl mx-auto">
-          <div className="bg-[#4e5631] rounded-sm shadow-xl border border-white/5 relative h-[380px] overflow-hidden group">
-            <img 
-              src={products[0].img} 
-              alt="Veloura Premium Banner" 
-              className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#4e5631] via-transparent to-transparent opacity-90" />
-            
-            <div className="absolute bottom-0 left-0 w-full p-8 text-center text-[#eff0ee] space-y-2">
-              <ShoppingBag className="mx-auto text-[#ab656b]" size={32} />
-              <p className="font-serif text-xl md:text-2xl tracking-wide">Signature Collection Lineup</p>
-              <p className="text-[10px] uppercase tracking-widest opacity-70">Limited Edition — Hanya Diproduksi Terbatas per Desain</p>
+        {/* MOBILE MENU */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden absolute top-24 left-0 w-full bg-[#f7f8f6] border-b border-[#4e5631]/10 px-6 py-8 flex flex-col gap-6 shadow-xl animate-fade-in">
+            <a href="#masalah" onClick={() => setMobileMenuOpen(false)} className="text-xs uppercase tracking-widest font-bold">Dilema</a>
+            <a href="#koleksi" onClick={() => setMobileMenuOpen(false)} className="text-xs uppercase tracking-widest font-bold">Koleksi</a>
+            <a href="#proses" onClick={() => setMobileMenuOpen(false)} className="text-xs uppercase tracking-widest font-bold">Kualitas</a>
+            <a href="#solusi" onClick={() => setMobileMenuOpen(false)} className="text-xs uppercase tracking-widest font-bold">Keunggulan</a>
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-xs uppercase tracking-widest font-bold">FAQ</a>
+            <hr className="border-[#4e5631]/10" />
+            <div className="flex flex-col gap-4">
+              <button onClick={() => handleNavigation("/login")} className="text-xs uppercase tracking-widest font-bold text-center py-2">Masuk</button>
+              <button onClick={() => handleNavigation("/register")} className="bg-[#4e5631] text-white text-xs uppercase tracking-widest py-4 font-bold text-center">Daftar Member</button>
             </div>
           </div>
-        </div>
+        )}
+      </nav>
 
+      {/* HERO SECTION */}
+      <section className="relative pt-44 lg:pt-52 pb-24 px-6 overflow-hidden z-10">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
+
+          <div className="lg:col-span-7 space-y-6 text-left">
+            <div className="inline-flex items-center gap-2 bg-white border border-[#ab656b]/20 px-4 py-2 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-[#ab656b] shadow-xs">
+              <Sparkles size={11} className="animate-pulse" />
+              <span>Koleksi Premium No. 1</span>
+            </div>
+
+            <h2 className="text-4xl md:text-6xl font-serif font-normal text-[#4e5631] leading-[1.15] tracking-tight">
+              Solusi Terbaik Untuk <br />Penampilan Anda Yang <br />
+              <span className="italic text-[#ab656b] font-light relative">
+                Anggun & Berkelas
+                <span className="absolute bottom-1 left-0 w-full h-[4px] bg-[#ab656b]/10 -z-10" />
+              </span>
+            </h2>
+
+            <p className="text-sm md:text-base text-[#4e5631]/70 max-w-xl leading-relaxed font-medium">
+              Berhenti memakai pakaian pasaran jahit massal yang kaku. Setiap helai koleksi kami dirancang eksklusif dengan potongan <span className="text-[#4e5631] font-bold">*crafted cutting*</span> yang menyamarkan kekurangan tubuh, langsung terasa mewah begitu menyentuh kulit Anda.
+            </p>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <button
+                onClick={() => handleNavigation("/register")}
+                className="bg-[#ab656b] text-white text-xs uppercase tracking-[0.2em] px-8 py-4.5 font-bold hover:bg-[#4e5631] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-[#ab656b]/10 hover:shadow-[#4e5631]/20 hover:-translate-y-0.5"
+              >
+                Jelajahi Lookbook Eksklusif
+                <ArrowRight size={14} />
+              </button>
+              <a
+                href="#koleksi"
+                className="border border-[#4e5631]/20 hover:border-[#4e5631] text-[#4e5631] text-xs uppercase tracking-[0.2em] px-8 py-4.5 font-bold transition-all duration-300 text-center"
+              >
+                Lihat Produk
+              </a>
+            </div>
+          </div>
+
+          {/* ASYMMETRIC IMAGE GRAPHIC */}
+          <div className="lg:col-span-5 relative mt-8 lg:mt-0">
+            <div className="absolute -inset-4 bg-[#ab656b]/5 rounded-none transform rotate-2 pointer-events-none" />
+            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#4e5631]/5 rounded-none pointer-events-none hidden md:block" />
+
+            <div className="bg-[#4e5631] shadow-2xl relative h-[450px] md:h-[500px] overflow-hidden group">
+              <img
+                src={products[0].img}
+                alt="Veloura Premium Banner"
+                className="w-full h-full object-cover opacity-90 scale-102 group-hover:scale-105 transition-transform duration-1000 ease-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#4e5631] via-[#4e5631]/20 to-transparent opacity-80" />
+
+              <div className="absolute bottom-0 left-0 w-full p-8 space-y-3">
+                <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
+                  <ShoppingBag className="text-white" size={18} />
+                </div>
+                <div>
+                  <p className="font-serif text-lg tracking-wide text-white">Signature Lineup</p>
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-[#eff0ee]/70 font-semibold mt-0.5">Hanya Diproduksi Terbatas per Desain</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </section>
 
       {/* SECTION AGITASI MASALAH */}
-      <section id="masalah" className="py-20 px-6 bg-[#4e5631] text-[#eff0ee]">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <span className="text-[#ab656b] uppercase tracking-widest text-xs font-bold block">Pernahkah Kamu Mengalami Ini?</span>
-          <h2 className="font-serif text-3xl md:text-4xl leading-tight">
-            Sudah beli baju mahal-mahal tapi pas dipakai malah kelihatan gemuk, bahannya gatal, dan kembar sama orang lain di acara pesta?
+      <section id="masalah" className="py-24 px-6 bg-[#4e5631] text-[#eff0ee] relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-4xl mx-auto text-center space-y-6 relative z-10">
+          <span className="text-[#ab656b] uppercase tracking-[0.25em] text-[11px] font-bold block">Pernahkah Kamu Mengalami Ini?</span>
+          <h2 className="font-serif text-3xl md:text-5xl leading-[1.25] font-light max-w-3xl mx-auto">
+            Sudah beli baju mahal-mahal tapi pas dipakai malah kelihatan <span className="italic text-[#ab656b]">gemuk, bahannya gatal,</span> dan kembar di pesta?
           </h2>
-          <div className="w-12 h-0.5 bg-[#ab656b] mx-auto my-4"></div>
-          <p className="text-sm opacity-80 max-w-2xl mx-auto leading-relaxed">
-            Berdasarkan survei, <strong className="text-white text-base">78,4% wanita</strong> sering merasa tidak percaya diri dengan bentuk tubuhnya saat memakai pakaian jadi (*ready-to-wear*) dari mal karena ukuran yang terlalu kaku dan pola jahit massal yang tidak presisi.
+          <div className="w-16 h-[1px] bg-[#ab656b]/50 mx-auto my-6"></div>
+          <p className="text-xs md:text-sm opacity-80 max-w-2xl mx-auto leading-relaxed font-light tracking-wide">
+            Berdasarkan survei internal kami, <span className="text-white font-bold border-b border-[#ab656b] pb-0.5">78,4% wanita</span> sering merasa tidak percaya diri dengan bentuk tubuhnya saat memakai pakaian jadi konvensional mal karena pola potong massal yang kaku dan tidak adaptif.
           </p>
         </div>
       </section>
 
       {/* DYNAMIC CATALOG LOOKBOOK SECTION */}
-      <section id="koleksi" className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 space-y-2">
-            <span className="text-[#ab656b] uppercase tracking-widest text-xs font-bold block">Curated Edition</span>
-            <h2 className="font-serif text-3xl text-[#4e5631]">Koleksi Terbaru Bulan Ini</h2>
-            <div className="w-12 h-0.5 bg-[#ab656b] mx-auto mt-2"></div>
+      <section id="koleksi" className="py-28 px-6 bg-white relative">
+        <div className="max-w-7xl mx-auto">
+
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 border-b border-[#4e5631]/10 pb-6">
+            <div className="space-y-2 text-left">
+              <span className="text-[#ab656b] uppercase tracking-[0.25em] text-[11px] font-bold block">Curated Edition</span>
+              <h2 className="font-serif text-3xl md:text-4xl text-[#4e5631]">Koleksi Terbaru Bulan Ini</h2>
+            </div>
+            <p className="text-xs text-[#4e5631]/60 font-medium max-w-xs mt-4 md:mt-0 tracking-wide">
+              Desain haute-couture edisi terbatas dengan material pilihan dunia.
+            </p>
           </div>
 
-          {/* Grid Responsif Menampilkan 4 Produk Sesuai Data */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {/* Grid Lookbook Modern */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {products.map((product) => (
-              <div 
-                key={product.id} 
-                className="border border-[#4e5631]/10 bg-[#eff0ee]/20 p-4 rounded-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow group"
+              <div
+                key={product.id}
+                className="group relative flex flex-col justify-between space-y-4 bg-[#f7f8f6]/30 p-3 hover:bg-white hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-[#4e5631]/5"
               >
-                {/* Image Container dengan Label Diskon */}
-                <div className="h-72 w-full overflow-hidden rounded-sm relative bg-[#4e5631]">
-                  <img 
-                    src={product.img} 
-                    alt={product.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                {/* Image Container */}
+                <div className="aspect-[3/4] w-full overflow-hidden relative bg-[#4e5631]">
+                  <img
+                    src={product.img}
+                    alt={product.name}
+                    className="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
-                  <span className="absolute top-3 right-3 bg-[#ab656b] text-white font-sans text-[10px] font-bold px-2 py-1 tracking-wider uppercase rounded-xs shadow-sm">
-                    Save {product.discount}
+
+                  {/* Badge Diskon Minimalis */}
+                  <span className="absolute top-4 left-4 bg-[#ab656b] text-white font-sans text-[9px] font-bold px-3 py-1 tracking-widest uppercase shadow-sm">
+                    -{product.discount}
                   </span>
+
+                  {/* Like Button */}
+                  <button
+                    onClick={(e) => toggleLike(product.id, e)}
+                    className="absolute top-4 right-4 w-8 h-8 bg-white/80 backdrop-blur-xs rounded-full flex items-center justify-center text-[#4e5631] hover:text-rose-600 transition-colors duration-300"
+                  >
+                    <Heart size={14} fill={likedProducts[product.id] ? "#e11d48" : "none"} className={likedProducts[product.id] ? "text-rose-600" : ""} />
+                  </button>
                 </div>
 
                 {/* Informasi Produk */}
-                <div className="space-y-1">
-                  <span className="text-[9px] uppercase font-bold tracking-widest text-[#ab656b]">Veloura Signature</span>
-                  <h4 className="font-serif text-base font-bold text-[#4e5631] line-clamp-1">{product.name}</h4>
-                  <p className="text-[11px] text-gray-500">Premium *crafted cut* dengan bahan eksklusif bertekstur nyaman.</p>
-                  
+                <div className="space-y-2 px-1 pb-2 text-left">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <span className="text-[9px] uppercase font-bold tracking-[0.2em] text-[#ab656b] block">Veloura Signature</span>
+                      <h4 className="font-serif text-base font-bold text-[#4e5631] mt-0.5 group-hover:text-[#ab656b] transition-colors duration-300 line-clamp-1">{product.name}</h4>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-gray-500 font-medium leading-relaxed line-clamp-2">Premium *crafted cut* dengan kenyamanan tekstur tanpa menerawang.</p>
+
                   {/* Harga & Harga Coret */}
-                  <div className="flex items-center gap-2 pt-2">
+                  <div className="flex items-baseline gap-2.5 pt-1 border-t border-[#4e5631]/5 mt-2">
                     <p className="font-serif text-sm font-bold text-[#4e5631]">IDR {product.price}</p>
-                    <p className="font-sans text-xs text-gray-400 line-through">IDR {product.oldPrice}</p>
+                    <p className="font-sans text-[11px] text-gray-400 line-through">IDR {product.oldPrice}</p>
                   </div>
                 </div>
               </div>
@@ -208,120 +283,131 @@ export default function LandingPage() {
       </section>
 
       {/* BEHIND THE ART SECTION */}
-      <section id="proses" className="py-20 px-6 bg-[#4e5631] text-[#eff0ee] border-t border-white/10">
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-4">
-            <span className="text-[#ab656b] uppercase tracking-widest text-xs font-bold block">Artisanal Craftsmanship</span>
-            <h2 className="font-serif text-3xl md:text-4xl leading-tight">Dibuat Satu Per Satu, Bukan Hasil Mesin Massal.</h2>
-            <p className="text-sm opacity-80 leading-relaxed">
-              Di Veloura Boutique, kami menolak metode potong kain bertumpuk ala konveksi massal yang merusak simetri pola baju. Setiap helai pakaian Anda ditangani khusus oleh satu penjahit dari awal hingga akhir.
+      <section id="proses" className="py-24 px-6 bg-[#4e5631] text-[#eff0ee] border-t border-white/5 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-12 gap-12 items-center">
+
+          <div className="md:col-span-5 space-y-4 text-left">
+            <span className="text-[#ab656b] uppercase tracking-[0.25em] text-[11px] font-bold block">Artisanal Craftsmanship</span>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight font-normal">Dibuat Satu Per Satu, Bukan Mesin Massal.</h2>
+            <p className="text-xs md:text-sm opacity-70 leading-relaxed font-light">
+              Di Veloura Boutique, kami menolak metode potong kain bertumpuk konveksi massal yang merusak keakuratan simetri kain. Setiap pakaian ditangani khusus oleh satu penjahit ahli dari pola awal hingga jahitan terakhir.
             </p>
           </div>
-          <div className="space-y-6">
-            <div className="flex gap-4 items-start">
-              <Layers className="text-[#ab656b] shrink-0 mt-1" size={20} />
-              <div>
-                <h4 className="font-serif font-bold text-base text-white">Double-Stitch Premium</h4>
-                <p className="text-xs opacity-70 mt-1">Metode jahit jarum ganda luar-dalam untuk memastikan serat kain terkunci rapi, tidak gampang berwujud benang lepas, dan awet bertahun-tahun.</p>
+
+          <div className="md:col-span-7 grid sm:grid-cols-2 gap-6">
+            <div className="p-6 bg-white/[0.02] border border-white/10 space-y-3 text-left">
+              <div className="w-10 h-10 bg-[#ab656b]/10 rounded-full flex items-center justify-center text-[#ab656b]">
+                <Layers size={18} />
               </div>
+              <h4 className="font-serif font-bold text-base text-white">Double-Stitch Premium</h4>
+              <p className="text-xs opacity-60 leading-relaxed font-light">Metode jahit jarum ganda luar-dalam untuk memastikan serat kain terkunci rapi dan awet bertahun-tahun.</p>
             </div>
-            <div className="flex gap-4 items-start">
-              <Eye className="text-[#ab656b] shrink-0 mt-1" size={20} />
-              <div>
-                <h4 className="font-serif font-bold text-base text-white">QC Butik Sangat Ketat</h4>
-                <p className="text-xs opacity-70 mt-1">Kami memeriksa presisi ritsleting, kekuatan kancing, dan simetri kejatuhan kain sebanyak 3 fase sebelum baju dibungkus ke kotak kemasan.</p>
+
+            <div className="p-6 bg-white/[0.02] border border-white/10 space-y-3 text-left">
+              <div className="w-10 h-10 bg-[#ab656b]/10 rounded-full flex items-center justify-center text-[#ab656b]">
+                <Eye size={18} />
               </div>
+              <h4 className="font-serif font-bold text-base text-white">QC Butik 3 Fase</h4>
+              <p className="text-xs opacity-60 leading-relaxed font-light">Pemeriksaan presisi ritsleting, kekuatan kancing, dan kejatuhan kain sebelum dikemas dalam boks eksklusif.</p>
             </div>
           </div>
+
         </div>
       </section>
 
       {/* VALUE PRODUK BUTIK */}
-      <section id="solusi" className="py-20 px-6 bg-white border-b border-[#4e5631]/10">
+      <section id="solusi" className="py-28 px-6 bg-[#f7f8f6] relative">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16 space-y-2">
-            <span className="text-[#ab656b] uppercase tracking-widest text-xs font-bold block">Mengapa Belanja Di Veloura Boutique</span>
-            <h2 className="font-serif text-3xl text-[#4e5631]">3 Alasan Mengapa Koleksi Kami Terasa Istimewa</h2>
-            <div className="w-12 h-0.5 bg-[#ab656b] mx-auto mt-2"></div>
+
+          <div className="text-center mb-20 space-y-2">
+            <span className="text-[#ab656b] uppercase tracking-[0.25em] text-[11px] font-bold block">Mengapa Memilih Kami</span>
+            <h2 className="font-serif text-3xl md:text-4xl text-[#4e5631]">3 Standar Kemewahan Veloura</h2>
+            <div className="w-12 h-[1px] bg-[#ab656b] mx-auto mt-4"></div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-6 bg-[#eff0ee]/30 border border-[#4e5631]/10 rounded-sm">
-              <div className="w-10 h-10 rounded-full bg-[#4e5631] text-white flex items-center justify-center font-serif font-bold mb-4">1</div>
-              <h3 className="font-serif text-lg mb-2 text-[#4e5631] font-bold">Cutting Slimming Effect</h3>
-              <p className="text-xs text-[#4e5631]/80 leading-relaxed">
-                Pola jahitan khusus yang dirancang oleh desainer berpengalaman untuk memberikan ilusi tubuh lebih jenjang, ramping, dan proporsional seketika.
+            <div className="p-8 bg-white border border-[#4e5631]/5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left space-y-4">
+              <span className="font-serif text-3xl font-light text-[#ab656b]/40 block border-b border-gray-100 pb-2">01</span>
+              <h3 className="font-serif text-lg text-[#4e5631] font-bold">Cutting Slimming Effect</h3>
+              <p className="text-xs text-[#4e5631]/70 leading-relaxed font-medium">
+                Pola jahitan optik khusus yang dirancang oleh desainer berpengalaman untuk memberikan ilusi tubuh lebih jenjang, ramping, dan proporsional seketika.
               </p>
             </div>
-            <div className="p-6 bg-[#eff0ee]/30 border border-[#4e5631]/10 rounded-sm">
-              <div className="w-10 h-10 rounded-full bg-[#4e5631] text-white flex items-center justify-center font-serif font-bold mb-4">2</div>
-              <h3 className="font-serif text-lg mb-2 text-[#4e5631] font-bold">Premium Fabric Selection</h3>
-              <p className="text-xs text-[#4e5631]/80 leading-relaxed">
-                Kami hanya menggunakan kain kelas dunia seperti sutra murni, katun organik, dan brokat premium yang super adem, jatuh dengan indah, dan tidak menerawang.
+
+            <div className="p-8 bg-white border border-[#4e5631]/5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left space-y-4">
+              <span className="font-serif text-3xl font-light text-[#ab656b]/40 block border-b border-gray-100 pb-2">02</span>
+              <h3 className="font-serif text-lg text-[#4e5631] font-bold">Premium Fabric</h3>
+              <p className="text-xs text-[#4e5631]/70 leading-relaxed font-medium">
+                Kami mengurasi kain kelas dunia seperti sutra murni, katun organik, dan brokat premium yang super adem, jatuh dengan indah, dan tidak menerawang.
               </p>
             </div>
-            <div className="p-6 bg-[#eff0ee]/30 border border-[#4e5631]/10 rounded-sm">
-              <div className="w-10 h-10 rounded-full bg-[#4e5631] text-white flex items-center justify-center font-serif font-bold mb-4">3</div>
-              <h3 className="font-serif text-lg mb-2 text-[#4e5631] font-bold">No Mass-Production</h3>
-              <p className="text-xs text-[#4e5631]/80 leading-relaxed">
-                Setiap desain hanya diproduksi dalam jumlah yang sangat terbatas. Menjamin eksklusivitas Anda agar tidak perlu khawatir berpapasan dengan motif pakaian yang sama.
+
+            <div className="p-8 bg-white border border-[#4e5631]/5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left space-y-4">
+              <span className="font-serif text-3xl font-light text-[#ab656b]/40 block border-b border-gray-100 pb-2">03</span>
+              <h3 className="font-serif text-lg text-[#4e5631] font-bold">No Mass-Production</h3>
+              <p className="text-xs text-[#4e5631]/70 leading-relaxed font-medium">
+                Setiap desain hanya diproduksi dalam kuantitas sangat sedikit. Menjamin eksklusivitas agar tidak perlu khawatir berpapasan dengan motif pakaian serupa.
               </p>
             </div>
           </div>
+
         </div>
       </section>
 
       {/* TESTIMONIAL EDITORIAL */}
-      <section id="testimoni" className="py-20 px-6 text-center bg-[#eff0ee]/50">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <p className="text-[#ab656b] uppercase tracking-widest text-xs font-bold block">Apa Kata Mereka</p>
-          <h2 className="font-serif text-2xl text-[#4e5631]">Mereka Yang Telah Membuktikan & Mempercayakan Penampilannya pada Kami</h2>
-          
-          <span className="text-4xl text-[#ab656b] font-serif block">“</span>
-          <h3 className="font-serif text-lg md:text-xl text-[#4e5631] italic font-light leading-relaxed">
+      <section id="testimoni" className="py-28 px-6 text-center bg-white border-y border-[#4e5631]/5 relative">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#f7f8f6]">
+            <Award className="text-[#ab656b]" size={20} />
+          </div>
+
+          <h3 className="font-serif text-xl md:text-2xl text-[#4e5631] italic font-light leading-relaxed max-w-2xl mx-auto">
             "Awalnya iseng beli satu baju untuk acara kondangan, pas dipakai langsung jadi pusat perhatian karena kain brokatnya mewah banget dan jatuhnya pas di badan. Sekarang kalau mau ada acara semi-formal pasti langsung lari ke Veloura!"
           </h3>
-          
-          <div className="pt-2">
-            <h4 className="font-bold text-sm tracking-widest uppercase">Donna Nelson</h4>
-            <p className="text-[11px] text-[#ab656b] font-bold uppercase tracking-wider mt-0.5">Pelanggan Setia Veloura Boutique</p>
+
+          <div className="space-y-1">
+            <h4 className="font-bold text-xs tracking-[0.25em] uppercase text-[#4e5631]">Donna Nelson</h4>
+            <p className="text-[10px] text-[#ab656b] font-bold uppercase tracking-widest">Verified Collector</p>
           </div>
         </div>
       </section>
 
       {/* ACCORDION FAQ SECTION */}
-      <section id="faq" className="py-20 px-6 bg-white">
-        <div className="max-w-2xl mx-auto">
-          
-          <h2 className="font-serif text-2xl text-center text-[#4e5631] mb-12">Hal yang Sering Ditanyakan (FAQ)</h2>
+      <section id="faq" className="py-28 px-6 bg-[#f7f8f6]">
+        <div className="max-w-3xl mx-auto">
 
-          <div className="space-y-4">
+          <div className="text-center mb-16 space-y-2">
+            <span className="text-[#ab656b] uppercase tracking-[0.25em] text-[11px] font-bold block">Pertanyaan Umum</span>
+            <h2 className="font-serif text-2xl md:text-3xl text-[#4e5631]">Hal yang Sering Ditanyakan</h2>
+          </div>
+
+          <div className="space-y-4 bg-white p-6 md:p-8 shadow-sm border border-gray-100">
             {[
-              { q: "Apakah ada garansi kalau ukuran baju tidak muat atau kekecilan?", a: "Tentu saja. Kami memberikan garansi tukar ukuran atau opsi perbaikan (*alteration*) gratis dalam waktu 3 hari setelah pakaian sampai, demi memastikan baju melekat sempurna di tubuh Anda." },
-              { q: "Bagaimana cara perawatan kain premium dari butik ini?", a: "Setiap paket pengiriman kami lengkapi dengan kartu panduan instruksi cuci (*care card*) khusus untuk menjaga serat kain dan keaslian warna agar tetap awet bertahun-tahun." },
-              { q: "Apakah melayani pengiriman luar kota dan packing kado?", a: "Kami melayani pengiriman ke seluruh Indonesia dengan standar kotak kemasan (*exclusive box*) yang tebal, wangi, dan sangat mewah, siap dijadikan hadiah berkesan." }
+              { q: "Apakah ada garansi kalau ukuran baju tidak muat?", a: "Tentu saja. Kami memberikan garansi tukar ukuran atau opsi perbaikan (alteration) gratis dalam waktu 3 hari setelah pakaian sampai, demi memastikan baju melekat sempurna di tubuh Anda." },
+              { q: "Bagaimana cara perawatan kain premium dari butik ini?", a: "Every single piece kami lengkapi dengan kartu panduan instruksi cuci (care card) khusus di dalam kemasan untuk menjaga serat kain dan keaslian warna tetap prima." },
+              { q: "Apakah melayani pengiriman luar kota dan packing kado?", a: "Kami melayani pengiriman ke seluruh Indonesia menggunakan kemasan kotak eksklusif tebal, wangi, berstandar luxury gift box yang sangat mewah." }
             ].map((faq, idx) => (
-              <div key={idx} className="border-b border-[#4e5631]/10 pb-4">
-                <button 
+              <div key={idx} className="border-b border-gray-100 pb-4 last:border-none last:pb-0">
+                <button
                   onClick={() => toggleFaq(idx)}
-                  className="w-full flex items-center justify-between text-left font-serif text-base text-[#4e5631] py-2 hover:text-[#ab656b] transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between text-left font-serif text-[#4e5631] py-3 hover:text-[#ab656b] transition-colors cursor-pointer"
                 >
-                  <span className="font-medium text-sm md:text-base">{faq.q}</span>
-                  <ChevronDown size={16} className={`transform transition-transform ${openFaq === idx ? "rotate-180 text-[#ab656b]" : "text-gray-400"}`} />
+                  <span className="font-bold text-sm md:text-base pr-4">{faq.q}</span>
+                  <ChevronDown size={16} className={`transform transition-transform shrink-0 duration-300 ${openFaq === idx ? "rotate-180 text-[#ab656b]" : "text-gray-400"}`} />
                 </button>
-                <div className={`overflow-hidden transition-all duration-300 ${openFaq === idx ? "max-h-40 pt-2" : "max-h-0"}`}>
-                  <p className="text-xs text-gray-500 leading-relaxed">{faq.a}</p>
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${openFaq === idx ? "max-h-40 pt-2" : "max-h-0"}`}>
+                  <p className="text-xs text-gray-500 leading-relaxed font-medium pl-1">{faq.a}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="text-center pt-14">
-            <button 
+          <div className="text-center pt-16">
+            <button
               onClick={() => handleNavigation("/register")}
-              className="bg-[#ab656b] text-white text-xs uppercase tracking-widest px-12 py-4 font-bold rounded-sm hover:bg-[#4e5631] transition-all shadow-md hover:scale-[1.02] duration-300 cursor-pointer"
+              className="bg-[#ab656b] text-white text-xs uppercase tracking-[0.2em] px-12 py-4.5 font-bold hover:bg-[#4e5631] transition-all duration-300 shadow-xl shadow-[#ab656b]/10 hover:shadow-[#4e5631]/20 hover:-translate-y-0.5"
             >
-              Beli Sekarang Juga
+              Mulai Bergabung Member
             </button>
           </div>
 
@@ -329,28 +415,109 @@ export default function LandingPage() {
       </section>
 
       {/* FOOTER & TRUST BADGES */}
-      <footer className="bg-[#4e5631] text-[#eff0ee] pt-12 pb-12 px-6 text-center space-y-8">
-        
-        <div className="flex flex-wrap justify-center gap-8 text-white/50 border-b border-white/10 pb-8 max-w-2xl mx-auto text-xs">
-          <div className="flex items-center gap-2">
-            <Scissors size={16} className="text-[#ab656b]" />
-            <span>Garansi Alterasi / Tukar Ukuran</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Zap size={16} className="text-[#ab656b]" />
-            <span>Desain Orisinil Tanpa Plagiasi</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-[#ab656b]" />
-            <span>Pengiriman Aman Berkotak Premium</span>
-          </div>
-        </div>
+      {/* FOOTER & TRUST BADGES */}
+      <footer className="bg-[#4e5631] text-[#eff0ee] pt-24 pb-12 px-6 relative overflow-hidden z-10 border-t border-white/5 font-quicksand">
+        {/* Subtle Background Pattern for Footer */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.01] bg-[radial-gradient(#white_1px,transparent_1px)] [background-size:16px_16px]" />
 
-        <div className="space-y-1">
-          <h3 className="font-serif tracking-widest text-base">VELOURA BOUTIQUE</h3>
-          <p className="opacity-40 text-[10px] tracking-wider uppercase">
-            © 2026 Veloura Boutique Luxury House. All Rights Reserved.
-          </p>
+        <div className="max-w-7xl mx-auto space-y-16 relative z-10">
+
+          {/* 1. LUXURY TRUST BADGES GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-white/10 divide-y md:divide-y-0 md:divide-x divide-white/10 bg-white/[0.01] backdrop-blur-xs">
+            <div className="flex flex-col items-center text-center p-8 group hover:bg-white/[0.02] transition-colors duration-300">
+              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-[#ab656b] group-hover:scale-110 transition-transform duration-300">
+                <Scissors size={20} strokeWidth={1.5} />
+              </div>
+              <h5 className="font-serif text-sm tracking-widest uppercase mt-4 text-white">Complimentary Alteration</h5>
+              <p className="text-[11px] opacity-50 max-w-xs mt-2 font-light leading-relaxed">Garansi penyesuaian ukuran gratis dalam 3 hari agar siluet pakaian melekat sempurna pada lekuk tubuh Anda.</p>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-8 group hover:bg-white/[0.02] transition-colors duration-300">
+              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-[#ab656b] group-hover:scale-110 transition-transform duration-300">
+                <Zap size={20} strokeWidth={1.5} />
+              </div>
+              <h5 className="font-serif text-sm tracking-widest uppercase mt-4 text-white">Anti-Mass Production</h5>
+              <p className="text-[11px] opacity-50 max-w-xs mt-2 font-light leading-relaxed">Setiap pola dipotong eksklusif satu per satu demi menjaga keaslian desain tanpa risiko kembaran di ruang publik.</p>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-8 group hover:bg-white/[0.02] transition-colors duration-300">
+              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-[#ab656b] group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle2 size={20} strokeWidth={1.5} />
+              </div>
+              <h5 className="font-serif text-sm tracking-widest uppercase mt-4 text-white">Signature Box Packaging</h5>
+              <p className="text-[11px] opacity-50 max-w-xs mt-2 font-light leading-relaxed">Proteksi pengiriman premium menggunakan hardbox tebal berlapis kain satin, wangi, lengkap dengan care-card khusus.</p>
+            </div>
+          </div>
+
+          {/* 2. MEGA FOOTER NAVIGATION & NEWSLETTER */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pt-4">
+
+            {/* Brand Heritage column */}
+            <div className="md:col-span-4 space-y-4 text-left">
+              <h3 className="font-serif tracking-[0.35em] text-xl font-bold text-white">
+                VELOURA<span className="text-[#ab656b]">.</span>
+              </h3>
+              <p className="text-xs opacity-60 font-light leading-relaxed max-w-sm">
+                Maison de couture yang berdedikasi tinggi untuk menghadirkan kemewahan pakaian wanita modern lewat presisi cutting, kurasi material tekstil terbaik dunia, dan sentuhan detail pengerjaan tangan ahli.
+              </p>
+            </div>
+
+            {/* Directory Links column */}
+            <div className="md:col-span-3 grid grid-cols-2 gap-4 text-left">
+              <div className="space-y-3">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#ab656b] font-bold">Maison</p>
+                <ul className="text-xs space-y-2 opacity-70 font-light">
+                  <li><a href="#masalah" className="hover:text-white hover:underline transition-all">The Dilemma</a></li>
+                  <li><a href="#koleksi" className="hover:text-white hover:underline transition-all">Collections</a></li>
+                  <li><a href="#proses" className="hover:text-white hover:underline transition-all">Craftsmanship</a></li>
+                  <li><a href="#solusi" className="hover:text-white hover:underline transition-all">The Value</a></li>
+                </ul>
+              </div>
+              <div className="space-y-3">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#ab656b] font-bold">Assistance</p>
+                <ul className="text-xs space-y-2 opacity-70 font-light">
+                  <li><a href="#faq" className="hover:text-white hover:underline transition-all">Client FAQ</a></li>
+                  <li><a href="#" className="hover:text-white hover:underline transition-all">Care Guide</a></li>
+                  <li><a href="#" className="hover:text-white hover:underline transition-all">Terms of Use</a></li>
+                  <li><a href="#" className="hover:text-white hover:underline transition-all">Privacy Policy</a></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Premium Newsletter Subscription column */}
+            <div className="md:col-span-5 space-y-4 text-left">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#ab656b] font-bold">La Lettre Veloura</p>
+              <p className="text-xs opacity-60 font-light leading-relaxed">
+                Jadilah kolektor pertama yang menerima pemberitahuan rilis *Lookbook* terbatas, undangan privat *private-viewing*, dan artikel tren mode butik internasional.
+              </p>
+
+              <form onSubmit={(e) => e.preventDefault()} className="flex items-center border-b border-white/20 pb-1 pt-2 focus-within:border-[#ab656b] transition-colors duration-300">
+                <input
+                  type="email"
+                  placeholder="Masukkan alamat email Anda"
+                  className="bg-transparent text-xs w-full focus:outline-none placeholder-white/30 text-white font-light font-sans tracking-wide"
+                  required
+                />
+                <button type="submit" className="text-white hover:text-[#ab656b] p-1 transition-colors duration-300" title="Subscribe">
+                  <ArrowRight size={16} />
+                </button>
+              </form>
+            </div>
+
+          </div>
+
+          {/* 3. BOTTOM LEGAL COPYRIGHT */}
+          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[9px] tracking-[0.25em] uppercase font-semibold opacity-40">
+            <p>© 2026 VELOURA BOUTIQUE LUXURY HOUSE. ALL RIGHTS RESERVED.</p>
+            <div className="flex gap-6">
+              <a href="#" className="hover:opacity-100 transition-opacity">PARIS</a>
+              <span>•</span>
+              <a href="#" className="hover:opacity-100 transition-opacity">MILAN</a>
+              <span>•</span>
+              <a href="#" className="hover:opacity-100 transition-opacity">JAKARTA</a>
+            </div>
+          </div>
+
         </div>
       </footer>
 

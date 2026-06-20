@@ -17,10 +17,14 @@ import {
   Area, 
   BarChart, 
   Bar, 
+  PieChart,
+  Pie,
+  Cell,
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip 
+  Tooltip,
+  Legend
 } from "recharts";
 
 // ==========================================
@@ -33,7 +37,7 @@ import ReviewHighlightCard from "../components/ReviewHighlightCard";
 import StockAlertCard from "../components/StockAlertCard"; 
 import Footer from "../components/Footer";
 
-import { FiShield, FiPlus, FiRefreshCw, FiClock, FiCalendar, FiLogOut } from "react-icons/fi";
+import { FiShield, FiPlus, FiRefreshCw, FiClock, FiCalendar } from "react-icons/fi";
 
 const crmDataQuarters = {
   Q1: [
@@ -48,6 +52,13 @@ const crmDataQuarters = {
   ]
 };
 
+// Data Dummy untuk Grafik Donut Segmentasi Konsumen
+const customerSegmentationData = [
+  { name: "Klien Loyal", value: 580, color: "#4E5631" },
+  { name: "Respon Baru", value: 430, color: "#A47174" },
+  { name: "Dormant", value: 230, color: "#cbd5e1" },
+];
+
 const defaultProductsMock = [
   { id: 1024, name: "Elegant Dress", price: "250.000", img: "https://plus.unsplash.com/premium_photo-1728657358050-58356d4a6c64?q=80&w=1170&auto=format&fit=crop" },
   { id: 1025, name: "Casual Outfit", price: "180.000", img: "https://plus.unsplash.com/premium_photo-1689575247968-d1040651e57f?q=80&w=1170&auto=format&fit=crop" },
@@ -60,7 +71,6 @@ const Dashboard = ({ products: propsProducts }) => {
   const [localProducts, setLocalProducts] = useState(defaultProductsMock);
   const activeProducts = propsProducts && propsProducts.length > 0 ? propsProducts : localProducts;
   
-  // Amankan state user agar tidak memicu crash layar putih jika data null
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("user")) || null;
@@ -72,7 +82,6 @@ const Dashboard = ({ products: propsProducts }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const productSectionRef = useRef(null);
 
-  // Effect untuk memperbarui Jam Real-time
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -80,7 +89,6 @@ const Dashboard = ({ products: propsProducts }) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Sinkronisasi data user dari localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       try {
@@ -131,8 +139,6 @@ const Dashboard = ({ products: propsProducts }) => {
   const handleOpenEditMode = (product, index) => {
     setIsEditMode(true);
     setSelectedProductIndex(index);
-    // BAGIAN DIPERBAIKI: Mengubah .replace(/\./g, "") menjadi .replace(/./g, "") 
-    // atau menggunakan metode pembersihan angka yang lebih aman untuk string nominal.
     setFormData({ 
       namaProduk: product.name, 
       hargaProduk: product.price.replace(/[^0-9]/g, ""), 
@@ -168,31 +174,14 @@ const Dashboard = ({ products: propsProducts }) => {
     setIsDialogOpen(false);
   };
 
-  const handleLogout = async () => {
-    localStorage.removeItem("user");
-    await supabase.auth.signOut();
-    window.dispatchEvent(new Event("localUserUpdate"));
-    navigate("/login");
-  };
-
-  // Formatter String untuk Hari & Tanggal
   const formattedDate = currentTime.toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric"
+    weekday: "long", year: "numeric", month: "long", day: "numeric"
   });
 
-  // Formatter String untuk Jam
   const formattedTime = currentTime.toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
+    hour: "2-digit", minute: "2-digit", second: "2-digit"
   });
 
-  // ==========================================
-  // SAFETY GUARD (MENCEGAH BLANK PAGE JIKA BELUM LOGIN)
-  // ==========================================
   if (!currentUser) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-50 font-quicksand p-4">
@@ -211,12 +200,12 @@ const Dashboard = ({ products: propsProducts }) => {
 
   return (
     <DashboardContainer>
-      <div className="animate-fade-in pb-10 text-slate-800 px-4 sm:px-6 lg:px-8 pt-6 select-none bg-transparent max-w-7xl mx-auto space-y-8">
+      <div className="animate-fade-in pb-10 text-slate-800 px-4 sm:px-6 lg:px-8 pt-6 select-none bg-transparent max-w-7xl mx-auto space-y-8 font-quicksand">
         
         {/* ALWAYS VISIBLE SYSTEM ALERT */}
         <Alert className="border-none rounded-2xl py-3 px-5 bg-amber-50/70 text-amber-900 flex items-center gap-3 shadow-3xs">
           <FiShield size={14} className="text-amber-700 shrink-0" />
-          <AlertDescription className="text-xs font-medium font-quicksand tracking-wide">
+          <AlertDescription className="text-xs font-medium tracking-wide">
             Sistem Keamanan: Fitur mutasi repositori produk, pipeline pembaruan CRM, dan otomatisasi penyiaran promo berjalan normal di bawah otoritas sesi penuh ({currentUser.role || "Administrator"}).
           </AlertDescription>
         </Alert>
@@ -224,10 +213,8 @@ const Dashboard = ({ products: propsProducts }) => {
         {/* SECTION 1: HEADER & STATUS BAR WITH DATE-TIME METRICS */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200/60 pb-6">
           <div className="space-y-1.5 flex-1">
-            
-            {/* REAL-TIME LIVE CLOCK BADGE */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-2 text-slate-500 font-mono text-[11px] font-semibold tracking-wide">
-              <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1 rounded-xl border border-slate-200/40">
+              <div className="flex items-center gap-1.5 bg-slate-50 Hitung px-3 py-1 rounded-xl border border-slate-200/40">
                 <FiCalendar size={12} className="text-[#A47174]" />
                 <span>{formattedDate}</span>
               </div>
@@ -242,17 +229,13 @@ const Dashboard = ({ products: propsProducts }) => {
                 Selamat Datang, {currentUser.name || "User"}
               </h1>
             </div>
-            
             <div className="h-[2px] w-14 bg-[#A47174] mt-2"></div>
-            
-            <p className="text-xs text-slate-500 font-quicksand font-medium tracking-wide pt-1.5 max-w-2xl">
+            <p className="text-xs text-slate-500 font-medium tracking-wide pt-1.5 max-w-2xl">
               Panel kendali retensi pelanggan, kurasi inventaris premium, monitoring aktivitas retensi belanja, dan metrik otomasi ekosistem Veloura.
             </p>
           </div>
 
-          {/* ACTION BUTTONS & LOGOUT */}
           <div className="flex items-center gap-3 self-start md:self-end">
-            
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <button 
                 onClick={handleOpenCreateMode}
@@ -261,7 +244,7 @@ const Dashboard = ({ products: propsProducts }) => {
                 <FiPlus size={13} /> Registrasi Item
               </button>
               
-              <DialogContent className="sm:max-w-[360px] rounded-2xl bg-white p-6 border border-slate-100 shadow-2xl font-quicksand">
+              <DialogContent className="sm:max-w-[360px] rounded-2xl bg-white p-6 border border-slate-100 shadow-2xl">
                 <DialogHeader>
                   <DialogTitle className="text-base font-bold font-playfair text-[#4E5631]">
                     {isEditMode ? "Ubah Detail Produk" : "Registrasi Koleksi Baru"}
@@ -316,7 +299,7 @@ const Dashboard = ({ products: propsProducts }) => {
         {/* SECTION 3: MASTER DATA VISUALIZATION GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
           
-          {/* ANALYTICS CARD (2 COLS WIDTH) */}
+          {/* ANALYTICS TREND CARD (2 COLS WIDTH) */}
           <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-50">
               <div className="space-y-0.5">
@@ -365,63 +348,110 @@ const Dashboard = ({ products: propsProducts }) => {
             </div>
           </div>
 
-          {/* CRM AUTOMATION (1 COL WIDTH) */}
-          <div className="bg-[#FAF9F5] p-6 rounded-2xl border border-slate-200/40 flex flex-col justify-between">
-            <div className="space-y-2">
-              <span className="text-[9px] font-bold text-[#A47174] uppercase tracking-widest">Otomatisasi Kampanye</span>
-              <h3 className="text-sm font-bold font-playfair text-slate-800 tracking-wide">Target Distribusi Omnichannel</h3>
-              <p className="text-slate-400 text-xs font-medium leading-relaxed">
-                Modul pengiriman katalog eksklusif, voucer apresiasi loyalitas, dan pemberitahuan rilis privat secara serentak.
-              </p>
+          {/* DONUT CHART: SEGMENTASI KONSUMEN (1 COL WIDTH) */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-4">
+            <div className="border-b border-slate-50 pb-2">
+              <h3 className="text-sm font-bold text-slate-800 tracking-wide">Segmentasi Konsumen</h3>
+              <p className="text-[11px] text-slate-400 font-medium">Distribusi Berdasarkan Loyalitas</p>
+            </div>
+            
+            <div className="h-[160px] w-full relative flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={customerSegmentationData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={70}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {customerSegmentationData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{fontFamily: 'Quicksand', borderRadius: '12px', fontSize: '11px', border: '1px solid #f1f5f9'}} />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Text indicator di tengah lingkaran donut */}
+              <div className="absolute flex flex-col items-center justify-center text-center">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                <span className="text-base font-mono font-bold text-slate-800">1,240</span>
+              </div>
             </div>
 
-            <div className="space-y-2 pt-4">
-              <Dialog open={isBlastDialogOpen} onOpenChange={setIsBlastDialogOpen}>
-                <button 
-                  onClick={() => setIsBlastDialogOpen(true)}
-                  className="w-full h-9 rounded-xl text-xs font-semibold tracking-wide border transition-all bg-white text-slate-700 border-slate-200 hover:border-slate-300 cursor-pointer shadow-3xs"
-                >
-                  Simulasi Siaran Promo
-                </button>
-                
-                <DialogContent className="sm:max-w-[380px] rounded-2xl bg-white p-6 border border-slate-100 font-quicksand">
-                  <DialogHeader>
-                    <DialogTitle className="text-base font-bold text-[#4E5631] font-playfair">Konfigurasi Target Massa</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={(e) => { e.preventDefault(); setIsBlastDialogOpen(false); }} className="space-y-4 pt-2">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Klaster Konsumen</label>
-                      <Select value={selectedSegment} onValueChange={setSelectedSegment}>
-                        <SelectTrigger className="rounded-xl h-9 text-xs border-slate-200"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white border-slate-200 rounded-xl">
-                          <SelectItem value="loyal" className="text-xs">Klaster Pelanggan Loyal</SelectItem>
-                          <SelectItem value="new" className="text-xs">Klaster Registrasi Baru</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Konten Pesan</label>
-                      <textarea value={blastTemplate} onChange={(e) => setBlastTemplate(e.target.value)} className="w-full text-xs p-3 border border-slate-200 rounded-xl h-20 focus:outline-none" />
-                    </div>
-                    <div className="flex justify-end gap-2 pt-2">
-                      <button type="button" onClick={() => setIsBlastDialogOpen(false)} className="px-4 h-9 bg-slate-100 text-slate-500 text-xs font-semibold rounded-xl">Batal</button>
-                      <button type="submit" className="px-4 h-9 bg-[#4E5631] text-white rounded-xl text-xs font-semibold">Tembakkan Konten</button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
-              <button 
-                onClick={() => alert("Mengatur Segmen...")}
-                className="w-full h-9 rounded-xl text-xs font-semibold text-white tracking-wide transition-all bg-[#4E5631] hover:bg-[#3d4426] cursor-pointer"
-              >
-                Kelola Segmentasi
-              </button>
+            {/* Custom Legend Keterangan Warna */}
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-50 text-[10px] font-medium text-slate-600">
+              {customerSegmentationData.map((item, idx) => (
+                <div key={idx} className="flex flex-col items-center text-center">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: item.color }}></span>
+                    <span className="truncate max-w-[65px] text-slate-500">{item.name}</span>
+                  </div>
+                  <span className="font-mono font-bold text-slate-800 mt-0.5">{item.value} Pax</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* SECTION 4: INVENTORY & AUXILIARY METRICS FEED */}
+        {/* SECTION 4: INTERACTIVE BROADCAST PIPELINE */}
+        <div className="bg-[#FAF9F5] p-6 rounded-2xl border border-slate-200/40 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1 max-w-2xl">
+            <span className="text-[9px] font-bold text-[#A47174] uppercase tracking-widest">Otomatisasi Kampanye</span>
+            <h3 className="text-sm font-bold font-playfair text-slate-800 tracking-wide">Target Distribusi Omnichannel & Siaran Massa</h3>
+            <p className="text-slate-500 text-xs font-medium leading-relaxed">
+              Modul pengiriman katalog eksklusif, voucer apresiasi loyalitas, dan pemberitahuan rilis privat secara serentak ke berbagai klaster pelanggan Veloura.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch gap-3 shrink-0 sm:w-auto w-full">
+            <Dialog open={isBlastDialogOpen} onOpenChange={setIsBlastDialogOpen}>
+              <button 
+                onClick={() => setIsBlastDialogOpen(true)}
+                className="h-9 px-5 rounded-xl text-xs font-semibold tracking-wide border transition-all bg-white text-slate-700 border-slate-200 hover:border-slate-300 cursor-pointer shadow-3xs"
+              >
+                Simulasi Siaran Promo
+              </button>
+              
+              <DialogContent className="sm:max-w-[380px] rounded-2xl bg-white p-6 border border-slate-100 font-quicksand">
+                <DialogHeader>
+                  <DialogTitle className="text-base font-bold text-[#4E5631] font-playfair">Konfigurasi Target Massa</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={(e) => { e.preventDefault(); setIsBlastDialogOpen(false); }} className="space-y-4 pt-2">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Klaster Konsumen</label>
+                    <Select value={selectedSegment} onValueChange={setSelectedSegment}>
+                      <SelectTrigger className="rounded-xl h-9 text-xs border-slate-200"><SelectValue /></SelectTrigger>
+                      <SelectContent className="bg-white border-slate-200 rounded-xl">
+                        <SelectItem value="loyal" className="text-xs">Klaster Pelanggan Loyal</SelectItem>
+                        <SelectItem value="new" className="text-xs">Klaster Registrasi Baru</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Konten Pesan</label>
+                    <textarea value={blastTemplate} onChange={(e) => setBlastTemplate(e.target.value)} className="w-full text-xs p-3 border border-slate-200 rounded-xl h-20 focus:outline-none" />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button type="button" onClick={() => setIsBlastDialogOpen(false)} className="px-4 h-9 bg-slate-100 text-slate-500 text-xs font-semibold rounded-xl">Batal</button>
+                    <button type="submit" className="px-4 h-9 bg-[#4E5631] text-white rounded-xl text-xs font-semibold">Tembakkan Konten</button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            <button 
+              onClick={() => alert("Mengatur Segmen...")}
+              className="h-9 px-5 rounded-xl text-xs font-semibold text-white tracking-wide transition-all bg-[#4E5631] hover:bg-[#3d4426] cursor-pointer text-center"
+            >
+              Kelola Segmentasi
+            </button>
+          </div>
+        </div>
+
+        {/* SECTION 5: INVENTORY & AUXILIARY METRICS FEED */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* PRODUCT COLLECTION FEED (2 COLS WIDTH) */}

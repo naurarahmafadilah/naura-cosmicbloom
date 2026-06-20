@@ -1,626 +1,278 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
-// ==========================================
-// SHADCN UI INTEGRATION (FOR DIALOGS)
-// ==========================================
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
-import { Input } from "../components/ui/input";
-
-// ==========================================
-// ICONS
-// ==========================================
 import { 
-  FiUser, 
-  FiAward, 
-  FiCalendar, 
-  FiScissors, 
-  FiPercent, 
-  FiHeadphones,
-  FiShoppingBag,
-  FiHeart,
-  FiCheckCircle,
-  FiArrowRight,
-  FiInfo,
-  FiTag,
-  FiMessageSquare,
-  FiHelpCircle
+  FiCalendar, FiMapPin, FiArrowRight, FiTag, 
+  FiHeart, FiGift, FiAward, FiShoppingBag, 
+  FiX, FiCheckCircle, FiEye 
 } from "react-icons/fi";
+import HeaderMember from "../layouts/HeaderMember";
+import FooterMember from "../layouts/FooterMember";
 
 const MemberDashboard = () => {
-  const navigate = useNavigate();
+  // State untuk menyimpan data user yang sedang login
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user")) || null;
-    } catch {
-      return null;
+  // State Metrik & Interaksi
+  const [wishlistCount, setWishlistCount] = useState(2);
+  const [cartCount, setCartCount] = useState(0);
+  const [memberPoints, setMemberPoints] = useState(2450);
+  const [totalTransactions] = useState(12);
+  
+  // State Modal Quick View & Toast
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
+
+  // Mengambil data user dari localStorage saat komponen dimuat
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Gagal membaca sesi user:", error);
+      }
     }
-  });
-
-  const [profile, setProfile] = useState({
-    nama: "Veloura VIP Member",
-    email: "client@veloura.com",
-    phone: "+62 812-9900-1122",
-    size: "M",
-    lingkarDada: "92",
-    lingkarPinggang: "74",
-    tinggiBadan: "165"
-  });
-
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({ ...profile });
-  const [claimedVouchers, setClaimedVouchers] = useState([]);
-
-  // State untuk Input Form Feedback Member
-  const [feedbackCategory, setFeedbackCategory] = useState("Pelayanan Butik");
-  const [feedbackMessage, setFeedbackMessage] = useState("");
-  const [feedbackStatus, setFeedbackStatus] = useState("");
+  }, []);
 
   const [saleProducts] = useState([
-    {
-      "id": "s1",
-      "slug": "elegant-evening-dress",
-      "name": "Elegant Evening Dress",
-      "oldPrice": "350.000",
-      "price": "250.000",
-      "discount": "30%",
-      "img": "https://plus.unsplash.com/premium_photo-1728657358050-58356d4a6c64?q=80&w=1170&auto=format&fit=crop"
-    },
-    {
-      "id": "s2",
-      "slug": "casual-autumn-shirt",
-      "name": "Casual Autumn Shirt",
-      "oldPrice": "250.000",
-      "price": "180.000",
-      "discount": "28%",
-      "img": "https://plus.unsplash.com/premium_photo-1689575247968-d1040651e57f?q=80&w=1170&auto=format&fit=crop"
-    },
-    {
-      "id": "s3",
-      "slug": "summer-breeze-dress",
-      "name": "Summer Breeze Dress",
-      "oldPrice": "400.000",
-      "price": "300.000",
-      "discount": "25%",
-      "img": "https://plus.unsplash.com/premium_photo-1727427850453-144b335cd995?q=80&w=687&auto=format&fit=crop"
-    },
-    {
-      "id": "s4",
-      "slug": "minimalist-silk-outfit",
-      "name": "Minimalist Silk Outfit",
-      "oldPrice": "320.000",
-      "price": "270.000",
-      "discount": "15%",
-      "img": "https://plus.unsplash.com/premium_photo-1755958632983-adbc0ff3b41b?q=80&w=1170&auto=format&fit=crop"
-    }
+    { id: "s1", name: "Amour Silk Evening Gown", oldPrice: "7.500.000", price: "5.250.000", discount: "30%", description: "Gaun malam sutra premium dengan potongan elegan yang mengikuti siluet tubuh secara anggun. Cocok untuk gala dinner dan acara formal VIP.", material: "100% Mulberry Silk", fit: "Slim Fit - Custom Tailored", img: "https://plus.unsplash.com/premium_photo-1728657358050-58356d4a6c64?q=80&w=600" },
+    { id: "s2", name: "Elysian Linen Blazer", oldPrice: "4.200.000", price: "3.200.000", discount: "24%", description: "Blazer kasual-formal berstruktur tegas yang dibuat dari rami linen pilihan. Memberikan sirkulasi udara maksimal dengan estetika quiet luxury yang kuat.", material: "Organic Heritage Linen", fit: "Relaxed Structured", img: "https://plus.unsplash.com/premium_photo-1689575247968-d1040651e57f?q=80&w=600" },
+    { id: "s3", name: "Sienna Satin Slip Dress", oldPrice: "5.100.000", price: "4.200.000", discount: "17%", description: "Slip dress minimalis bernuansa warm-earth yang memantulkan kilau lembut satin premium saat terkena cahaya. Sangat luwes untuk gaya day-to-night.", material: "Ultra-soft Liquid Satin", fit: "Fluid Slip Fit", img: "https://plus.unsplash.com/premium_photo-1727427850453-144b335cd995?q=80&w=600" },
+    { id: "s4", name: "Monarch Velvet Accent", oldPrice: "4.500.000", price: "3.800.000", discount: "15%", description: "Outerwear dengan tekstur beludru kelas tinggi yang menambahkan impresi megah seketika pada busana basic Anda. Jahitan tepi eksklusif buatan tangan.", material: "Royal Velvet Brocade", fit: "Structured Silhouette", img: "https://plus.unsplash.com/premium_photo-1755958632983-adbc0ff3b41b?q=80&w=600" }
   ]);
 
-  const [transactions] = useState([
-    { id: "VLR-88291", item: "Amour Silk Evening Gown", type: "Custom Tailored", date: "15 Juni 2026", status: "In Alteration", price: "Rp 7.500.000" },
-    { id: "VLR-87102", item: "Elysian Linen Blazer Blouse", type: "Ready-to-Wear", date: "02 Mei 2026", status: "Completed", price: "Rp 3.200.000" },
-    { id: "VLR-85940", item: "Monarch Velvet Corset Accent", type: "Custom Tailored", date: "24 April 2026", status: "Completed", price: "Rp 3.800.000" }
-  ]);
-
-  const [wishlist] = useState([
-    { name: "Sienna Satin Slip Dress", price: "Rp 4.200.000", img: "👗" },
-    { name: "Aurora Tweed Outer Jacket", price: "Rp 5.100.000", img: "🧥" }
-  ]);
-
-  useEffect(() => {
-    if (currentUser) {
-      setProfile((prev) => ({
-        ...prev,
-        nama: currentUser.name || "Veloura Customer",
-        email: currentUser.email || "client@veloura.com",
-      }));
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    setFormData({ ...profile });
-  }, [profile, isEditDialogOpen]);
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    setProfile({ ...formData });
+  // Fungsi Tambah Ke Keranjang
+  const handleAddToCart = (product, e) => {
+    e.stopPropagation();
+    setCartCount(prev => prev + 1);
+    setMemberPoints(prev => prev + 150); 
     
-    if (currentUser) {
-      const updatedUser = { ...currentUser, name: formData.nama };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setCurrentUser(updatedUser);
-      window.dispatchEvent(new Event("localUserUpdate"));
-    }
-    
-    setIsEditDialogOpen(false);
+    setToastMessage(`Sukses memasukkan "${product.name}" ke keranjang Atelier Anda.`);
+    setTimeout(() => setToastMessage(""), 4000);
   };
 
-  const handleFeedbackSubmit = (e) => {
-    e.preventDefault();
-    if (!feedbackMessage.trim()) return;
-    
-    setFeedbackStatus("success");
-    setFeedbackMessage("");
-    setTimeout(() => setFeedbackStatus(""), 4000);
-  };
-
-  const toggleClaimVoucher = (title) => {
-    if (claimedVouchers.includes(title)) {
-      setClaimedVouchers(claimedVouchers.filter(t => t !== title));
-    } else {
-      setClaimedVouchers([...claimedVouchers, title]);
-    }
+  // Fungsi Tambah Ke Wishlist
+  const handleToggleWishlist = (product, e) => {
+    e.stopPropagation();
+    setWishlistCount(prev => prev + 1);
+    setToastMessage(`Koleksi "${product.name}" disimpan ke galeri inspirasi Anda.`);
+    setTimeout(() => setToastMessage(""), 4000);
   };
 
   return (
-    <div className="w-full min-h-screen bg-bg-main font-quicksand text-primary-dark pb-16">
+    <div className="w-full min-h-screen bg-[#faf9f5] relative flex flex-col">
+      {/* Toast Notification Premium */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#2c3218] border border-white/10 text-white px-5 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-fade-in max-w-sm backdrop-blur-md">
+          <FiCheckCircle className="text-[#f7d6d6] text-xl shrink-0" />
+          <p className="text-xs font-quicksand font-medium leading-relaxed">{toastMessage}</p>
+        </div>
+      )}
+
+      {/* Header Premium Utama */}
+      <HeaderMember cartCount={cartCount} wishlistCount={wishlistCount} /> 
       
-      {/* HEADER UTAMA VELOURA BOUTIQUE */}
-      <header className="w-full bg-white border-b border-border-subtle px-6 py-4 flex items-center justify-between shadow-veloura">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-bold tracking-widest font-playfair uppercase text-primary-dark">
-            Veloura<span className="text-secondary-light font-accent normal-case lowercase text-3xl">.</span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate("/contact")}
-            className="flex items-center gap-1.5 bg-bg-soft border border-border-subtle text-primary-dark text-xs font-bold px-4 py-2 rounded-xl hover:bg-white transition cursor-pointer"
-          >
-            <FiHeadphones size={13} className="text-secondary-light" />
-            <span>Concierge Service</span>
-          </button>
-          <div className="flex items-center gap-2 bg-primary-dark text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs">
-            <FiUser size={13} className="text-primary-light" />
-            <span>{profile.nama}</span>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-6 mt-8 space-y-6">
+      {/* Konten Utama Dashboard */}
+      <div className="flex-grow max-w-7xl mx-auto px-6 sm:px-10 py-10 space-y-10 font-quicksand text-[#2c3218] w-full">
         
-        {/* HERO BANNER */}
-        <section className="w-full bg-gradient-to-r from-primary-dark via-[#5c653b] to-[#3a3f24] rounded-3xl p-8 text-white shadow-veloura relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-3 max-w-2xl z-10">
-            <span className="inline-block bg-primary-light/30 border border-primary-light/40 text-bg-soft text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-              ✨ Member Privilege Area
+        {/* LUXURY BANNER ARCHETYPE */}
+        <section className="w-full bg-gradient-to-br from-[#2c3218] via-[#3a3f24] to-[#1e2210] rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 border border-white/10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
+          
+          <div className="space-y-5 max-w-2xl z-10">
+            <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 text-[#fcfbf9] text-[10px] font-bold px-4 py-2 rounded-full uppercase tracking-widest">
+              ✨ Haute Couture Private Access
             </span>
-            <h2 className="text-3xl font-normal tracking-wide font-playfair text-white">
-              Selamat Datang, <span className="font-family text-4xl text-bg-soft block md:inline">{profile.nama}</span>
+            <h2 className="text-3xl sm:text-5xl font-normal font-playfair tracking-wide leading-tight">
+              Selamat Datang Kembali, <br />
+              {/* Nama berubah dinamis sesuai data user login */}
+              <span className="text-[#f7d6d6] font-light italic block mt-1">
+                {currentUser?.name || "VIP Member"}
+              </span>
             </h2>
-            <p className="text-xs text-bg-soft/90 leading-relaxed font-medium font-quicksand max-w-xl">
-              Akses koleksi teranyar desainer Anda, kelola arsip detail fitting busana pribadi, serta klaim privilese potongan harga eksklusif butik Veloura dari satu tempat terpusat.
+            <p className="text-xs sm:text-sm text-stone-300 font-light max-w-xl leading-relaxed">
+              Akses kurasi eksklusif busana musim ini, kelola detail cetak pola fitting personal garmen Anda, dan nikmati layanan prioritas asisten mode utama kami.
             </p>
-            <div className="flex gap-2.5 pt-2">
-              <button 
-                onClick={() => navigate("/shop")}
-                className="bg-secondary-light text-white hover:bg-hover-rose text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition cursor-pointer border border-transparent"
-              >
-                Jelajahi Koleksi
-              </button>
-              <button 
-                onClick={() => navigate("/contact")}
-                className="bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition cursor-pointer"
-              >
-                Hubungi Personal Stylist
-              </button>
-            </div>
           </div>
 
-          {/* Kotak Agenda Fitting Terdekat */}
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 w-full md:w-72 shadow-inner z-10">
-            <p className="text-[10px] text-primary-light uppercase tracking-widest font-bold">Agenda Fitting Koleksi</p>
-            <h3 className="text-base font-normal mt-1.5 text-white font-playfair">Veloura Private Trunk Show</h3>
-            <div className="mt-3 space-y-2 text-xs font-quicksand text-bg-soft/90">
-              <div className="flex items-center gap-2">
-                <FiShoppingBag size={12} className="text-primary-light" />
-                <span>VIP Suite Room - Main Atelier</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FiCalendar size={12} className="text-primary-light" />
-                <span>28 Juni 2026, 14:00 WIB</span>
-              </div>
-            </div>
-          </div>
-          <div className="absolute -right-16 -top-16 w-64 h-64 bg-primary-light/10 rounded-full blur-3xl pointer-events-none"></div>
-        </section>
-
-        {/* 4 CARDS AKUN MEMBER (GRID) */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-border-subtle shadow-veloura flex flex-col justify-between h-28">
-            <div className="flex justify-between items-center">
-              <div className="w-8 h-8 bg-bg-soft text-primary-dark rounded-xl flex items-center justify-center"><FiUser size={14} /></div>
-              <span className="bg-primary-light/10 text-primary-dark text-[9px] font-bold px-2 py-0.5 rounded-md tracking-wider uppercase">VIP Tier</span>
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-stone-400 block uppercase tracking-wider">Status Akun</span>
-              <p className="text-lg font-normal text-primary-dark mt-0.5 font-playfair">Active Client</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-border-subtle shadow-veloura flex flex-col justify-between h-28">
-            <div className="flex justify-between items-center">
-              <div className="w-8 h-8 bg-bg-soft text-secondary-light rounded-xl flex items-center justify-center"><FiAward size={14} /></div>
-              <span className="bg-bg-soft text-secondary-dark text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Elite Tier</span>
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-stone-400 block uppercase tracking-wider">Level Membership</span>
-              <p className="text-lg font-normal text-secondary-dark mt-0.5 font-playfair">Gold Insignia</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-border-subtle shadow-veloura flex flex-col justify-between h-28">
-            <div className="flex justify-between items-center">
-              <div className="w-8 h-8 bg-bg-soft text-primary-light rounded-xl flex items-center justify-center"><FiShoppingBag size={14} /></div>
-              <span className="bg-stone-100 text-stone-600 text-[10px] font-bold px-2 py-0.5 rounded-md">Veloura Order</span>
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-stone-400 block uppercase tracking-wider">Total Item Koleksi</span>
-              <p className="text-lg font-normal text-primary-dark mt-0.5 font-playfair">{transactions.length} Busana Terdaftar</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-border-subtle shadow-veloura flex flex-col justify-between h-28">
-            <div className="flex justify-between items-center">
-              <div className="w-8 h-8 bg-bg-soft text-secondary-light rounded-xl flex items-center justify-center"><FiHeart size={14} /></div>
-              <span className="bg-bg-soft text-secondary-light text-[10px] font-bold px-2 py-0.5 rounded-md">Maison Point</span>
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-stone-400 block uppercase tracking-wider">Total Akumulasi Pembelian</span>
-              <p className="text-lg font-normal text-primary-dark mt-0.5 font-playfair">Rp 14.500.000</p>
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 w-full lg:w-80 relative overflow-hidden shadow-2xl z-10">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#c97d7d]"></div>
+            <span className="text-[10px] text-[#f7d6d6] uppercase tracking-widest font-bold block">Agenda Fitting Terdekat</span>
+            <h3 className="text-lg font-normal mt-1 text-white font-playfair">Veloura Private Trunk Show</h3>
+            <div className="mt-4 space-y-3 text-xs text-stone-300 font-light">
+              <div className="flex items-center gap-2"><FiMapPin className="text-[#c97d7d]" size={13}/> VIP Suite Room - Main Atelier</div>
+              <div className="flex items-center gap-2"><FiCalendar className="text-[#c97d7d]" size={13}/> Kamis, 25 Juni 2026</div>
             </div>
           </div>
         </section>
 
-        {/* SECTION: GALERI PRIVATE SALE */}
-        <section className="bg-white p-6 rounded-2xl border border-border-subtle shadow-veloura space-y-4">
-          <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+        {/* METRICS & LOYALTY GRID */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-2xl border border-[#e6e4dd] shadow-xs flex items-center justify-between hover:border-stone-400 transition duration-300">
             <div>
-              <h3 className="text-base font-normal text-primary-dark uppercase tracking-wider font-playfair">Veloura Special Selection</h3>
-              <p className="text-[11px] text-stone-400 font-quicksand">Katalog penawaran khusus terkurasi hanya untuk member terdaftar.</p>
+              <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">Maison Tier Status</span>
+              <p className="text-xl font-normal font-playfair text-[#2c3218] mt-1">Gold Insignia</p>
+              <span className="text-[11px] text-[#c97d7d] font-semibold mt-1 inline-block">Top 5% Elite Client</span>
             </div>
-            <div className="flex items-center gap-1.5 text-secondary-light text-xs font-bold bg-secondary-light/10 px-3 py-1 rounded-full">
-              <FiTag size={12} />
-              <span>Exclusive Deals</span>
+            <div className="w-12 h-12 bg-[#faf9f5] rounded-xl flex items-center justify-center border border-[#e6e4dd] text-xl text-[#c97d7d]"><FiAward /></div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-[#e6e4dd] shadow-xs flex flex-col justify-between hover:border-stone-400 transition duration-300 min-h-[110px]">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">Veloura Privé Points</span>
+                <p className="text-2xl font-bold font-playfair text-[#2c3218] mt-0.5">{memberPoints.toLocaleString()} <span className="text-xs font-quicksand font-normal text-stone-500">Pts</span></p>
+              </div>
+              <div className="w-12 h-12 bg-[#faf9f5] rounded-xl flex items-center justify-center border border-[#e6e4dd] text-xl text-[#c97d7d]"><FiGift /></div>
+            </div>
+            <div className="mt-3">
+              <div className="flex justify-between text-[10px] text-stone-400 mb-1">
+                <span>Progress ke Diamond</span>
+                <span>81%</span>
+              </div>
+              <div className="w-full bg-[#faf9f5] h-1.5 rounded-full border border-[#e6e4dd] overflow-hidden">
+                <div className="bg-[#3a3f24] h-full rounded-full transition-all duration-500" style={{ width: "81%" }}></div>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-1">
+          <div className="bg-white p-6 rounded-2xl border border-[#e6e4dd] shadow-xs flex items-center justify-between hover:border-stone-400 transition duration-300">
+            <div>
+              <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">Atelier Basket</span>
+              <p className="text-2xl font-bold font-playfair text-[#2c3218] mt-0.5">{cartCount} <span className="text-xs font-quicksand font-normal text-stone-500">Item</span></p>
+              <span className="text-[11px] text-[#3a3f24] font-medium inline-block mt-1">Siap Menuju Checkout</span>
+            </div>
+            <div className="w-12 h-12 bg-[#faf9f5] rounded-xl flex items-center justify-center border border-[#e6e4dd] text-xl text-[#3a3f24]"><FiShoppingBag /></div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-[#e6e4dd] shadow-xs flex items-center justify-between hover:border-stone-400 transition duration-300">
+            <div>
+              <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">Wishlist Terpanau</span>
+              <p className="text-2xl font-bold font-playfair text-[#2c3218] mt-0.5">{wishlistCount} <span className="text-xs font-quicksand font-normal text-stone-500">Koleksi</span></p>
+              <span className="text-[11px] text-stone-400 mt-1 inline-block">Galeri Terkurasi</span>
+            </div>
+            <div className="w-12 h-12 bg-[#faf9f5] rounded-xl flex items-center justify-center border border-[#e6e4dd] text-xl text-[#c97d7d]"><FiHeart /></div>
+          </div>
+        </section>
+
+        {/* LOOKBOOK INTERAKTIF */}
+        <section className="bg-white p-6 sm:p-10 rounded-3xl border border-[#e6e4dd] space-y-8 shadow-xs">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#e6e4dd] pb-6 gap-4">
+            <div>
+              <h3 className="text-xl font-normal text-[#2c3218] uppercase tracking-wide font-playfair">Veloura Lookbook Selection</h3>
+              <p className="text-xs text-stone-400 mt-1">Katalog penawaran premium terkurasi terbatas hanya untuk pemegang hak akses utama.</p>
+            </div>
+            <span className="bg-[#f7d6d6]/40 text-[#a35c5c] text-[10px] font-bold px-4 py-2 rounded-full uppercase tracking-wider flex items-center gap-1.5 border border-[#e6e4dd]">
+              <FiTag size={12}/> Exclusive Member Pricing
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             {saleProducts.map((product) => (
-              <div 
-                key={product.id} 
-                onClick={() => navigate(`/shop/${product.slug}`)}
-                className="group bg-bg-soft rounded-xl border border-border-subtle overflow-hidden cursor-pointer shadow-xs hover:shadow-md hover:border-stone-300 transition-all duration-300 flex flex-col"
-              >
-                <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-100">
-                  <img src={product.img} alt={product.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                  <span className="absolute top-2.5 left-2.5 bg-secondary-light text-white text-[10px] font-bold px-2 py-0.5 rounded-md tracking-wider shadow-sm">
-                    {product.discount} OFF
-                  </span>
-                </div>
-                <div className="p-3.5 flex flex-col flex-grow justify-between bg-white">
-                  <div className="space-y-1">
-                    <h4 className="text-xs font-semibold text-primary-dark font-playfair group-hover:text-secondary-light transition-colors line-clamp-1">
-                      {product.name}
-                    </h4>
-                    <p className="text-[10px] text-stone-400 tracking-wider">Veloura Limited Edition</p>
-                  </div>
-                  <div className="flex items-baseline justify-between pt-3 mt-auto border-t border-stone-100">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] text-stone-400 line-through">Rp {product.oldPrice}</span>
-                      <span className="text-xs font-bold text-primary-dark">Rp {product.price}</span>
-                    </div>
-                    <span className="p-1.5 bg-bg-soft text-primary-dark group-hover:bg-primary-dark group-hover:text-white rounded-lg transition-colors duration-200">
-                      <FiArrowRight size={11} />
+              <div key={product.id} className="group bg-white rounded-2xl border border-[#e6e4dd] overflow-hidden hover:shadow-xl hover:border-stone-400 transition-all duration-500 flex flex-col justify-between">
+                
+                <div className="relative aspect-[3/4] bg-stone-100 overflow-hidden cursor-pointer" onClick={() => setSelectedProduct(product)}>
+                  <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <span className="absolute top-4 left-4 bg-[#c97d7d] text-white text-[10px] font-bold px-3 py-1 rounded-md tracking-wider shadow-md">{product.discount} OFF</span>
+                  
+                  <button 
+                    onClick={(e) => handleToggleWishlist(product, e)}
+                    className="absolute top-4 right-4 p-2.5 bg-white/80 backdrop-blur-md text-stone-600 hover:text-rose-500 rounded-full shadow-md transition z-10"
+                  >
+                    <FiHeart size={14} />
+                  </button>
+
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <span className="bg-white/90 backdrop-blur-sm text-[#2c3218] text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <FiEye size={14} /> Lihat Detail
                     </span>
                   </div>
                 </div>
+
+                <div className="p-5 flex flex-col justify-between flex-grow bg-white">
+                  <div>
+                    <h4 className="text-sm font-medium text-[#2c3218] font-playfair tracking-wide group-hover:text-[#c97d7d] transition-colors cursor-pointer" onClick={() => setSelectedProduct(product)}>{product.name}</h4>
+                    <p className="text-[10px] text-stone-400 tracking-wider mt-1 uppercase font-bold">Limited Atelier Run</p>
+                  </div>
+                  
+                  <div className="flex items-baseline justify-between pt-4 mt-5 border-t border-stone-100">
+                    <div className="flex flex-col">
+                      <span className="text-[11px] text-stone-400 line-through">Rp {product.oldPrice}</span>
+                      <span className="text-base font-bold text-[#2c3218]">Rp {product.price}</span>
+                    </div>
+                    <button 
+                      onClick={(e) => handleAddToCart(product, e)}
+                      className="p-3 bg-[#faf9f5] text-[#2c3218] hover:bg-[#3a3f24] hover:text-white rounded-xl transition-all duration-300 border border-[#e6e4dd] flex items-center justify-center"
+                    >
+                      <FiShoppingBag size={14} />
+                    </button>
+                  </div>
+                </div>
+
               </div>
             ))}
           </div>
         </section>
+      </div>
 
-        {/* SECTION: DETAIL PROFILE, VOUCHER, & ORDERS */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          
-          {/* Profil Ukuran */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-border-subtle shadow-veloura space-y-5">
-            <div className="flex justify-between items-center border-b border-border-subtle pb-3">
-              <div>
-                <h3 className="text-base font-normal text-primary-dark uppercase tracking-wider font-playfair">Profil & Ukuran Mode</h3>
-                <p className="text-[11px] text-stone-400 font-quicksand">Konfigurasi ini otomatis digunakan untuk mempermudah kustomisasi garmen Anda.</p>
-              </div>
-              <button 
-                onClick={() => setIsEditDialogOpen(true)}
-                className="flex items-center gap-1 text-white bg-primary-light hover:bg-hover-green text-xs font-bold px-3 py-1.5 rounded-xl transition cursor-pointer"
-              >
-                <FiScissors size={12} />
-                <span>Sesuaikan Ukuran</span>
-              </button>
+      {/* Footer Utama */}
+      <FooterMember />
+
+      {/* QUICK VIEW DETAILS MODAL */}
+      {selectedProduct && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 transition-opacity duration-300">
+          <div className="bg-[#faf9f5] w-full max-w-3xl rounded-3xl overflow-hidden shadow-2xl border border-[#e6e4dd] flex flex-col md:flex-row relative animate-scale-up">
+            
+            <button 
+              onClick={() => setSelectedProduct(null)}
+              className="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full text-stone-700 shadow-md transition"
+            >
+              <FiX size={18} />
+            </button>
+
+            <div className="w-full md:w-1/2 aspect-square md:aspect-auto md:h-[450px] bg-stone-200">
+              <img src={selectedProduct.img} alt={selectedProduct.name} className="w-full h-full object-cover" />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-quicksand">
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-stone-400 block tracking-wider">Nama Klien</label>
-                <p className="text-xs font-semibold bg-bg-soft p-3 rounded-xl border border-border-subtle text-primary-dark">{profile.nama}</p>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-stone-400 block tracking-wider">Email</label>
-                <p className="text-xs font-semibold bg-bg-soft p-3 rounded-xl border border-border-subtle text-primary-dark truncate">{profile.email}</p>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <label className="text-[10px] uppercase font-bold text-stone-400 block tracking-wider">Kontak Telepon</label>
-                <p className="text-xs font-semibold bg-bg-soft p-3 rounded-xl border border-border-subtle text-primary-dark">{profile.phone}</p>
-              </div>
-              <div className="grid grid-cols-4 gap-2 sm:col-span-2 mt-2">
-                <div className="bg-bg-soft border border-border-subtle rounded-xl p-2.5 text-center">
-                  <span className="text-[9px] text-stone-400 block uppercase font-bold">Standard</span>
-                  <span className="text-sm font-bold text-primary-dark">{profile.size}</span>
-                </div>
-                <div className="bg-bg-soft border border-border-subtle rounded-xl p-2.5 text-center">
-                  <span className="text-[9px] text-stone-400 block uppercase font-bold">L. Dada</span>
-                  <span className="text-sm font-bold text-primary-dark">{profile.lingkarDada} cm</span>
-                </div>
-                <div className="bg-bg-soft border border-border-subtle rounded-xl p-2.5 text-center">
-                  <span className="text-[9px] text-stone-400 block uppercase font-bold">L. Pinggang</span>
-                  <span className="text-sm font-bold text-primary-dark">{profile.lingkarPinggang} cm</span>
-                </div>
-                <div className="bg-bg-soft border border-border-subtle rounded-xl p-2.5 text-center">
-                  <span className="text-[9px] text-stone-400 block uppercase font-bold">Tinggi</span>
-                  <span className="text-sm font-bold text-primary-dark">{profile.tinggiBadan} cm</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Eksklusif Voucher */}
-          <div className="bg-white p-6 rounded-2xl border border-border-subtle shadow-veloura space-y-4">
-            <div className="flex justify-between items-center border-b border-border-subtle pb-3">
-              <div>
-                <h3 className="text-base font-normal text-primary-dark uppercase tracking-wider font-playfair">Veloura Privileges</h3>
-                <p className="text-[11px] text-stone-400 font-quicksand">Hak istimewa potongan harga butik.</p>
-              </div>
-              <span className="text-secondary-light"><FiPercent size={16} /></span>
-            </div>
-
-            <div className="space-y-3 font-quicksand">
-              {[
-                { title: "Private Couture Collection", desc: "Potongan khusus gaun sutra alam", discount: "15% OFF" },
-                { title: "Complimentary Alteration", desc: "Bebas biaya perbaikan & fitting custom", discount: "FREE" }
-              ].map((promo, idx) => {
-                const isClaimed = claimedVouchers.includes(promo.title);
-                return (
-                  <div key={idx} className="bg-bg-soft p-4 rounded-xl border border-dashed border-primary-light flex justify-between items-center gap-3">
-                    <div className="truncate">
-                      <h4 className="text-xs font-bold text-primary-dark truncate font-playfair">{promo.title}</h4>
-                      <p className="text-[10px] text-stone-500 mt-0.5 truncate">{promo.desc}</p>
-                      <button 
-                        onClick={() => toggleClaimVoucher(promo.title)}
-                        className={`text-[10px] font-bold mt-2 flex items-center gap-1 cursor-pointer transition ${isClaimed ? 'text-primary-light' : 'text-secondary-light hover:underline'}`}
-                      >
-                        {isClaimed ? (
-                          <><FiCheckCircle size={10} /> <span>Claimed Code</span></>
-                        ) : (
-                          <><span>Gunakan Kode</span> <FiArrowRight size={10} /></>
-                        )}
-                      </button>
-                    </div>
-                    <span className={`font-bold text-[10px] tracking-wider px-2.5 py-1 rounded-lg shrink-0 ${isClaimed ? 'bg-primary-light text-white' : 'bg-primary-dark text-white'}`}>
-                      {promo.discount}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Tabel Riwayat Pesanan */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-border-subtle shadow-veloura space-y-4">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-              <div>
-                <h3 className="text-base font-normal text-primary-dark uppercase tracking-wider font-playfair">Arsip Pesanan & Busana</h3>
-                <p className="text-[11px] text-stone-400 font-quicksand">Status pelacakan serta riwayat faktur pembelian Anda.</p>
-              </div>
-              <FiShoppingBag className="text-primary-light" size={16} />
-            </div>
-
-            <div className="overflow-x-auto w-full">
-              <table className="w-full text-left border-collapse font-quicksand text-xs">
-                <thead>
-                  <tr className="border-b border-border-subtle text-stone-400 uppercase tracking-wider text-[10px]">
-                    <th className="py-2.5 font-bold">Invoice / Item</th>
-                    <th className="py-2.5 font-bold">Kategori</th>
-                    <th className="py-2.5 font-bold">Status Proses</th>
-                    <th className="py-2.5 font-bold text-right">Nilai Garmen</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-100">
-                  {transactions.map((tx, idx) => (
-                    <tr key={idx} className="hover:bg-bg-soft/50 transition-colors">
-                      <td className="py-3 pr-2">
-                        <span className="block font-bold text-stone-400 text-[10px]">{tx.id}</span>
-                        <span className="font-semibold text-primary-dark font-playfair text-xs">{tx.item}</span>
-                      </td>
-                      <td className="py-3 text-stone-500 font-medium">{tx.type}</td>
-                      <td className="py-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${tx.status === 'In Alteration' ? 'bg-secondary-light/10 text-secondary-dark' : 'bg-primary-light/10 text-primary-dark'}`}>
-                          {tx.status}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right font-bold text-primary-dark">{tx.price}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Wishlist */}
-          <div className="bg-white p-6 rounded-2xl border border-border-subtle shadow-veloura space-y-4">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-              <div>
-                <h3 className="text-base font-normal text-primary-dark uppercase tracking-wider font-playfair">Radar Wishlist VIP</h3>
-                <p className="text-[11px] text-stone-400 font-quicksand">Koleksi tersimpan untuk peninjauan garmen mendatang.</p>
-              </div>
-              <FiHeart className="text-secondary-light" size={16} />
-            </div>
-
-            <div className="space-y-3 font-quicksand">
-              {wishlist.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2.5 bg-bg-soft rounded-xl border border-border-subtle">
-                  <div className="flex items-center gap-3 truncate">
-                    <span className="text-2xl p-1 bg-white rounded-lg shadow-2xs border border-border-subtle">{item.img}</span>
-                    <div className="truncate">
-                      <h4 className="text-xs font-bold text-primary-dark font-playfair truncate">{item.name}</h4>
-                      <p className="text-[10px] text-stone-400 mt-0.5">{item.price}</p>
-                    </div>
-                  </div>
-                  <button onClick={() => navigate("/shop")} className="p-2 bg-white text-primary-dark hover:bg-primary-dark hover:text-white rounded-xl transition border border-border-subtle shrink-0 cursor-pointer">
-                    <FiArrowRight size={12} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FEEDBACK & HELP CENTER SECTION */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-          
-          {/* Kirim Masukan / Feedback */}
-          <div className="bg-white p-6 rounded-2xl border border-border-subtle shadow-veloura space-y-4">
-            <div className="flex items-center gap-2 border-b border-border-subtle pb-3">
-              <div className="p-2 bg-bg-soft text-primary-light rounded-xl"><FiMessageSquare size={16} /></div>
-              <div>
-                <h3 className="text-base font-normal text-primary-dark uppercase tracking-wider font-playfair">Kirim Feedback</h3>
-                <p className="text-[11px] text-stone-400">Suara Anda membantu Veloura menyajikan kualitas busana dan layanan terbaik.</p>
-              </div>
-            </div>
-
-            <form onSubmit={handleFeedbackSubmit} className="space-y-3 font-quicksand">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Kategori Masukan</label>
-                <select 
-                  value={feedbackCategory}
-                  onChange={(e) => setFeedbackCategory(e.target.value)}
-                  className="w-full bg-bg-soft border border-border-subtle rounded-xl p-2.5 text-xs font-medium focus:outline-hidden focus:border-stone-400"
-                >
-                  <option value="Pelayanan Butik">Pelayanan Butik & Stylist</option>
-                  <option value="Kualitas Pakaian">Kualitas Bahan & Jahitan Garmen</option>
-                  <option value="Sistem Aplikasi">Aplikasi & Pengalaman Member</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Pesan Anda</label>
-                <textarea 
-                  rows="3"
-                  value={feedbackMessage}
-                  onChange={(e) => setFeedbackMessage(e.target.value)}
-                  placeholder="Tulis kritik, saran, atau impresi pengalaman belanja Anda di sini..."
-                  className="w-full bg-bg-soft border border-border-subtle rounded-xl p-3 text-xs placeholder-stone-400 focus:outline-hidden focus:border-stone-400 resize-none"
-                  required
-                ></textarea>
-              </div>
-              
-              {feedbackStatus === "success" && (
-                <p className="text-[11px] text-primary-light font-semibold flex items-center gap-1">
-                  <FiCheckCircle size={12} /> Terima kasih! Masukan Anda telah kami terima dengan baik.
-                </p>
-              )}
-
-              <button 
-                type="submit"
-                className="w-full bg-primary-dark hover:bg-[#3a3f24] text-white text-xs font-bold py-2.5 rounded-xl shadow-xs transition cursor-pointer"
-              >
-                Kirim Feedback Pribadi
-              </button>
-            </form>
-          </div>
-
-          {/* Butuh Bantuan / Hubungi Layanan Pelanggan */}
-          <div className="bg-white p-6 rounded-2xl border border-border-subtle shadow-veloura flex flex-col justify-between space-y-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 border-b border-border-subtle pb-3">
-                <div className="p-2 bg-bg-soft text-secondary-light rounded-xl"><FiHelpCircle size={16} /></div>
+            <div className="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-between font-quicksand text-[#2c3218]">
+              <div className="space-y-4">
                 <div>
-                  <h3 className="text-base font-normal text-primary-dark uppercase tracking-wider font-playfair">Butuh Bantuan?</h3>
-                  <p className="text-[11px] text-stone-400">Tim asisten Butik Veloura siap mendampingi kendala Anda.</p>
+                  <span className="bg-[#c97d7d]/10 text-[#c97d7d] text-[10px] font-bold px-3 py-1 rounded-md uppercase tracking-wider">{selectedProduct.discount} ATELIER PRIVILEGE</span>
+                  <h3 className="text-2xl font-normal font-playfair text-[#2c3218] mt-2 leading-tight">{selectedProduct.name}</h3>
+                </div>
+
+                <div className="flex items-baseline gap-3">
+                  <span className="text-xl font-bold text-[#2c3218]">Rp {selectedProduct.price}</span>
+                  <span className="text-xs text-stone-400 line-through">Rp {selectedProduct.oldPrice}</span>
+                </div>
+
+                <p className="text-xs text-stone-600 font-light leading-relaxed">{selectedProduct.description}</p>
+
+                <div className="pt-2 space-y-1.5 text-xs text-stone-500 border-t border-stone-200/60">
+                  <p><strong className="text-stone-700 font-medium">Material:</strong> {selectedProduct.material}</p>
+                  <p><strong className="text-stone-700 font-medium">Fitting Blueprint:</strong> {selectedProduct.fit}</p>
                 </div>
               </div>
 
-              {/* Daftar FAQ Cepat */}
-              <div className="space-y-2.5 text-xs text-stone-600 font-medium font-quicksand">
-                <div className="p-3 bg-bg-soft rounded-xl border border-border-subtle flex justify-between items-center group hover:bg-stone-50 transition-colors cursor-pointer">
-                  <span>Bagaimana cara menjadwalkan ulang agenda fitting?</span>
-                  <FiArrowRight size={12} className="text-stone-400 group-hover:text-primary-dark" />
-                </div>
-                <div className="p-3 bg-bg-soft rounded-xl border border-border-subtle flex justify-between items-center group hover:bg-stone-50 transition-colors cursor-pointer">
-                  <span>Apakah bisa meminta modifikasi garmen di luar size standar?</span>
-                  <FiArrowRight size={12} className="text-stone-400 group-hover:text-primary-dark" />
-                </div>
-                <div className="p-3 bg-bg-soft rounded-xl border border-border-subtle flex justify-between items-center group hover:bg-stone-50 transition-colors cursor-pointer">
-                  <span>Ketentuan pengembalian produk edisi terbatas</span>
-                  <FiArrowRight size={12} className="text-stone-400 group-hover:text-primary-dark" />
-                </div>
+              <div className="mt-8 flex gap-3">
+                <button 
+                  onClick={(e) => { handleAddToCart(selectedProduct, e); setSelectedProduct(null); }}
+                  className="flex-1 bg-[#3a3f24] hover:bg-[#2c3218] text-white text-xs font-bold py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-md"
+                >
+                  <FiShoppingBag size={14} />
+                  <span>Masukkan Keranjang</span>
+                </button>
+                <button 
+                  onClick={(e) => { handleToggleWishlist(selectedProduct, e); setSelectedProduct(null); }}
+                  className="p-3.5 bg-white border border-[#e6e4dd] text-stone-600 hover:text-rose-500 hover:border-stone-400 rounded-xl transition shadow-xs"
+                >
+                  <FiHeart size={14} />
+                </button>
               </div>
             </div>
 
-            {/* Tombol Hubungi Live Support */}
-            <div className="pt-2">
-              <button 
-                onClick={() => window.open("https://wa.me/6281299001122", "_blank")}
-                className="w-full bg-secondary-light hover:bg-hover-rose text-white text-xs font-bold py-2.5 rounded-xl shadow-xs transition cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <FiHeadphones size={14} />
-                <span>Hubungi Personal Concierge (WhatsApp)</span>
-              </button>
-            </div>
           </div>
-
-        </section>
-      </main>
-
-      {/* SHADCN CUSTOM MODAL FOR EDIT DATA */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[420px] rounded-2xl bg-white p-6 font-quicksand border border-border-subtle shadow-veloura">
-          <DialogHeader>
-            <DialogTitle className="text-base font-normal text-primary-dark uppercase tracking-wider font-playfair">Ubah Data Klien & Ukuran Garmen</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleFormSubmit} className="space-y-3.5 pt-2">
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Nama Lengkap</label>
-              <Input value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} className="rounded-xl h-9 text-xs border-border-subtle focus:ring-primary-light focus:border-primary-light" required />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Nomor Handphone</label>
-              <Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="rounded-xl h-9 text-xs border-border-subtle" required />
-            </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Standard Pakaian</label>
-                <Input value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} placeholder="S, M, L, XL" className="rounded-xl h-9 text-xs border-border-subtle" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Lingkar Dada (cm)</label>
-                <Input value={formData.lingkarDada} onChange={e => setFormData({...formData, lingkarDada: e.target.value})} className="rounded-xl h-9 text-xs border-border-subtle" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Lingkar Pinggang (cm)</label>
-                <Input value={formData.lingkarPinggang} onChange={e => setFormData({...formData, lingkarPinggang: e.target.value})} className="rounded-xl h-9 text-xs border-border-subtle" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Tinggi Badan (cm)</label>
-                <Input value={formData.tinggiBadan} onChange={e => setFormData({...formData, tinggiBadan: e.target.value})} className="rounded-xl h-9 text-xs border-border-subtle" />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-border-subtle">
-              <button type="button" onClick={() => setIsEditDialogOpen(false)} className="px-4 h-9 bg-bg-soft text-stone-500 text-xs font-semibold rounded-xl hover:bg-stone-200 transition">Batal</button>
-              <button type="submit" className="px-4 h-9 bg-primary-dark text-white rounded-xl text-xs font-semibold hover:bg-hover-green transition">Simpan Perubahan</button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 };
