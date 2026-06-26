@@ -95,3 +95,43 @@ Memperluas informasi pada landing page dengan menyajikan masalah nyata butik (*P
 ## 7. Commit Git V2
 *   **Commit Hash**: `a6e7ab7`
 *   **Pesan Commit**: `feat: menambahkan problem, solution, feature, benefit dan statistik`
+
+---
+
+# ==========================================
+# PRD VERSI 3: Finalisasi Landing Page (Area BOTTOM & AIDA Lengkap)
+# ==========================================
+
+## 1. Tujuan Produk
+Membangun Landing Page Veloura Boutique CRM versi final dan utuh dengan menyatukan seluruh elemen arsitektur (Area TOP, MIDDLE, BOTTOM) secara dinamis, persuasif, serta meningkatkan tingkat konversi pendaftaran dengan menambahkan bukti sosial (*Social Proof*), alur kerja (*Workflow*), dan klarifikasi keraguan (*FAQ*).
+
+## 2. User Story
+*   **Sebagai** calon pengguna (pemilik/manajer butik),
+*   **Saya ingin** membaca ulasan dari pemilik butik lain, melihat cara kerja sistem secara berurutan, mendapatkan jawaban atas pertanyaan krusial saya, serta dapat mendaftar langsung dengan mudah,
+*   **Agar** saya memiliki keyakinan penuh 100% untuk mengadopsi Veloura CRM tanpa keraguan teknis sedikit pun.
+
+## 3. Functional Requirement
+*   **Workflow Section**: Diagram tahapan visual proses kerja CRM (Pendaftaran, Rekam Riwayat, Naik Tier, Promosi Target).
+*   **Testimonial Section**: Slider/Grid ulasan asli dari 3 pemilik butik fiktif dengan penilaian bintang 5 dan foto profil.
+*   **FAQ Section**: Accordion interaktif berisi 5 pertanyaan fundamental (Harga, keamanan data, akses mobile, cara daftar, cara kerja membership) yang dapat di-toggle buka-tutup.
+*   **Area BOTTOM CTA**: Banner berukuran besar berwarna gelap mewah (*slate*) kontras dengan tombol daftar gratis bercahaya gradasi untuk menarik keputusan akhir (*Action*).
+*   **Comprehensive Footer**: Menampilkan deskripsi brand, link sitemap (Product, Company, Resources), detail kontak langsung (Email, Telepon, Alamat), dan ikon media sosial (Instagram, Twitter).
+
+## 4. Struktur Landing Page Final
+*   **[TOP - Attention]**: Navigation Bar & Hero Section
+*   **[MIDDLE - Interest]**: Problem Section & Solution Section
+*   **[MIDDLE - Desire]**: Feature Section, Benefit Section, Statistics, Workflow, Testimonial, FAQ Accordion
+*   **[BOTTOM - Action]**: Large CTA Banner & Comprehensive Footer
+
+## 5. Perubahan dari Versi Sebelumnya
+*   Menambahkan interaktivitas React state (`openFaq`) untuk toggle Accordion FAQ.
+*   Menyempurnakan Footer dan menambahkan visual testimonial serta workflow.
+*   Menggunakan skema warna butik premium dengan efek bayangan halus (*soft shadows*) dan layout memikat.
+
+## 6. Evaluasi PRD V3
+*   **Kelebihan**: Landing page sangat lengkap, interaktif, responsif, dan menyajikan visual yang menawan (premium look). Alur AIDA terpenuhi sempurna dari awal halaman hingga footer.
+*   **Hasil Akhir**: Siap dirilis sebagai portal promosi resmi Veloura Boutique CRM.
+
+## 7. Commit Git V3
+*   **Commit Hash**: `b4c3120`
+*   **Pesan Commit**: `feat: menyelesaikan landing page CRM versi final`
