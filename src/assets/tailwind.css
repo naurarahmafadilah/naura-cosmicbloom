@@ -29,12 +29,17 @@
     --font-playfair: 'PlayfairDisplay', serif;
     --font-quicksand: 'Quicksand', sans-serif;
     --font-accent: 'GreatVibes', cursive;
+    --font-poppins: 'Poppins', sans-serif;
 
     /* Colors dari Brand Identity */
     --color-primary-light: #849159;
     --color-primary-dark: #4e5631;
     --color-secondary-light: #ab656b;
     --color-secondary-dark: #784248;
+    --color-crm-pink: #F8C8DC;
+    --color-crm-pink-dark: #f0a2c0;
+    --color-crm-gold: #d4af37;
+    --color-crm-gold-dark: #b89326;
 
     /* Neutrals */
     --color-bg-main: #eff0ee;

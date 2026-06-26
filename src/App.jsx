@@ -8,6 +8,7 @@ import Loading from "./components/Loading";
 // Rute Utama & Landing
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const GuestLandingPage = lazy(() => import("./pages/GuestLandingPage")); // 🌟 TAMBAHAN
+const CRMLandingPage = lazy(() => import("./pages/CRMLandingPage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 // ==========================================================
@@ -57,6 +58,7 @@ const App = () => {
            ========================================================== */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/guest" element={<GuestLandingPage />} /> {/* 🌟 TAMBAHAN RUTE GUEST */}
+        <Route path="/crm" element={<CRMLandingPage />} />
         
         {/* Hub Utama & Modul Integrasi Member Veloura */}
         <Route path="/member" element={<MemberDashboard />} />
