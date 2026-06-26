@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Sparkles,
   ShoppingBag,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [likedProducts, setLikedProducts] = useState({});
@@ -32,7 +34,7 @@ export default function LandingPage() {
     },
     {
       "id": "s2",
-      "slug": "casual-autumn-shirt",
+      "slug": "minimalist-casual-outfit",
       "name": "Casual Autumn Shirt",
       "oldPrice": "250.000",
       "price": "180.000",
@@ -41,7 +43,7 @@ export default function LandingPage() {
     },
     {
       "id": "s3",
-      "slug": "summer-breeze-dress",
+      "slug": "summer-breeze-style",
       "name": "Summer Breeze Dress",
       "oldPrice": "400.000",
       "price": "300.000",
@@ -50,7 +52,7 @@ export default function LandingPage() {
     },
     {
       "id": "s4",
-      "slug": "minimalist-silk-outfit",
+      "slug": "modern-silk-look",
       "name": "Minimalist Silk Outfit",
       "oldPrice": "320.000",
       "price": "270.000",
@@ -64,7 +66,7 @@ export default function LandingPage() {
   };
 
   const handleNavigation = (path) => {
-    window.location.href = path;
+    navigate(path);
   };
 
   const toggleLike = (id, e) => {
@@ -235,7 +237,8 @@ export default function LandingPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="group relative flex flex-col justify-between space-y-4 bg-[#f7f8f6]/30 p-3 hover:bg-white hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-[#4e5631]/5"
+                onClick={() => handleNavigation(`/shop/${product.slug}`)}
+                className="group relative flex flex-col justify-between space-y-4 bg-[#f7f8f6]/30 p-3 hover:bg-white hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-[#4e5631]/5 cursor-pointer"
               >
                 {/* Image Container */}
                 <div className="aspect-[3/4] w-full overflow-hidden relative bg-[#4e5631]">
