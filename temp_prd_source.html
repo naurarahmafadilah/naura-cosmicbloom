@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>PRD Veloura Boutique CRM</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: #334155;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+    }
+    
+    .page {
+      padding: 40px 60px;
+      page-break-after: always;
+      position: relative;
+    }
+    
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Playfair Display', serif;
+      color: #1e293b;
+    }
+
+    /* Cover Page styling */
+    .cover-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      background: linear-gradient(135deg, #fdf6f8 0%, #ffffff 100%);
+      padding: 40px;
+      box-sizing: border-box;
+    }
+
+    .cover-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #F8C8DC 0%, #EAA1C2 100%);
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 20px rgba(248, 200, 220, 0.3);
+    }
+
+    .cover-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin: 10px 0;
+      color: #1e293b;
+    }
+
+    .cover-subtitle {
+      font-size: 18px;
+      color: #ab656b;
+      margin-bottom: 50px;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .cover-meta {
+      margin-top: 100px;
+      font-size: 12px;
+      color: #64748b;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .cover-meta p {
+      margin: 5px 0;
+    }
+
+    /* Main headings */
+    .section-title {
+      font-size: 24px;
+      border-bottom: 2px solid #F8C8DC;
+      padding-bottom: 10px;
+      margin-top: 0;
+      margin-bottom: 30px;
+      color: #1e293b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .subsection-title {
+      font-size: 16px;
+      color: #ab656b;
+      margin-top: 25px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    /* Table of contents styling */
+    .toc-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 50px 0;
+    }
+
+    .toc-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .toc-name {
+      font-weight: 500;
+    }
+
+    .toc-dots {
+      flex-grow: 1;
+      border-bottom: 1px dotted #cbd5e1;
+      margin: 0 10px;
+    }
+
+    .toc-page {
+      font-weight: bold;
+      color: #ab656b;
+    }
+
+    /* Card styling */
+    .card {
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 0;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 0;
+    }
+
+    /* Grid for layout */
+    .grid-2 {
+      display: grid;
+      grid-template-cols: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-cols: 1fr 1fr 1fr;
+      gap: 15px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-cols: 1fr 1fr 1fr 1fr;
+      gap: 15px;
+    }
+
+    /* Tag/Badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .badge-primary {
+      background-color: #fdf2f5;
+      color: #ab656b;
+      border: 1px solid #fbcfe8;
+    }
+
+    .badge-gold {
+      background-color: #fefbeb;
+      color: #b89326;
+      border: 1px solid #fef3c7;
+    }
+
+    /* Table styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 12px;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+    }
+
+    /* Code block container */
+    pre {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 11px;
+      overflow-x: auto;
+      color: #334155;
+    }
+
+    .highlight-box {
+      background-color: #fcf8fa;
+      border-left: 4px solid #ab656b;
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      font-size: 12px;
+      margin: 15px 0;
+    }
+
+    .highlight-box-title {
+      font-weight: bold;
+      color: #ab656b;
+      margin-bottom: 5px;
+    }
+
+    .page-num {
+      position: absolute;
+      bottom: 20px;
+      right: 60px;
+      font-size: 10px;
+      color: #94a3b8;
+    }
+
+    .doc-header {
+      position: absolute;
+      top: 20px;
+      left: 60px;
+      font-size: 9px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+      PAGE 1: COVER PAGE
+     ========================================== -->
+  <div class="cover-container" style="page-break-after: always;">
+    <div class="cover-logo">V</div>
+    <h1 class="cover-title">Product Requirement Document</h1>
+    <h2 class="cover-subtitle">Veloura Boutique CRM Landing Page</h2>
+    
+    <div style="width: 60px; height: 3px; bg-color: #ab656b; background: #ab656b; margin: 20px auto;"></div>
+    
+    <p style="font-size: 13px; color: #64748b; max-w-sm; max-width: 450px; margin: 0 auto; font-weight: 300;">
+      Dokumentasi komprehensif rancangan Arsitektur Landing Page dan Alur AIDA (Attention, Interest, Desire, Action) yang dikembangkan secara iteratif melalui 3 Versi PRD.
+    </p>
+
+    <div class="cover-meta">
+      <p><strong>Penulis:</strong> Naura Rahma Fadilah (NIM: 2457301111)</p>
+      <p><strong>Institusi:</strong> Politeknik Caltex Riau</p>
+      <p><strong>Tanggal:</strong> 26 Juni 2026</p>
+      <p><strong>Versi Dokumen:</strong> 3.0 (Final)</p>
+    </div>
+  </div>
+
+  <!-- ==========================================
+      PAGE 2: DAFTAR ISI & KONSEPTUAL
+     ========================================== -->
+  <div class="page">
+    <div class="doc-header">Veloura Boutique CRM - PRD</div>
+    <h2 class="section-title">Daftar Isi & Struktur Konsep</h2>
+    
+    <ul class="toc-list">
+      <li class="toc-item">
+        <span class="toc-name">1. Pendahuluan & Konsep Utama AIDA</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">Halaman 2</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-name">2. PRD Versi 1 - Fondasi Landing Page (Area TOP)</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">Halaman 3</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-name">3. Hasil Format & Desain Landing Page Versi 1</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">Halaman 4</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-name">4. PRD Versi 2 - Masalah & Manfaat (Area MIDDLE)</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">Halaman 5</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-name">5. Hasil Format & Desain Landing Page Versi 2</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">Halaman 6</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-name">6. PRD Versi 3 - Finalisasi AIDA (Area BOTTOM)</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">Halaman 7</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-name">7. Hasil Format & Desain Landing Page Versi 3 (Final)</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">Halaman 8</span>
+      </li>
+    </ul>
+
+    <div class="highlight-box">
+      <div class="highlight-box-title">Konsep Arsitektur & Alur Pengguna (AIDA)</div>
+      <p style="margin: 0; font-size: 11px;">
+        Landing page dirancang untuk membimbing calon pelanggan dari tahap <strong>Attention (Perhatian)</strong> di Area TOP (Header & Hero), menumbuhkan <strong>Interest (Minat)</strong> dan <strong>Desire (Keinginan)</strong> di Area MIDDLE (Masalah, Solusi, Fitur, Testimoni, FAQ), hingga berujung pada pengambilan keputusan <strong>Action (Tindakan)</strong> di Area BOTTOM (Tombol Registrasi Utama & Footer Lengkap).
+      </p>
+    </div>
+
+    <div class="page-num">Halaman 2</div>
+  </div>
+
+  <!-- ==========================================
+      PAGE 3: PRD VERSI 1
+     ========================================== -->
+  <div class="page">
+    <div class="doc-header">Veloura Boutique CRM - PRD V1</div>
+    <h2 class="section-title">PRD Versi 1: Fondasi Landing Page (Area TOP)</h2>
+    
+    <div class="badge badge-primary">Fokus: Attention</div>
+    
+    <h3 class="subsection-title">1. Tujuan Produk</h3>
+    <p style="font-size: 12px; margin-top: 0;">
+      Membangun kehadiran awal Veloura Boutique CRM secara sederhana untuk mengenalkan sistem kepada pemilik butik. Fokus pengembangan diletakkan sepenuhnya pada <strong>Area TOP</strong> guna menarik perhatian pertama pengunjung.
+    </p>
+
+    <h3 class="subsection-title">2. User Story</h3>
+    <p style="font-size: 12px; margin-top: 0; font-style: italic; color: #475569;">
+      "Sebagai pemilik butik fashion, saya ingin melihat pesan utama dan mockup tampilan sistem CRM secara cepat di halaman awal, agar saya dapat mengetahui apakah aplikasi ini relevan dengan bisnis pakaian saya."
+    </p>
+
+    <h3 class="subsection-title">3. Functional Requirement</h3>
+    <ul>
+      <li style="font-size: 12px;"><strong>Navbar Elegan:</strong> Logo Veloura Boutique CRM, link menu (Home, Features, Contact), tombol Login & Register.</li>
+      <li style="font-size: 12px;"><strong>Hero Headline:</strong> "Kelola Hubungan Pelanggan dengan Lebih Mudah".</li>
+      <li style="font-size: 12px;"><strong>Hero Subheadline:</strong> Deskripsi singkat fungsi CRM dalam mengelola data member, riwayat belanja, dan otomasi promosi.</li>
+      <li style="font-size: 12px;"><strong>CTA Utama:</strong> Tombol "Mulai Gratis" (Registrasi) & "Lihat Demo" (Uji Coba interaktif).</li>
+      <li style="font-size: 12px;"><strong>Visual Mockup:</strong> Ilustrasi visual dashboard analitik butik.</li>
+      <li style="font-size: 12px;"><strong>Footer Minimal:</strong> Copyright notice standar.</li>
+    </ul>
+
+    <h3 class="subsection-title">4. Evaluasi PRD V1</h3>
+    <div class="highlight-box" style="border-left-color: #ef4444; background-color: #fef2f2;">
+      <p style="margin: 0; font-size: 11px; color: #991b1b;">
+        <strong>Kekurangan Utama:</strong> Informasi produk terlalu dangkal. Pengunjung tidak diperlihatkan masalah nyata yang dapat dipecahkan, ketiadaan social proof (testimonial), serta tidak ada penjelasan detail fitur. Landing page butuh diperluas ke Area MIDDLE.
+      </p>
+    </div>
+
+    <p style="font-size: 11px; color: #64748b;"><strong>Git Commit:</strong> <code>feat: membuat landing page dasar CRM</code> (Commit Hash: <code>756fd0f</code>)</p>
+
+    <div class="page-num">Halaman 3</div>
+  </div>
+
+  <!-- ==========================================
+      PAGE 4: FORMAT HASIL V1
+     ========================================== -->
+  <div class="page">
+    <div class="doc-header">Veloura Boutique CRM - FORMAT V1</div>
+    <h2 class="section-title">Hasil Desain & Struktur Landing Page V1</h2>
+    
+    <div class="highlight-box">
+      <div class="highlight-box-title">Visualisasi Struktur Tata Letak (Area TOP)</div>
+      <p style="margin: 0; font-size: 11px;">
+        Berikut adalah gambaran blok layout yang diimplementasikan pada tahap V1:
+      </p>
+    </div>
+
+    <div style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 15px; background-color: #f8fafc; font-family: monospace; font-size: 11px; text-align: center;">
+      <!-- Navigation -->
+      <div style="border: 1.5px dashed #ab656b; padding: 8px; margin-bottom: 15px; border-radius: 6px; background-color: #fff;">
+        <strong>Navbar:</strong> [Logo: V VELOURA.] &nbsp;&nbsp;&nbsp;&nbsp; Home | Features | Contact &nbsp;&nbsp;&nbsp;&nbsp; [Masuk] &nbsp; [Mulai Gratis]
+      </div>
+      
+      <!-- Hero Body -->
+      <div style="border: 1.5px dashed #ab656b; padding: 20px; border-radius: 6px; background-color: #fff; text-align: left; display: grid; grid-template-cols: 1.2fr 1fr; gap: 15px;">
+        <div>
+          <span style="font-size: 9px; color: #ab656b; font-weight: bold;">[TAG: Sistem CRM Butik Premium]</span>
+          <h4 style="margin: 5px 0 10px 0; font-size: 14px;">Kelola Hubungan Pelanggan dengan Lebih Mudah</h4>
+          <p style="font-size: 9px; color: #64748b;">Veloura CRM membantu butik mengelola data pelanggan, membership, riwayat transaksi, dan promosi...</p>
+          <div style="margin-top: 15px;">
+            <span style="border: 1px solid #ab656b; padding: 4px 10px; font-size: 8px; border-radius: 4px; background-color: #fdf2f5; color: #ab656b;">Mulai Gratis</span>
+            <span style="border: 1px solid #ccc; padding: 4px 10px; font-size: 8px; border-radius: 4px; margin-left: 5px;">Lihat Demo</span>
+          </div>
+        </div>
+        
+        <!-- Mockup -->
+        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background-color: #0f172a; color: #94a3b8; font-size: 7px; text-align: left;">
+          <div style="border-bottom: 1px solid #334155; padding-bottom: 3px; margin-bottom: 5px; color: #fff;">● ● ● &nbsp;&nbsp; veloura-boutique-crm.com</div>
+          <div style="display: grid; grid-template-cols: 1fr 3fr; gap: 5px;">
+            <div style="border-right: 1px solid #334155; padding-right: 2px;">
+              <div style="background-color: rgba(248, 200, 220, 0.2); height: 8px; border-radius: 2px; margin-bottom: 3px;"></div>
+              <div style="background-color: #1e293b; height: 5px; border-radius: 1px; width: 80%; margin-bottom: 3px;"></div>
+            </div>
+            <div>
+              <div style="display: flex; gap: 3px; margin-bottom: 5px;">
+                <div style="background-color: #1e293b; padding: 2px; border-radius: 2px; flex: 1;">Member: 1.2K</div>
+                <div style="background-color: #1e293b; padding: 2px; border-radius: 2px; flex: 1;">Revenue: 45M</div>
+              </div>
+              <div style="background-color: rgba(248, 200, 220, 0.1); height: 25px; border-radius: 4px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div style="border: 1.5px dashed #ab656b; padding: 8px; margin-top: 15px; border-radius: 6px; background-color: #fff; font-size: 9px; color: #94a3b8;">
+        <strong>Footer:</strong> © 2026 Veloura Boutique CRM. All rights reserved.
+      </div>
+    </div>
+
+    <div class="page-num">Halaman 4</div>
+  </div>
+
+  <!-- ==========================================
+      PAGE 5: PRD VERSI 2
+     ========================================== -->
+  <div class="page">
+    <div class="doc-header">Veloura Boutique CRM - PRD V2</div>
+    <h2 class="section-title">PRD Versi 2: Masalah & Manfaat (Area MIDDLE)</h2>
+    
+    <div class="badge badge-primary" style="background-color: #fef3c7; color: #d97706; border-color: #fde68a;">Fokus: Interest & Desire</div>
+    
+    <h3 class="subsection-title">1. Tujuan Produk</h3>
+    <p style="font-size: 12px; margin-top: 0;">
+      Mengisi **Area MIDDLE** halaman promosi untuk membangkitkan ketertarikan mendalam calon pelanggan. Mengedukasi mereka tentang inefisiensi pengelolaan manual dan mengenalkan solusi otomatisasi.
+    </p>
+
+    <h3 class="subsection-title">2. User Story</h3>
+    <p style="font-size: 12px; margin-top: 0; font-style: italic; color: #475569;">
+      "Sebagai pemilik butik ritel mode, saya ingin melihat rincian masalah bisnis harian saya dan mengetahui bagaimana Veloura menyelesaikannya secara instan, agar saya terdorong mendaftarkan toko saya."
+    </p>
+
+    <h3 class="subsection-title">3. Penambahan Fitur & Informasi</h3>
+    <ul>
+      <li style="font-size: 12px;"><strong>Problem Section:</strong> Menyoroti 4 hambatan utama butik (Data Tercecer, Sulit Kenali VIP, Promosi Acak, Analisis Buta).</li>
+      <li style="font-size: 12px;"><strong>Solution Section:</strong> Transformasi butik manual menjadi terotomatisasi (enkripsi data, penghematan waktu 15+ jam seminggu).</li>
+      <li style="font-size: 12px;"><strong>Feature Cards:</strong> 4 kartu pilar utama (Customer Management, Membership Program, Sales Analytics, Promotion Automation).</li>
+      <li style="font-size: 12px;"><strong>Benefit Cards:</strong> Tiga manfaat nyata (Menghemat Waktu, Meningkatkan Loyalitas, Meningkatkan Penjualan).</li>
+      <li style="font-size: 12px;"><strong>Statistik Kredibilitas:</strong> Angka 5,000+ Pelanggan Terkelola, 98% Kepuasan Pelanggan, dan 1,200+ Member Aktif VIP.</li>
+      <li style="font-size: 12px;"><strong>Secondary CTA Banner:</strong> Uji coba 14 hari penuh fitur tanpa kartu kredit.</li>
+    </ul>
+
+    <h3 class="subsection-title">4. Evaluasi PRD V2</h3>
+    <div class="highlight-box" style="border-left-color: #eab308; background-color: #fefde8;">
+      <p style="margin: 0; font-size: 11px; color: #854d0e;">
+        <strong>Kekurangan:</strong> Landing page sudah kaya informasi namun masih terkesan kurang meyakinkan secara emosional karena ketiadaan ulasan pengguna asli (Testimoni). Belum ada tanya jawab FAQ untuk mengatasi keraguan teknis, serta footer masih belum lengkap.
+      </p>
+    </div>
+
+    <p style="font-size: 11px; color: #64748b;"><strong>Git Commit:</strong> <code>feat: menambahkan problem, solution, feature, benefit dan statistik</code> (Commit Hash: <code>a6e7ab7</code>)</p>
+
+    <div class="page-num">Halaman 5</div>
+  </div>
+
+  <!-- ==========================================
+      PAGE 6: FORMAT HASIL V2
+     ========================================== -->
+  <div class="page">
+    <div class="doc-header">Veloura Boutique CRM - FORMAT V2</div>
+    <h2 class="section-title">Hasil Desain & Struktur Landing Page V2</h2>
+    
+    <h3 class="subsection-title" style="margin-top: 0;">1. Visualisasi Kartu Fitur (Grid 2x2)</h3>
+    <div class="grid-2">
+      <div class="card" style="border-left: 4px solid #FF9A9E;">
+        <h4 class="card-title">👤 Customer Management</h4>
+        <p class="card-desc">Simpan riwayat ukuran pakaian, preferensi bahan, dan catatan personalisasi gaun untuk melayani pelanggan secara eksklusif.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid #A6C1EE;">
+        <h4 class="card-title">🎗️ Membership Program</h4>
+        <p class="card-desc">Atur poin belanja, diskon bertingkat untuk Silver, Gold, hingga Royal Club secara otomatis tanpa pencatatan manual.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid #8FD3F4;">
+        <h4 class="card-title">📈 Sales Analytics</h4>
+        <p class="card-desc">Visualisasikan produk paling laku, tren pendapatan bulanan, dan efektivitas promosi melalui diagram interaktif yang mudah dipahami.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid #C2E9FB;">
+        <h4 class="card-title">⚙️ Promotion Automation</h4>
+        <p class="card-desc">Kirim penawaran promosi otomatis khusus untuk menyapa pelanggan yang berulang tahun secara terjadwal.</p>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">2. Visualisasi Statistik Banner (Soft Pink Design)</h3>
+    <div style="background: linear-gradient(90deg, #F8C8DC 0%, #EAA1C2 100%); border-radius: 20px; padding: 25px; color: white; text-align: center; margin-bottom: 25px;">
+      <div class="grid-3">
+        <div>
+          <span style="font-size: 26px; font-weight: 700; display: block; font-family: 'Playfair Display';">5,000+</span>
+          <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.9);">Pelanggan Terkelola</span>
+        </div>
+        <div style="border-left: 1px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(255,255,255,0.3);">
+          <span style="font-size: 26px; font-weight: 700; display: block; font-family: 'Playfair Display';">98%</span>
+          <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.9);">CS Satisfaction</span>
+        </div>
+        <div>
+          <span style="font-size: 26px; font-weight: 700; display: block; font-family: 'Playfair Display';">1,200+</span>
+          <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.9);">Member Aktif VIP</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-num">Halaman 6</div>
+  </div>
+
+  <!-- ==========================================
+      PAGE 7: PRD VERSI 3
+     ========================================== -->
+  <div class="page">
+    <div class="doc-header">Veloura Boutique CRM - PRD V3</div>
+    <h2 class="section-title">PRD Versi 3: Finalisasi AIDA (Area BOTTOM)</h2>
+    
+    <div class="badge badge-primary" style="background-color: #ecfdf5; color: #059669; border-color: #a7f3d0;">Fokus: Action & Trust</div>
+    
+    <h3 class="subsection-title">1. Tujuan Produk</h3>
+    <p style="font-size: 12px; margin-top: 0;">
+      Melengkapi landing page ke tahap final dengan menggabungkan Area TOP, MIDDLE, dan BOTTOM. Menambahkan pembuktian sosial (*Social Proof*), alur kerja terstruktur (*Workflow*), mengeliminasi keraguan (*FAQ*), serta memperkuat konversi tindakan (*Action*).
+    </p>
+
+    <h3 class="subsection-title">2. User Story</h3>
+    <p style="font-size: 12px; margin-top: 0; font-style: italic; color: #475569;">
+      "Sebagai calon pengguna yang ragu terhadap keamanan data dan biaya tersembunyi, saya ingin membaca penjelasan FAQ, alur kerja sistem, dan ulasan butik lain, agar saya dapat mengambil keputusan pendaftaran secara percaya diri."
+    </p>
+
+    <h3 class="subsection-title">3. Penambahan Fitur & Informasi Baru (Final)</h3>
+    <ul>
+      <li style="font-size: 12px;"><strong>Workflow CRM:</strong> 4 alur langkah (Pendaftaran → Rekam Riwayat → Naik Tier Otomatis → Promosi Tepat Sasaran).</li>
+      <li style="font-size: 12px;"><strong>Testimonial Grid:</strong> Ulasan bintang 5 dari 3 pemilik butik fiktif lengkap dengan foto profil & nama butik.</li>
+      <li style="font-size: 12px;"><strong>FAQ Accordion:</strong> 5 pertanyaan krusial dengan fungsi toggle interaktif (State-driven).</li>
+      <li style="font-size: 12px;"><strong>BOTTOM CTA Banner:</strong> Banner besar gelap mewah kontras dengan tombol daftar gradasi berkilau.</li>
+      <li style="font-size: 12px;"><strong>Comprehensive Footer:</strong> Sitemap menu produk, tautan media sosial, serta detail kontak butik lengkap (Email, HP, Alamat fisik).</li>
+    </ul>
+
+    <h3 class="subsection-title">4. Evaluasi Akhir (PRD V3)</h3>
+    <div class="highlight-box" style="border-left-color: #10b981; background-color: #ecfdf5;">
+      <p style="margin: 0; font-size: 11px; color: #065f46;">
+        <strong>Kelebihan:</strong> Menghasilkan landing page butik CRM yang sangat realistis, indah, dan berstandar profesional. Menggabungkan arsitektur modular yang responsif dengan alur psikologis pembeli AIDA yang sangat meyakinkan.
+      </p>
+    </div>
+
+    <p style="font-size: 11px; color: #64748b;"><strong>Git Commit:</strong> <code>feat: menyelesaikan landing page CRM versi final</code> (Commit Hash: <code>b4c3120</code>)</p>
+
+    <div class="page-num">Halaman 7</div>
+  </div>
+
+  <!-- ==========================================
+      PAGE 8: FORMAT HASIL V3
+     ========================================== -->
+  <div class="page">
+    <div class="doc-header">Veloura Boutique CRM - FORMAT V3</div>
+    <h2 class="section-title">Hasil Desain & Struktur Landing Page V3 (Final)</h2>
+    
+    <h3 class="subsection-title" style="margin-top: 0;">1. Simulasi Testimonial Klien</h3>
+    <div class="grid-3" style="margin-bottom: 20px;">
+      <div class="card" style="padding: 12px; font-size: 11px;">
+        <span style="color: #b89326; font-size: 10px; display: block; margin-bottom: 5px;">★★★★★</span>
+        <p style="margin: 0 0 10px 0; font-style: italic; color: #64748b; font-size: 10px;">"Berhasil meningkatkan retensi pelanggan hingga 40% dalam 3 bulan pertama."</p>
+        <strong>Sophia Henderson</strong><br>
+        <span style="font-size: 8px; color: #94a3b8;">Clarissa Couture</span>
+      </div>
+      <div class="card" style="padding: 12px; font-size: 11px;">
+        <span style="color: #b89326; font-size: 10px; display: block; margin-bottom: 5px;">★★★★★</span>
+        <p style="margin: 0 0 10px 0; font-style: italic; color: #64748b; font-size: 10px;">"database ukuran pakaian terintegrasi sangat membantu tim atelier kami."</p>
+        <strong>Dimitri Alistair</strong><br>
+        <span style="font-size: 8px; color: #94a3b8;">Atelier 9 Manager</span>
+      </div>
+      <div class="card" style="padding: 12px; font-size: 11px;">
+        <span style="color: #b89326; font-size: 10px; display: block; margin-bottom: 5px;">★★★★★</span>
+        <p style="margin: 0 0 10px 0; font-style: italic; color: #64748b; font-size: 10px;">"Otomatisasi ucapan ulang tahun mendongkrak penjualan kami berkali lipat."</p>
+        <strong>Nabila Rahmani</strong><br>
+        <span style="font-size: 8px; color: #94a3b8;">Bloom Boutique</span>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">2. Simulasi Interaksi Accordion FAQ</h3>
+    <div style="border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; font-size: 11px; overflow: hidden; margin-bottom: 20px;">
+      <div style="padding: 12px 20px; font-weight: 600; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; color: #ab656b; background-color: #fdfafb;">
+        <span>Apakah data pelanggan butik saya aman?</span>
+        <span>▲</span>
+      </div>
+      <div style="padding: 15px 20px; color: #64748b; background-color: #fafafa; border-bottom: 1px solid #e2e8f0;">
+        Sangat aman. Seluruh data pelanggan disimpan menggunakan enkripsi SSL/TLS tingkat tinggi. Data 100% milik butik Anda dan tidak akan dibagikan kepada pihak ketiga.
+      </div>
+      <div style="padding: 12px 20px; font-weight: 600; display: flex; justify-content: space-between;">
+        <span>Bisa digunakan melalui HP atau tablet?</span>
+        <span>▼</span>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">3. Bottom CTA Dark Banner (High Conversion)</h3>
+    <div style="background-color: #0f172a; border-radius: 20px; padding: 25px; text-align: center; color: white;">
+      <span style="font-size: 9px; text-transform: uppercase; color: #b89326; letter-spacing: 1px; font-weight: bold; display: block; margin-bottom: 5px;">Uji Coba 14 Hari Tanpa Risiko</span>
+      <h4 style="margin: 5px 0 10px 0; font-size: 16px; font-family: 'Playfair Display';">Mulai Tingkatkan Loyalitas Pelanggan Bersama Veloura CRM</h4>
+      <p style="font-size: 9px; color: #94a3b8; max-width: 400px; margin: 0 auto 15px auto;">Gabung dengan ratusan butik modern lainnya yang mendigitalisasi program VIP mereka.</p>
+      <span style="background: linear-gradient(135deg, #F8C8DC 0%, #EAA1C2 100%); color: white; padding: 8px 20px; border-radius: 8px; font-size: 10px; font-weight: bold; cursor: pointer; display: inline-block;">Daftar Gratis Sekarang</span>
+    </div>
+
+    <div class="page-num">Halaman 8</div>
+  </div>
+
+</body>
+</html>

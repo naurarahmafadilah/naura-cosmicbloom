@@ -21,6 +21,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [likedProducts, setLikedProducts] = useState({});
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const products = [
     {
@@ -30,6 +31,7 @@ export default function LandingPage() {
       "oldPrice": "350.000",
       "price": "250.000",
       "discount": "30%",
+      "description": "Potongan eksklusif dengan kain premium yang memberi kesan anggun dan nyaman saat dipakai.",
       "img": "https://plus.unsplash.com/premium_photo-1728657358050-58356d4a6c64?q=80&w=1170&auto=format&fit=crop"
     },
     {
@@ -39,6 +41,7 @@ export default function LandingPage() {
       "oldPrice": "250.000",
       "price": "180.000",
       "discount": "28%",
+      "description": "Model santai namun tetap berkelas, cocok untuk gaya sehari-hari yang elegan.",
       "img": "https://plus.unsplash.com/premium_photo-1689575247968-d1040651e57f?q=80&w=1170&auto=format&fit=crop"
     },
     {
@@ -48,6 +51,7 @@ export default function LandingPage() {
       "oldPrice": "400.000",
       "price": "300.000",
       "discount": "25%",
+      "description": "Nuansa ringan dan fresh dengan kualitas jahitan butik yang halus dan rapi.",
       "img": "https://plus.unsplash.com/premium_photo-1727427850453-144b335cd995?q=80&w=687&auto=format&fit=crop"
     },
     {
@@ -57,6 +61,7 @@ export default function LandingPage() {
       "oldPrice": "320.000",
       "price": "270.000",
       "discount": "15%",
+      "description": "Kombinasi siluet modern dan tekstur satin premium untuk penampilan yang mewah.",
       "img": "https://plus.unsplash.com/premium_photo-1755958632983-adbc0ff3b41b?q=80&w=1170&auto=format&fit=crop"
     }
   ];
@@ -72,6 +77,14 @@ export default function LandingPage() {
   const toggleLike = (id, e) => {
     e.stopPropagation();
     setLikedProducts(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const openProductDetail = (product) => {
+    setSelectedProduct(product);
+  };
+
+  const closeProductDetail = () => {
+    setSelectedProduct(null);
   };
 
   return (
@@ -237,7 +250,7 @@ export default function LandingPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                onClick={() => handleNavigation(`/shop/${product.slug}`)}
+                onClick={() => openProductDetail(product)}
                 className="group relative flex flex-col justify-between space-y-4 bg-[#f7f8f6]/30 p-3 hover:bg-white hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-[#4e5631]/5 cursor-pointer"
               >
                 {/* Image Container */}
